@@ -1,6 +1,5 @@
 package com.melina.notes.entity;
 
-import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
