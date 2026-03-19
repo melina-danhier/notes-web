@@ -1,7 +1,7 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
-import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.NoteDTO;
+import com.melina.notes.entity.Note;
 import com.melina.notes.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,34 +17,33 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public ResponseEntity<NoteDto> createNote(@RequestBody CreateUpdateNoteDto note) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(noteService.create(note));
+    public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
+        NoteDTO note = noteService.createNote(noteDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
 
     @GetMapping
-    public ResponseEntity<List<NoteDto>> getNotes() {
-        return ResponseEntity.ok()
-                .body(noteService.getAll());
+    public ResponseEntity<List<NoteDTO>> getAllNotes(@RequestParam Long userId) {
+        List<NoteDTO> notes = noteService.getAllNotes(userId);
+        if (notes.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(notes);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<NoteDto> getNote(@PathVariable Long id) {
-        return ResponseEntity.ok()
-                .body(noteService.get(id));
+    @GetMapping("/{noteId}")
+    public ResponseEntity<NoteDTO> getNoteById(@PathVariable Long noteId, @RequestParam Long userId) {
+        NoteDTO note = noteService.getNoteById(userId,noteId);
+        return ResponseEntity.ok(note);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<NoteDto> updateNote(@PathVariable Long id,
-                                              @RequestBody CreateUpdateNoteDto noteDto) {
-        return ResponseEntity.ok()
-                .body(noteService.update(id, noteDto));
+    @PatchMapping("/{noteId}")
+    public ResponseEntity<NoteDTO> updateNote(@PathVariable Long noteId, @RequestBody NoteDTO noteDTO) {
+        NoteDTO note = noteService.updateNote(noteId,noteDTO);
+        return ResponseEntity.ok(note);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
-        noteService.delete(id);
+    @DeleteMapping("/{noteId}")
+    public ResponseEntity<Void> deleteNote(@PathVariable Long noteId) {
+        noteService.deleteNote(noteId);
         return ResponseEntity.ok().build();
     }
-
 }

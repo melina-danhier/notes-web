@@ -1,17 +1,15 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
-import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
 import com.melina.notes.exception.NoteNotFoundException;
+import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.mapper.NoteMapper;
 import com.melina.notes.repository.NoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -19,37 +17,39 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final NoteMapper noteMapper;
 
-    public NoteDto create(CreateUpdateNoteDto noteDto) {
-        Note note = noteMapper.toEntity(noteDto);
+    public NoteDTO createNote(NoteDTO noteDTO) {
+        Note note = new Note();
+        noteMapper.updateNote(note,noteDTO);
         note = noteRepository.save(note);
-        return noteMapper.toDto(note);
+        return noteMapper.toNoteDTO(note);
     }
 
-    public List<NoteDto> getAll() {
-        List<Note> allNotes = noteRepository.findAll();
-        return allNotes.stream()
-                .map(noteMapper::toDto)
-                .toList();
+    public List<NoteDTO> getAllNotes(Long userId) {
+        List<Note> notes = noteRepository.findAllByUser_Id(userId);
+        return noteMapper.toNoteDTO(notes);
     }
 
-    public NoteDto get(Long id) {
-        Note note = getNoteEntity(id);
-        return noteMapper.toDto(note);
+    public NoteDTO getNoteById(Long userId, Long noteId) {
+        Note note = getNote(noteId);
+        if (note.getUser().getId().equals(userId)) {
+            throw new UserNoteMismatchException("User with id " + userId + " is not owner of Note with id " + noteId);
+        }
+        return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDto update(Long id, CreateUpdateNoteDto noteDto) {
-        Note note = getNoteEntity(id);
-        noteMapper.update(note,noteDto);
-        note = noteRepository.save(note);
-        return noteMapper.toDto(note);
+    public NoteDTO updateNote(Long noteId, NoteDTO noteDTO) {
+        Note note = getNote(noteId);
+        noteMapper.updateNote(note,noteDTO);
+        return noteMapper.toNoteDTO(note);
     }
 
-    public void delete(Long id) {
-        noteRepository.deleteById(id);
+    public void deleteNote(Long noteId) {
+        Note note = getNote(noteId);
+        noteRepository.delete(note);
     }
 
-    private Note getNoteEntity(Long id) {
-        return noteRepository.findById(id)
-                .orElseThrow(() -> new NoteNotFoundException(id));
+    private Note getNote(Long noteId) {
+        return noteRepository.findById(noteId)
+                .orElseThrow(() -> new NoteNotFoundException("Note with id not found: " + noteId));
     }
 }
