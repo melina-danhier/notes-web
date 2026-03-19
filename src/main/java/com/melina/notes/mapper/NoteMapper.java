@@ -1,14 +1,15 @@
 package com.melina.notes.mapper;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
-import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface NoteMapper {
-    Note toEntity(CreateUpdateNoteDto dto);
-    NoteDto toDto(Note note);
-    void update(@MappingTarget Note note, CreateUpdateNoteDto dto);
+    NoteDTO toNoteDTO(Note note);
+    List<NoteDTO> toNoteDTO(List<Note> notes);
+    void updateNote(@MappingTarget Note note, NoteDTO noteDTO);
 }

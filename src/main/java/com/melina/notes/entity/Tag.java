@@ -17,5 +17,5 @@ public class Tag {
     private String tag;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Note> students = new HashSet<>();
+    private Set<Note> notes = new HashSet<>();
 }
