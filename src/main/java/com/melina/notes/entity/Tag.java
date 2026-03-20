@@ -18,4 +18,5 @@ public class Tag {
 
     @ManyToMany(mappedBy = "tags")
     private Set<Note> notes = new HashSet<>();
+
 }

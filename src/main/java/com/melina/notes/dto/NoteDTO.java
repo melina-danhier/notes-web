@@ -12,6 +12,6 @@ public class NoteDTO {
     private String content;
     private Instant created;
     private Instant updated;
-    private List<String> tags;
+    private List<TagDTO> tags;
     private Long userId;
 }

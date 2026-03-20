@@ -20,4 +20,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: true # Crucial if the DB already exists or is managed by JPA
+    baseline-on-migrate: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
