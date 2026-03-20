@@ -9,5 +9,4 @@ public class UserDTO {
     private String username;
     private String email;
     private String role;
-    private List<NoteDTO> notes;
 }

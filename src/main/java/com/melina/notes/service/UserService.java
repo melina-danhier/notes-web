@@ -19,8 +19,7 @@ public class UserService {
 
     public UserDTO updateUser(Long id, UpdateUserDTO userDTO) {
         User user = getUser(id);
-        user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
+        userMapper.update(user,userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user = userRepository.save(user);
         return userMapper.toDto(user);

@@ -16,5 +16,6 @@ public interface NoteMapper {
     List<NoteDTO> toNoteDTO(List<Note> notes);
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "user", ignore = true)
     void updateNote(@MappingTarget Note note, NoteDTO noteDTO);
 }

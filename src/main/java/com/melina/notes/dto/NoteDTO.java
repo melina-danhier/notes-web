@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class NoteDTO {
+    private Long id;
     private String title;
     private String content;
     private Instant created;

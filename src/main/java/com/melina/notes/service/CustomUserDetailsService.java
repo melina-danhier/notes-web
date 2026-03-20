@@ -1,14 +1,15 @@
 package com.melina.notes.service;
 
-import com.melina.notes.entity.CustomUserDetails;
 import com.melina.notes.entity.User;
 import com.melina.notes.repository.UserRepository;
+import com.melina.notes.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +17,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public @NullMarked UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+    public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return new CustomUserDetails(user);
     }

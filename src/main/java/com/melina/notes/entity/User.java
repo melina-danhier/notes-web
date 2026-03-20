@@ -23,7 +23,4 @@ public class User {
     private String email;
     private String password;
     private String role = "ROLE_USER";
-
-    @OneToMany(mappedBy = "user")
-    private Set<Note> notes = new HashSet<>();
 }
