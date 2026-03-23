@@ -1,7 +1,10 @@
 package com.melina.notes.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -14,6 +17,9 @@ import java.util.Set;
 @Entity
 @Table(name = "notes")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

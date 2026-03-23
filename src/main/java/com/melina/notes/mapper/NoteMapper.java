@@ -1,5 +1,6 @@
 package com.melina.notes.mapper;
 
+import com.melina.notes.dto.CreateUpdateNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
 import org.mapstruct.Mapper;
@@ -16,6 +17,5 @@ public interface NoteMapper {
     List<NoteDTO> toNoteDTO(List<Note> notes);
 
     @Mapping(target = "tags", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    void updateNote(@MappingTarget Note note, NoteDTO noteDTO);
+    void updateNote(@MappingTarget Note note, CreateUpdateNoteDTO noteDTO);
 }

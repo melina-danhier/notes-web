@@ -1,15 +1,16 @@
 package com.melina.notes.service;
 
+import com.melina.notes.dto.CreateUpdateNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.mapper.NoteMapper;
 import com.melina.notes.repository.NoteRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -18,12 +19,17 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final NoteMapper noteMapper;
     private final TagService tagService;
+    private final UserService userService;
 
-    public NoteDTO createNoteForUser(NoteDTO noteDTO, Long id) {
-        Note note = new Note();
-        noteMapper.updateNote(note,noteDTO);
-        note.setId(id);
-        note.setTags(tagService.getOrCreateTags(noteDTO.getTags()));
+    public NoteDTO createNoteForUser(CreateUpdateNoteDTO noteDTO, Long userId) {
+        Note note = Note.builder()
+                .title(noteDTO.getTitle())
+                .content(noteDTO.getContent())
+                .created(Instant.now())
+                .updated(Instant.now())
+                .tags(tagService.getOrCreateTags(noteDTO.getTags()))
+                .user(userService.getUser(userId))
+                .build();
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }
@@ -35,19 +41,14 @@ public class NoteService {
 
     public NoteDTO getNoteById(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        if (note.getUser().getId().equals(userId)) {
-            throw new UserNoteMismatchException(userId,noteId);
-        }
         return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDTO updateNoteForUser(Long userId, Long noteId, NoteDTO noteDTO) {
+    public NoteDTO updateNoteForUser(Long userId, Long noteId, CreateUpdateNoteDTO noteDTO) {
         Note note = getNote(userId, noteId);
-        if (!note.getUser().getId().equals(userId)) {
-            throw new UserNoteMismatchException(userId,noteId);
-        }
         noteMapper.updateNote(note,noteDTO);
         note.setTags(tagService.getOrCreateTags(noteDTO.getTags()));
+        note.setUpdated(Instant.now());
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }

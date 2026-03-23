@@ -16,11 +16,10 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
-    public List<Tag> getOrCreateTags(List<TagDTO> tagStrings) {
+    public List<Tag> getOrCreateTags(List<String> rawTags) {
         List<Tag> tags = new ArrayList<>();
-        for (TagDTO tagDTO : tagStrings) {
-            String tagString = tagDTO.getTag();
-            Tag tag = tagRepository.findByTag(tagString).orElse(createTag(tagString));
+        for (String rawTag : rawTags) {
+            Tag tag = tagRepository.findByTag(rawTag).orElse(createTag(rawTag));
             tags.add(tag);
         }
         return tags;

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notizen</title>
+    <link rel="stylesheet" href="/css/notes.css"/>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="user-info">
+            <h1 sec:authorize="isAuthenticated()" th:text="'Willkommen, ' + ${displayName} + '!'"></h1>
+            <a sec:authorize="isAuthenticated()" href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <!-- Eingabeformular -->
+    <form th:action="@{/api/notes}" method="post" class="note-form" th:object="${noteDto}">
+        <div class="form-row">
+            <div class="input-group">
+                <label for="titleInput">Titel *</label>
+                <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" required>
+            </div>
+            <div class="input-group">
+                <label for="tagsInput">Tags</label>
+                <input type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Arbeit, Wichtig, privat">
+            </div>
+        </div>
+        <div class="input-group full-width">
+            <label for="contentInput">Inhalt</label>
+            <textarea id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">💾 Notiz speichern</button>
+    </form>
+
+    <!-- Liste der Notizen -->
+    <div id="notesList" class="notes-container" th:if="${notes != null}">
+        <div th:each="note : ${notes}" class="note-card" th:id="'note-' + ${note.id}">
+            <div class="note-header">
+                <!--/*@thymesVar id="title" type="java"*/-->
+                <h3 th:text="${note.title}">Notiz</h3>
+                <div class="note-actions">
+                    <button class="btn-delete" th:onclick="'deleteNote(' + ${note.id} + ')'">🗑️</button>
+                </div>
+            </div>
+            <!--/*@thymesVar id="tags" type="java"*/-->
+            <div class="note-tags" th:if="${note.tags != null and #lists.size(note.tags) > 0}">
+                <span th:each="tag : ${note.tags}" class="tag" th:text="'#' + ${tag.tag}"></span>
+            </div>
+            <!--/*@thymesVar id="content" type="java"*/-->
+            <p th:text="${note.content}">Inhalt...</p>
+            <div class="note-meta">
+                <!--/*@thymesVar id="createdTime" type="java"*/-->
+                <span class="time" th:text="${note.createdTime != null} ? ${#temporals.format(note.createdTime, 'dd.MM.yyyy HH:mm')} : 'Gerade erstellt'"></span>
+            </div>
+        </div>
+        <div th:if="${notes.isEmpty()}" class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>Keine Notizen vorhanden</h3>
+            <p>Erstelle deine erste Notiz oben!</p>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const API_URL = /*[[@{/api/notes}]]*/ '/api/notes';
+
+    async function deleteNote(id) {
+        if (!confirm('Notiz wirklich löschen?')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                document.getElementById(`note-${id}`).remove();
+                showMessage('Notiz gelöscht! ✅', 'success');
+            }
+        } catch (error) {
+            showMessage('Löschen fehlgeschlagen: ' + error.message, 'error');
+        }
+    }
+
+    function showMessage(text, type) {
+        const msg = document.createElement('div');
+        msg.className = `message message-${type}`;
+        msg.textContent = text;
+        document.querySelector('.container').prepend(msg);
+
+        setTimeout(() => msg.remove(), 4000);
+    }
+
+    // Form Submit Handling (AJAX)
+    document.querySelector('.note-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const noteDto = Object.fromEntries(formData);
+
+        // Tags parsen - RICHTIGE Struktur für CreateUpdateNoteDTO
+        if (noteDto.tagsRaw) {
+            noteDto.tags = noteDto.tagsRaw.split(',').map(t => t.trim()).filter(t => t);
+            delete noteDto.tagsRaw;
+        }
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify(noteDto)
+            });
+
+            if (response.ok) {
+                this.reset();
+                showMessage('Notiz gespeichert! ✅', 'success');
+                // Reload via GET (Thymeleaf)
+                window.location.reload();
+            }
+        } catch (error) {
+            showMessage('Speichern fehlgeschlagen: ' + error.message, 'error');
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+</html>
