@@ -10,12 +10,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop # Automatically update schema (useful if Flyway migrations are empty)
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 
   flyway:
     enabled: true
