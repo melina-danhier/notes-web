@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Notizen</title>
     <link rel="stylesheet" href="/css/notes.css"/>
 </head>
@@ -51,8 +53,8 @@
             <!--/*@thymesVar id="content" type="java"*/-->
             <p th:text="${note.content}">Inhalt...</p>
             <div class="note-meta">
-                <!--/*@thymesVar id="createdTime" type="java"*/-->
-                <span class="time" th:text="${note.createdTime != null} ? ${#temporals.format(note.createdTime, 'dd.MM.yyyy HH:mm')} : 'Gerade erstellt'"></span>
+                <!--/*@thymesVar id="created" type="java"*/-->
+                <span class="time" th:text="${note.created != null} ? ${#temporals.format(note.created, 'dd.MM.yyyy HH:mm')} : 'Gerade erstellt'"></span>
             </div>
         </div>
         <div th:if="${notes.isEmpty()}" class="empty-state">
@@ -67,13 +69,20 @@
     /*<![CDATA[*/
     const API_URL = /*[[@{/api/notes}]]*/ '/api/notes';
 
+    // CSRF TOKEN HOLEN
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
     async function deleteNote(id) {
         if (!confirm('Notiz wirklich löschen?')) return;
 
         try {
             const response = await fetch(`${API_URL}/${id}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                credentials: 'include',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
             });
 
             if (response.ok) {
@@ -90,18 +99,16 @@
         msg.className = `message message-${type}`;
         msg.textContent = text;
         document.querySelector('.container').prepend(msg);
-
         setTimeout(() => msg.remove(), 4000);
     }
 
-    // Form Submit Handling (AJAX)
+    // Form Submit Handling (AJAX) - CSRF FIX
     document.querySelector('.note-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const formData = new FormData(this);
         const noteDto = Object.fromEntries(formData);
 
-        // Tags parsen - RICHTIGE Struktur für CreateUpdateNoteDTO
         if (noteDto.tagsRaw) {
             noteDto.tags = noteDto.tagsRaw.split(',').map(t => t.trim()).filter(t => t);
             delete noteDto.tagsRaw;
@@ -110,7 +117,10 @@
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken  // ← DAS FEHLTE!
+                },
                 credentials: 'include',
                 body: JSON.stringify(noteDto)
             });
@@ -118,8 +128,9 @@
             if (response.ok) {
                 this.reset();
                 showMessage('Notiz gespeichert! ✅', 'success');
-                // Reload via GET (Thymeleaf)
                 window.location.reload();
+            } else {
+                throw new Error(`HTTP ${response.status}`);
             }
         } catch (error) {
             showMessage('Speichern fehlgeschlagen: ' + error.message, 'error');

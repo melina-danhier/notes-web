@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/notes")
 @RequiredArgsConstructor
@@ -25,11 +23,11 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
 
-    @GetMapping
-    public ResponseEntity<List<NoteDTO>> getAllNotes(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<NoteDTO> notes = noteService.getAllNotes(userDetails.getId());
-        return ResponseEntity.ok(notes);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<NoteDTO>> getAllNotes(@AuthenticationPrincipal CustomUserDetails userDetails) {
+//        List<NoteDTO> notes = noteService.getAllNotes(userDetails.getId());
+//        return ResponseEntity.ok(notes);
+//    }
 
     @GetMapping("/{noteId}")
     public ResponseEntity<NoteDTO> getNoteById(@PathVariable Long noteId,

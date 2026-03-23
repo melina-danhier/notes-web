@@ -7,6 +7,7 @@ import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.mapper.NoteMapper;
 import com.melina.notes.repository.NoteRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NoteService {
     private final NoteRepository noteRepository;
     private final NoteMapper noteMapper;
@@ -34,7 +36,7 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public List<NoteDTO> getAllNotes(Long userId) {
+    public List<NoteDTO> getAllNotesByUserId(Long userId) {
         List<Note> notes = noteRepository.findAllByUser_Id(userId);
         return noteMapper.toNoteDTO(notes);
     }

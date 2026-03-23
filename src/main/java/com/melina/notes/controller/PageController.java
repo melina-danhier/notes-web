@@ -9,16 +9,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class PageController {
-
     private final NoteService noteService;
 
     @GetMapping("/notes")
@@ -26,22 +22,14 @@ public class PageController {
         model.addAttribute("noteDto", new CreateUpdateNoteDTO());
 
         if (auth != null && auth.isAuthenticated()) {
-            Long userId = getUserIdFromAuth(auth);
-            List<NoteDTO> notes = noteService.getAllNotes(userId);
-            model.addAttribute("notes", notes);
-
-            // 👈 ADD THIS - Username für Template
             if (auth.getPrincipal() instanceof CustomUserDetails userDetails) {
+                List<NoteDTO> notes = noteService.getAllNotesByUserId(userDetails.getId());
+                model.addAttribute("notes", notes);
                 model.addAttribute("displayName", userDetails.getDisplayName());
+                return "notes";
             }
         }
-        return "notes";
+        throw new IllegalStateException("Benutzer nicht korrekt authentifiziert");
     }
 
-    private Long getUserIdFromAuth(Authentication auth) {
-        if (auth.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return userDetails.getId();
-        }
-        throw new IllegalStateException("Benutzer nicht authentifiziert");
-    }
 }

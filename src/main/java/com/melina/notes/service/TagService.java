@@ -1,6 +1,5 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.TagDTO;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
@@ -14,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TagService {
     private final TagRepository tagRepository;
-    private final TagMapper tagMapper;
 
     public List<Tag> getOrCreateTags(List<String> rawTags) {
         List<Tag> tags = new ArrayList<>();
