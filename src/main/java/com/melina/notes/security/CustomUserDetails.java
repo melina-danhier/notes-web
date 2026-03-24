@@ -1,6 +1,5 @@
 package com.melina.notes.security;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +25,7 @@ public record CustomUserDetails(User user) implements UserDetails {
     }
 
     @Override
-    public @NonNull String getUsername() {
+    public String getUsername() {
         return user.getEmail();
     }
 
