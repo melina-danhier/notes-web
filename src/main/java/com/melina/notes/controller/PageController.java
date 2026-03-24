@@ -1,14 +1,15 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateUpdateNoteDTO;
+import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -18,18 +19,25 @@ public class PageController {
     private final NoteService noteService;
 
     @GetMapping("/notes")
-    public String notesPage(Model model, Authentication auth) {
-        model.addAttribute("noteDto", new CreateUpdateNoteDTO());
+    public String notesPage(Model model, @AuthenticationPrincipal CustomUserDetails user) {
+        model.addAttribute("noteDto", new EditNoteDTO());
+        List<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId());
+        model.addAttribute("notes", notes);
+        model.addAttribute("displayname", user.getDisplayName());
+        return "notes";
+    }
 
-        if (auth != null && auth.isAuthenticated()) {
-            if (auth.getPrincipal() instanceof CustomUserDetails userDetails) {
-                List<NoteDTO> notes = noteService.getAllNotesByUserId(userDetails.getId());
-                model.addAttribute("notes", notes);
-                model.addAttribute("displayName", userDetails.getDisplayName());
-                return "notes";
-            }
-        }
-        throw new IllegalStateException("Benutzer nicht korrekt authentifiziert");
+    @GetMapping("/notes/new")
+    public String newNote(Model model) {
+        model.addAttribute("noteDto", new EditNoteDTO());
+        return "note-view";
+    }
+
+    @GetMapping("/notes/{id}")
+    public String editNote(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails user) {
+        EditNoteDTO note = noteService.getNoteByIdForView(user.getId(), id);
+        model.addAttribute("noteDto", note);
+        return "note-view";
     }
 
 }

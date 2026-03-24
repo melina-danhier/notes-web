@@ -1,7 +1,6 @@
 package com.melina.notes.service;
 
 import com.melina.notes.entity.Tag;
-import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,10 +13,13 @@ import java.util.List;
 public class TagService {
     private final TagRepository tagRepository;
 
-    public List<Tag> getOrCreateTags(List<String> rawTags) {
+    public List<Tag> getOrCreateTags(String rawTags) {
         List<Tag> tags = new ArrayList<>();
-        for (String rawTag : rawTags) {
-            Tag tag = tagRepository.findByTag(rawTag).orElse(createTag(rawTag));
+        String[] rawTagsList = rawTags.split(",");
+        for (String rawTag : rawTagsList) {
+            Tag tag = tagRepository
+                    .findByTag(rawTag.trim())
+                    .orElse(createTag(rawTag));
             tags.add(tag);
         }
         return tags;

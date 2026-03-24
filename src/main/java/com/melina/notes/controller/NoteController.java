@@ -1,6 +1,6 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateUpdateNoteDTO;
+import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
@@ -17,17 +17,11 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public ResponseEntity<NoteDTO> createNote(@RequestBody CreateUpdateNoteDTO noteDTO,
+    public ResponseEntity<NoteDTO> createNote(@RequestBody EditNoteDTO noteDTO,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
-        NoteDTO note = noteService.createNoteForUser(noteDTO, userDetails.getId());
+        NoteDTO note = noteService.createNoteForUser(userDetails.getId(),noteDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
-
-//    @GetMapping
-//    public ResponseEntity<List<NoteDTO>> getAllNotes(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        List<NoteDTO> notes = noteService.getAllNotes(userDetails.getId());
-//        return ResponseEntity.ok(notes);
-//    }
 
     @GetMapping("/{noteId}")
     public ResponseEntity<NoteDTO> getNoteById(@PathVariable Long noteId,
@@ -36,9 +30,9 @@ public class NoteController {
         return ResponseEntity.ok(note);
     }
 
-    @PatchMapping("/{noteId}")
+    @PutMapping("/{noteId}")
     public ResponseEntity<NoteDTO> updateNote(@PathVariable Long noteId,
-                                              @RequestBody CreateUpdateNoteDTO noteDTO,
+                                              @RequestBody EditNoteDTO noteDTO,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         NoteDTO note = noteService.updateNoteForUser(userDetails.getId(), noteId, noteDTO);
         return ResponseEntity.ok(note);

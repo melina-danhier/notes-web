@@ -1,6 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.CreateUpdateNoteDTO;
+import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
 import com.melina.notes.exception.NoteNotFoundException;
@@ -23,13 +23,13 @@ public class NoteService {
     private final TagService tagService;
     private final UserService userService;
 
-    public NoteDTO createNoteForUser(CreateUpdateNoteDTO noteDTO, Long userId) {
+    public NoteDTO createNoteForUser(Long userId, EditNoteDTO noteDTO) {
         Note note = Note.builder()
                 .title(noteDTO.getTitle())
                 .content(noteDTO.getContent())
                 .created(Instant.now())
                 .updated(Instant.now())
-                .tags(tagService.getOrCreateTags(noteDTO.getTags()))
+                .tags(tagService.getOrCreateTags(noteDTO.getTagsRaw()))
                 .user(userService.getUser(userId))
                 .build();
         note = noteRepository.save(note);
@@ -46,10 +46,15 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDTO updateNoteForUser(Long userId, Long noteId, CreateUpdateNoteDTO noteDTO) {
+    public EditNoteDTO getNoteByIdForView(Long userId, Long noteId) {
+        Note note = getNote(userId, noteId);
+        return noteMapper.toEditNoteDto(note);
+    }
+
+    public NoteDTO updateNoteForUser(Long userId, Long noteId, EditNoteDTO noteDTO) {
         Note note = getNote(userId, noteId);
         noteMapper.updateNote(note,noteDTO);
-        note.setTags(tagService.getOrCreateTags(noteDTO.getTags()));
+        note.setTags(tagService.getOrCreateTags(noteDTO.getTagsRaw()));
         note.setUpdated(Instant.now());
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
