@@ -14,20 +14,28 @@ public class TagService {
     private final TagRepository tagRepository;
 
     public List<Tag> getOrCreateTags(String rawTags) {
+        if (rawTags == null || rawTags.trim().isEmpty()) {
+            return new ArrayList<>(); // ✅ Handle null/empty
+        }
+
         List<Tag> tags = new ArrayList<>();
         String[] rawTagsList = rawTags.split(",");
+
         for (String rawTag : rawTagsList) {
-            Tag tag = tagRepository
-                    .findByTag(rawTag.trim())
-                    .orElse(createTag(rawTag));
+            String trimmedTag = rawTag.trim();
+            if (trimmedTag.isEmpty()) continue; // ✅ Skip empty tags
+
+            Tag tag = tagRepository.findByTag(trimmedTag)
+                    .orElseGet(() -> createTag(trimmedTag)); // ✅ Use orElseGet
             tags.add(tag);
         }
         return tags;
     }
 
     private Tag createTag(String tagString) {
-        Tag tag = new Tag();
-        tag.setTag(tagString);
+        Tag tag = Tag.builder() // ✅ Use builder if available
+                .tag(tagString.trim())
+                .build();
         return tagRepository.save(tag);
     }
 }
