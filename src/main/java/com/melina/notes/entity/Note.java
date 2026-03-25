@@ -40,6 +40,7 @@ public class Note {
             joinColumns = @JoinColumn(name = "note_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @Builder.Default
     private List<Tag> tags = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

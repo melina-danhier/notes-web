@@ -23,6 +23,7 @@ public class Tag {
     private String tag;
 
     @ManyToMany(mappedBy = "tags")
+    @Builder.Default
     private Set<Note> notes = new HashSet<>();
 
 }

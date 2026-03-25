@@ -17,7 +17,11 @@ public interface NoteMapper {
     List<NoteDTO> toNoteDTO(List<Note> notes);
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "updated", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "user", ignore = true)
     void updateNote(@MappingTarget Note note, EditNoteDTO noteDTO);
 
+    @Mapping(target = "tagsRaw", ignore = true)
     EditNoteDTO toEditNoteDto(Note note);
 }
