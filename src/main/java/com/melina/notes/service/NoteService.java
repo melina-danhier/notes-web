@@ -3,15 +3,18 @@ package com.melina.notes.service;
 import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
+import com.melina.notes.entity.Tag;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.mapper.NoteMapper;
+import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.NoteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +25,7 @@ public class NoteService {
     private final NoteMapper noteMapper;
     private final TagService tagService;
     private final UserService userService;
+    private final TagMapper tagMapper;
 
     public NoteDTO createNoteForUser(Long userId, EditNoteDTO noteDTO) {
         Note note = Note.builder()
@@ -48,7 +52,10 @@ public class NoteService {
 
     public EditNoteDTO getNoteByIdForView(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        return noteMapper.toEditNoteDto(note);
+        EditNoteDTO editNote = noteMapper.toEditNoteDto(note);
+        List<String> tagsAsStrings = note.getTags().stream().map(Tag::getTag).toList();
+        editNote.setTagsRaw(String.join(", ", tagsAsStrings));
+        return editNote;
     }
 
     public NoteDTO updateNoteForUser(Long userId, Long noteId, EditNoteDTO noteDTO) {

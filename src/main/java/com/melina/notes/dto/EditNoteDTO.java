@@ -15,6 +15,6 @@ public class EditNoteDTO {
     private String title;
 
     private String content;
-    private List<TagDTO> tags;
+
     private String tagsRaw;
 }
