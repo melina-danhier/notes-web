@@ -17,67 +17,56 @@
 <body>
 
 <div class="con w-100">
-    <header>
-        <div class="d-flex justify-content-between">
-            <h2 sec:authorize="isAuthenticated()" th:text="'👋🏻 Willkommen, ' + ${displayname} + '!'">Placeholder</h2>
-            <form sec:authorize="isAuthenticated()"
-                  th:action="@{/logout}"
-                  method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 sec:authorize="isAuthenticated()" th:text="'👋🏻 Hallo, ' + ${displayname} + '!'">Placeholder</h2>
+        <div class="d-flex gap-3 align-items-center">
+            <div>
+                <button id="newNoteBtn" class="btn btn-primary">➕ Neue Notiz</button>
+            </div>
+            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="m-0">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit" class="btn btn-danger">Logout</button>
             </form>
         </div>
-    </header>
-
-    <div class="d-flex justify-content-center mt-2">
-        <button id="newNoteBtn" class="btn btn-primary px-4">➕ Neue Notiz</button>
     </div>
 
     <div th:if="${notes.isEmpty()}" class="container justify-content-center p-3 m-3">
         <h5 class="fst-italic">Keine Notizen vorhanden</h5>
     </div>
 
-    <div id="notesList" th:if="${notes != null}"
-         class="row g-3 m-3">
-        <div th:each="note : ${notes}"
-             class="col-md-4 col-sm-6 col-12"
-             th:id="'note-' + ${note.id}">
+    <div id="notesList" th:if="${notes != null}" class="row g-4">
+        <div th:each="note : ${notes}" th:id="'note-' + ${note.id}"
+             class="col-lg-4 col-md-6 col-12">
             <div class="bg-light shadow-sm rounded-5 p-4">
                 <div class="d-flex justify-content-between gap-3">
                     <h4 th:text="${note.title}">Notiz</h4>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-primary py-2 px-3"
-                                th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\'; event.stopPropagation();'"
-                                title="Bearbeiten">
+                        <button class="btn btn-primary px-3" title="Bearbeiten"
+                                th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\'; event.stopPropagation();'">
                             ✏️
                         </button>
-                        <button class="btn btn-danger py-2 px-3"
-                                th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'"
-                                title="Löschen">
+                        <button class="btn btn-danger px-3" title="Löschen"
+                                th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'">
                             🗑️
                         </button>
                     </div>
                 </div>
 
-                <!-- Tags oder "Keine Tags" -->
-                <div class="my-3 d-flex gap-2 flex-wrap">
+                <div class="my-1 d-flex gap-2 flex-wrap">
                     <span th:if="${note.tags != null and #lists.size(note.tags) > 0}"
-                          th:each="tag : ${note.tags}"
-                          th:text="'#' + ${tag.tag}"
-                          class="small bg-primary-subtle p-2 rounded-3 text-primary-emphasis fw-medium">
+                          th:each="tag : ${note.tags}" th:text="'#' + ${tag.tag}"
+                          class="small bg-primary-subtle text-primary p-2 rounded-3">
                     </span>
                     <span th:if="${note.tags == null or #lists.size(note.tags) == 0}"
-                          class="small bg-secondary-subtle p-2 rounded-3 text-muted fst-italic fw-medium">
+                          class="small bg-secondary-subtle p-2 rounded-3 no-content">
                         Keine Tags
                     </span>
                 </div>
 
-                <!-- Genau eine Zeile Inhalt -->
-                <div class="note-content overflow-hidden text-truncate py-2 px-1 border-bottom border-light">
-                    <span th:text="${note.content != null and note.content.length() > 0
-                       ? #strings.abbreviate(note.content, 200) : 'Kein Inhalt'}"
+                <div class="py-2">
+                    <span th:text="${note.content != null and note.content.length() > 0 ? #strings.abbreviate(note.content, 250) : 'Kein Inhalt'}"
                           th:classappend="${note.content == null or note.content.length() == 0} ? 'no-content'"
-                          class="small text-body-secondary">
+                          class="p-2">Inhalt
                     </span>
                 </div>
 
