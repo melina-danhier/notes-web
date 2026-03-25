@@ -4,43 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrieren</title>
-    <link rel="stylesheet" href="/css/style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/loginSignup.js"></script>
 </head>
-<body>
+<body class="align-items-center">
 
-<div class="container">
-    <div class="form-box">
-        <h2>Konto erstellen</h2>
-        <form id="signupForm" th:action="@{/signup}" method="post">
-            <!-- CSRF Token hinzufügen -->
-            <input type="hidden" th:name="_csrf" th:value="${_csrf.token}" />
-
-            <div class="input-group">
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="name" name="name" placeholder="Vollständiger Name" required>
-            </div>
-            <div class="input-group">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="regEmail" name="email" placeholder="E-Mail Adresse" required>
-            </div>
-            <div class="input-group">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="regPassword" name="password" placeholder="Passwort" required>
-                <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
-            </div>
-            <div class="input-group">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Passwort bestätigen" required>
-            </div>
-            <button type="submit" class="btn">Registrieren</button>
-        </form>
-        <p class="switch-text">
-            Bereits ein Konto? <a th:href="@{/login}">Hier einloggen</a>
-        </p>
-    </div>
+<div class="con align-items-center">
+    <h2>Konto erstellen</h2>
+    <form id="signupForm" th:action="@{/signup}" method="post">
+        <div>
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="name" name="name" placeholder="Vollständiger Name" size="30" required>
+        </div>
+        <div>
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="regEmail" name="email" placeholder="E-Mail Adresse" size="30" required>
+        </div>
+        <div>
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="regPassword" name="password" placeholder="Passwort" size="30" required>
+            <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
+        </div>
+        <div>
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Passwort bestätigen" size="30" required>
+            <i class="fa-solid fa-eye" onclick="togglePassword()"></i>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Registrieren</button>
+    </form>
+    <p>Bereits ein Konto?
+        <a th:href="@{/login}" class="link-primary">Hier einloggen</a>
+    </p>
 </div>
 
-<script src="/js/script.js"></script>
+<script src="/js/loginSignup.js"></script>
 </body>
 </html>

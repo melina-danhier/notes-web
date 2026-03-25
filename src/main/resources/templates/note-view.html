@@ -1,45 +1,35 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="${noteDto?.title ?: 'Neue Notiz'}">Notiz</title>
-    <link rel="stylesheet" href="/css/notes.css"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/note-view.js"></script>
 </head>
 <body>
-<div class="container">
 
-    <!-- Formular für Create UND Edit -->
-    <form class="note-form" th:object="${noteDto}">
+<div class="con">
+    <h2 th:text="${noteDto?.id} ? 'Notiz bearbeiten' : 'Notiz erstellen'">Notiz erstellen oder bearbeiten</h2>
+    <form th:object="${noteDto}">
         <input type="hidden" id="noteIdInput" th:field="*{id}" name="id">
-        <div class="form-row">
-            <div class="input-group">
-                <label for="titleInput">Titel *</label>
-                <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" required>
-            </div>
-            <div class="input-group">
-                <label for="tagsInput">Tags</label>
-                <input type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Arbeit, Wichtig, privat">
-            </div>
-        </div>
-        <div class="input-group full-width">
-            <label for="contentInput">Inhalt</label>
-            <textarea id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz" rows="8"></textarea>
-        </div>
-        <div class="form-actions">
-            <button type="button" id="saveBtn" class="btn-primary">
-                <span th:text="${noteDto?.id} ? '💾 Speichern' : '➕ Neue Notiz erstellen'">Speichern</span>
+        <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" size="30" required>
+        <input class="col" type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Tag1, Tag2, ..." size="30">
+        <textarea class="col" id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz..." rows="8" cols="30"></textarea>
+        <div>
+            <button type="button" id="saveBtn" class="btn btn-success">
+                <span th:text="${noteDto?.id} ? '💾 Speichern' : '➕ Erstellen'">Speichern</span>
             </button>
-            <button type="button" id="deleteBtn" class="btn-danger"
-                    th:unless="${noteDto?.id == null}"
-                    onclick="deleteNote()">🗑️ Löschen</button>
-            <button type="button" class="btn-secondary" onclick="window.location.href='/notes'">Abbrechen</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/notes'">Abbrechen</button>
         </div>
     </form>
 </div>
 
-<script src="/js/note-view.js"></script>
 </body>
 </html>

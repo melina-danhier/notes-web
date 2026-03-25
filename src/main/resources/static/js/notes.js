@@ -28,6 +28,8 @@ function initNotesApp() {
 
     // Suche/Filter (falls vorhanden)
     initSearch();
+
+    updateLocalTimes();
 }
 
 /**
@@ -169,6 +171,54 @@ function showLoading(noteId) {
 }
 
 /**
+ * Lokale Zeit formatieren (deutsches Format)
+ */
+function formatLocalTime(isoString) {
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    };
+    return new Date(isoString).toLocaleDateString('de-DE', options);
+}
+
+/**
+ * Server-Zeit (UTC) -> Lokale Zeit konvertieren
+ */
+function updateLocalTimes() {
+    document.querySelectorAll('.local-time span').forEach(timeSpan => {
+        const serverText = timeSpan.textContent.trim();
+
+        // Prüfe ob es eine gültige Server-Zeit ist: dd.MM.yyyy HH:mm
+        if (!serverText.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$/)) return;
+
+        // Server-Zeit parsen: "25.03.2026 14:36" -> Date Objekt (als UTC interpretieren)
+        const [datePart, timePart] = serverText.split(' ');
+        const [day, month, year] = datePart.split('.').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+
+        // UTC Date erstellen (Server-Zeit = UTC)
+        const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+        // In lokale Zeit umwandeln
+        const localTime = utcDate.toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+
+        // Ersetzen
+        timeSpan.textContent = localTime;
+    });
+}
+
+/**
  * Loading Animation verstecken
  */
 function hideLoading(noteId) {
@@ -223,27 +273,4 @@ function checkEmptyState() {
             </div>
         `;
     }
-}
-
-/**
- * Utility: Toast Notification (optional)
- */
-function showToast(message, type = 'success') {
-    // Erstelle Toast falls nicht vorhanden
-    let toastElement = document.getElementById('appToast');
-    if (!toastElement) {
-        toastElement = createToastElement();
-        document.body.appendChild(toastElement);
-    }
-
-    toastElement.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed`;
-    const toastBody = toastElement.querySelector('.toast-body');
-    toastBody.textContent = message;
-
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
-}
-
-function createToastElement() {
-    return document.createElement('div');
 }

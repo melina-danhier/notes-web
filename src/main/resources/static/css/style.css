@@ -5,6 +5,10 @@
 
 body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
 }
 
 /* Kleine Animation beim Laden */
@@ -12,11 +16,30 @@ body {
     margin-right: auto;
     margin-left: auto;
     border-radius: 2rem;
+    background-color: white;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.175);
+    padding: 3rem;
     display: flex;
-    animation: fadeIn 0.5s ease-in-out;
+    flex-direction: column;
+    animation: fadeIn 1s ease-in-out;
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+form {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+input {
+    padding: 0.3rem;
+}
+
+i {
+    margin: 0.5rem;
 }
