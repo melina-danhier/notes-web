@@ -1,20 +1,17 @@
-# Build stage
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Erst nur pom.xml – dieser Layer wird gecacht, solange pom.xml unverändert bleibt
+# Nur das Nötigste
 COPY pom.xml .
-COPY .mvn .mvn
 COPY mvnw .
-RUN ./mvnw dependency:go-offline -B
+COPY .mvn .mvn
+RUN ./mvnw dependency:go-offline -B -T 1C
 
-# Erst jetzt src kopieren (ändert sich oft)
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN ./mvnw clean package -DskipTests -T 1C
 
-# Runtime stage
-FROM eclipse-temurin:21-jre
+FROM gcr.io/distroless/java21-debian12
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseZGC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
