@@ -1,12 +1,7 @@
-/**
- * Toggle Passwort Sichtbarkeit
- * Findet das Passwort-Feld basierend auf dem Kontext
- */
+
 function togglePassword() {
-    // Wir suchen das Input-Feld, das direkt vor dem geklickten Icon liegt
-    // Da wir in verschiedenen Forms sind, nehmen wir das nächste input-Feld
     const icon = event.target;
-    const input = icon.previousElementSibling; // Das Eingabefeld vor dem Icon
+    const input = icon.previousElementSibling;
 
     if (input.type === "password") {
         input.type = "text";

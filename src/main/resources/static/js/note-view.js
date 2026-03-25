@@ -1,29 +1,56 @@
 'use strict';
 
-const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-const saveBtn = document.getElementById('saveBtn');
+// Warte bis DOM vollständig geladen ist
+document.addEventListener('DOMContentLoaded', function() {
+    initEditNotesApp();
+});
 
-// 🆕 SAVE: POST /api/notes (Create) ODER PUT /api/notes/{id} (Update)
-saveBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-
-    const title = document.getElementById('titleInput').value.trim();
-    if (!title) {
-        alert('Titel ist erforderlich!');
+function initEditNotesApp() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (!saveBtn) {
+        console.error('Save Button (#saveBtn) nicht gefunden!');
         return;
     }
 
-    // ✅ EditNoteDTO-Struktur (genau wie Backend erwartet)
-    const noteData = {
-        id: document.getElementById('noteIdInput').value || null,
-        title: title,
-        content: document.getElementById('contentInput').value || '',
-        tagsRaw: document.getElementById('tagsInput').value || ''
-        // tags: [] wird im Backend verarbeitet
-    };
+    // Auto-focus Title
+    const titleInput = document.getElementById('noteIdInput') || null;
+    if (titleInput) titleInput.focus();
 
-    const noteId = noteData.id;
+    // Event Listener initialisieren
+    initSaveButton();
+    initAutoResize();
+    initKeyboardShortcuts();
+    initFormValidation();
+}
+
+function initSaveButton() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (!saveBtn) return;
+
+    saveBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        saveNote();
+    });
+}
+
+function saveNote() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (!saveBtn) return;
+
+    const formData = getFormData();
+    if (!isValidForm(formData)) return;
+
+    showLoading(saveBtn, '💾 Speichern...');
+
+    const csrfToken = getCsrfToken();
+    const csrfHeader = getCsrfHeader();
+
+    if (!csrfToken || !csrfHeader) {
+        showError('Sicherheitstoken fehlt. Bitte Seite neu laden.');
+        return;
+    }
+
+    const noteId = formData.id;
     const url = noteId ? `/api/notes/${noteId}` : '/api/notes';
     const method = noteId ? 'PUT' : 'POST';
 
@@ -33,65 +60,161 @@ saveBtn.addEventListener('click', function(e) {
             'Content-Type': 'application/json',
             [csrfHeader]: csrfToken
         },
-        body: JSON.stringify(noteData)
+        body: JSON.stringify(formData)
     })
         .then(response => {
             if (response.ok) {
                 showSuccess('✅ Notiz gespeichert!');
-                setTimeout(() => window.location.href = '/notes', 1000);
+                setTimeout(() => window.location.href = '/notes', 1200);
             } else {
                 return response.text().then(text => {
                     throw new Error(`HTTP ${response.status}: ${text}`);
                 });
             }
         })
-        .catch(error => showError(`❌ Fehler: ${error.message}`));
-});
+        .catch(error => {
+            console.error('Save Error:', error);
+            showError(`❌ Fehler: ${error.message}`);
+            hideLoading(saveBtn);
+        });
+}
 
-// 🆕 DELETE: Korrigiert (noteId aus Input)
-window.deleteNote = function() {
-    const noteId = document.getElementById('noteIdInput').value;
-    if (!noteId || !confirm('Notiz wirklich löschen?')) return;
+function getFormData() {
+    return {
+        id: document.getElementById('noteIdInput')?.value || null,
+        title: document.getElementById('titleInput')?.value?.trim() || '',
+        content: document.getElementById('contentInput')?.value || '',
+        tagsRaw: document.getElementById('tagsInput')?.value?.trim() || ''
+    };
+}
 
-    fetch(`/api/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: { [csrfHeader]: csrfToken }
-    })
-        .then(response => {
-            if (response.ok) {
-                showSuccess('✅ Notiz gelöscht!');
-                setTimeout(() => window.location.href = '/notes', 1000);
-            }
-        })
-        .catch(error => showError('❌ Fehler beim Löschen'));
-};
+function isValidForm(data) {
+    if (!data.title) {
+        showError('Titel ist erforderlich!');
+        document.getElementById('titleInput')?.focus();
+        return false;
+    }
+    if (data.title.length > 200) {
+        showError('Titel zu lang (max 200 Zeichen)!');
+        return false;
+    }
+    return true;
+}
 
-// Rest unverändert...
-document.addEventListener('DOMContentLoaded', function() {
-    const titleInput = document.getElementById('titleInput');
-    titleInput.focus();
-
+function initAutoResize() {
     const textarea = document.getElementById('contentInput');
+    if (!textarea) return;
+
     textarea.addEventListener('input', function() {
         this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+        this.style.height = Math.min(this.scrollHeight, 400) + 'px';
     });
-    textarea.dispatchEvent(new Event('input'));
 
+    textarea.dispatchEvent(new Event('input'));
+}
+
+function initKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + S = Save
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
-            saveBtn.click();
+            saveNote();
+            return;
+        }
+
+        // Ctrl/Cmd + Enter = Save
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            saveNote();
+            return;
+        }
+
+        // Escape = Cancel/Back
+        if (e.key === 'Escape') {
+            if (confirm('Änderungen verwerfen und zurück?')) {
+                window.history.back();
+            }
         }
     });
-});
+}
 
-function showSuccess(msg) { showNotification(msg, 'success'); }
-function showError(msg) { showNotification(msg, 'error'); }
+function initFormValidation() {
+    const titleInput = document.getElementById('titleInput');
+    if (!titleInput) return;
+
+    titleInput.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            showError('Titel ist erforderlich!');
+        }
+    });
+}
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+}
+
+function getCsrfHeader() {
+    return document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+}
+
+function showLoading(button, text) {
+    const originalText = button.innerHTML;
+    const originalDisabled = button.disabled;
+
+    button.dataset.originalText = originalText;
+    button.disabled = true;
+    button.innerHTML = text;
+
+    return { originalText, originalDisabled };
+}
+
+function hideLoading(button) {
+    if (button.dataset.originalText) {
+        button.innerHTML = button.dataset.originalText;
+        button.disabled = false;
+        delete button.dataset.originalText;
+    }
+}
+
+function showSuccess(msg) {
+    showNotification(msg, 'success');
+}
+
+function showError(msg) {
+    showNotification(msg, 'error');
+}
+
 function showNotification(msg, type) {
-    const div = document.createElement('div');
-    div.className = `notification ${type}`;
-    div.textContent = msg;
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2500);
+    // Toast Container erstellen (falls nicht vorhanden)
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Toast erstellen
+    const toastDiv = document.createElement('div');
+    toastDiv.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 shadow-lg`;
+    toastDiv.setAttribute('role', 'alert');
+    toastDiv.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${msg}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toastDiv);
+
+    // Bootstrap Toast anzeigen
+    const toast = new bootstrap.Toast(toastDiv);
+    toast.show();
+
+    // Cleanup nach 4 Sekunden
+    setTimeout(() => {
+        if (toastDiv.parentNode) {
+            toastDiv.remove();
+        }
+    }, 4000);
 }
