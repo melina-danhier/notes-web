@@ -2,8 +2,10 @@ package com.melina.notes.controller;
 
 import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
+import com.melina.notes.dto.TagDTO;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
+import com.melina.notes.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PageController {
     private final NoteService noteService;
+    private final TagService tagService;
 
     @GetMapping("/notes")
     public String notesPage(Model model, @AuthenticationPrincipal CustomUserDetails user) {
@@ -24,6 +27,8 @@ public class PageController {
         List<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId());
         model.addAttribute("notes", notes);
         model.addAttribute("displayname", user.getDisplayName());
+        List<TagDTO> tags = tagService.getAllTags();
+        model.addAttribute("allTags", tags);
         return "notes";
     }
 
