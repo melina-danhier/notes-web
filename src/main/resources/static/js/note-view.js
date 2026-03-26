@@ -1,6 +1,5 @@
 'use strict';
 
-// Warte bis DOM vollständig geladen ist
 document.addEventListener('DOMContentLoaded', function() {
     initEditNotesApp();
 });

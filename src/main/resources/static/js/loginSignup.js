@@ -1,3 +1,4 @@
+'use strict';
 
 function togglePassword() {
     const icon = event.target;
@@ -13,7 +14,3 @@ function togglePassword() {
         icon.classList.add("fa-eye");
     }
 }
-
-/**
- * Formularevents
- */
