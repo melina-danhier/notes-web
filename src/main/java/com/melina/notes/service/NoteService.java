@@ -11,12 +11,13 @@ import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.NoteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -69,6 +70,7 @@ public class NoteService {
 
     public void deleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        tagService.deleteTagsWithNoNotes(note.getTags());
         noteRepository.delete(note);
     }
 

@@ -4,12 +4,15 @@ import com.melina.notes.dto.TagDTO;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TagService {
@@ -42,10 +45,25 @@ public class TagService {
         return tagRepository.save(tag);
     }
 
+    @Transactional
     public List<TagDTO> getAllTags() {
+        deleteTagsWithNoNotes(tagRepository.findAll());
         List<Tag> tags = tagRepository.findAll();
         return tags.stream()
                 .map(tagMapper::toDTO)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteTagsWithNoNotes(List<Tag> tags) {
+        List<Long> emptyTagIds = tags.stream()
+                .map(Tag::getId)
+                .filter(id -> tagRepository.countNotesByTagId(id) == 0)
+                .toList();
+
+        if (!emptyTagIds.isEmpty()) {
+            tagRepository.deleteAllById(emptyTagIds);
+            log.info("Deleted {} empty tags: {}", emptyTagIds.size(), emptyTagIds);
+        }
     }
 }
