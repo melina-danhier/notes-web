@@ -1,9 +1,19 @@
 'use strict';
 
-// 🎯 ALLE MODULES IMPORTIEREN
-import { initNotesApp } from './notes-events.js';
-import './notes-delete.js';  // Globale deleteNote() Funktion
-import './notes-filter.js';  // Filter initialisieren
+import { initNotesApp } from './notes-init.js';
+import './notes-delete.js';
+import { initSearchAndFilter } from './notes-filter.js';
 
-// 🚀 APP STARTEN
-document.addEventListener('DOMContentLoaded', initNotesApp);
+document.addEventListener('DOMContentLoaded', function() {
+    initNotesApp();
+    initSearchAndFilter();
+
+    // Event Listener
+    document.getElementById('clearSearchBtn')?.addEventListener('click', window.clearSearch);
+
+    // "Alle Tags" initial aktiv
+    const allTagsBtn = document.querySelector('.tag-filter-item[data-tag-id=""]');
+    if (allTagsBtn) {
+        allTagsBtn.classList.add('active-tag-filter');
+    }
+});

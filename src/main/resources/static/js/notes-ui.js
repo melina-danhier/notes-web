@@ -20,17 +20,3 @@ export function showSuccessToast(message) {
     }
     new bootstrap.Toast(toast).show();
 }
-
-export function checkEmptyState() {
-    const notesList = document.getElementById('notesList');
-    const notes = document.querySelectorAll('[id^="note-"]');
-
-    if (notes.length === 0 && notesList) {
-        notesList.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <h5 class="fst-italic text-muted">Keine Notizen vorhanden</h5>
-                <p class="text-muted">➕ Erstelle deine erste Notiz!</p>
-            </div>
-        `;
-    }
-}

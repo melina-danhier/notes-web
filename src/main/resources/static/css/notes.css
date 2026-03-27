@@ -1,4 +1,6 @@
-.no-content {
-    font-style: italic;
-    color: gray;
+.center-gap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
 }
