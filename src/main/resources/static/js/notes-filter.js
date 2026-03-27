@@ -2,11 +2,9 @@
 
 export function initSearchAndFilter() {
     const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-
     if (!searchInput) return;
 
-    // Search Event Listeners
+    // Enter für Suche
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -14,64 +12,46 @@ export function initSearchAndFilter() {
         }
     });
 
-    if (searchBtn) {
-        searchBtn.addEventListener('click', performCombinedSearch);
-    }
-
-    // Tag Filter Event Listeners
-    document.querySelectorAll('.tag-filter-item').forEach(item => {
-        item.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Active Klasse togglen
-            document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
-            item.classList.add('active-tag-filter');
-
-            const tagId = item.dataset.tagId;
-            const tagName = item.dataset.tagName;
-
-            // Display updaten
-            document.getElementById('selectedTagDisplay').textContent = tagName;
-
-            // Kombinierten Filter anwenden
-            performCombinedSearch();
-        };
-    });
-
-    // Debounce für Search Input (optional, für bessere Performance)
+    // Automatische Suche bei Input
     let searchTimeout;
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(performCombinedSearch, 300);
     });
+
+    // Tag Filter
+    document.querySelectorAll('.tag-filter-item').forEach(item => {
+        item.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
+            item.classList.add('active-tag-filter');
+            document.getElementById('selectedTagDisplay').textContent = item.dataset.tagName;
+            performCombinedSearch();
+        };
+    });
 }
 
 function performCombinedSearch() {
-    const query = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
+    const query = document.getElementById('searchInput')?.value?.toLowerCase().trim() || '';
     const activeTagFilter = document.querySelector('.tag-filter-item.active-tag-filter');
     const tagId = activeTagFilter ? activeTagFilter.dataset.tagId : null;
-
-    const clearBtn = document.getElementById('clearSearchBtn');
-    if (clearBtn) {
-        clearBtn.style.display = query ? 'block' : 'none';
-    }
 
     if (!query && !tagId) {
         showAllNotes();
         return;
     }
 
-    // Notizen durchsuchen UND filtern
     const notes = document.querySelectorAll('#notesList > div');
     let hasResults = false;
 
     notes.forEach(note => {
-        const title = note.querySelector('.title')?.textContent.toLowerCase() || '';
-        const content = note.querySelector('.content')?.textContent.toLowerCase() || '';
+        const title = note.querySelector('.title')?.textContent?.toLowerCase() || '';
+        const content = note.querySelector('.content')?.textContent?.toLowerCase() || '';
         const noteTags = note.querySelectorAll('[data-tag-id]');
 
-        // 1. Tag-Filter prüfen
+        // Tag-Filter
         let tagMatch = !tagId || tagId === '' || tagId === 'null';
         if (!tagMatch) {
             noteTags.forEach(tag => {
@@ -81,13 +61,12 @@ function performCombinedSearch() {
             });
         }
 
-        // 2. Text-Suche prüfen
-        const textMatch = title.includes(query) || content.includes(query);
+        // Text-Suche
+        const textMatch = query ? (title.includes(query) || content.includes(query)) : true;
 
-        // 3. BEIDE Bedingungen müssen erfüllt sein
         if (tagMatch && textMatch) {
             note.style.display = 'block';
-            highlightText(note, query);
+            if (query) highlightText(note, query);
             hasResults = true;
         } else {
             note.style.display = 'none';
@@ -95,20 +74,8 @@ function performCombinedSearch() {
         }
     });
 
-    // Keine Ergebnisse anzeigen
     if (!hasResults) {
         showNoResults();
-    }
-}
-
-function clearSearch() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.value = '';
-        const clearBtn = document.getElementById('clearSearchBtn');
-        if (clearBtn) clearBtn.style.display = 'none';
-        showAllNotes();
-        searchInput.focus();
     }
 }
 
@@ -119,69 +86,65 @@ function showAllNotes() {
         clearHighlight(note);
     });
 
-    // No-results entfernen
     const noResults = document.querySelector('.no-results');
     if (noResults) noResults.remove();
 
-    // Tag-Filter zurücksetzen (optional)
     document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
     document.getElementById('selectedTagDisplay').textContent = 'Alle Tags';
 }
 
 function showNoResults() {
     const notesList = document.getElementById('notesList');
-    if (notesList) {
-        // Bestehende No-Results entfernen
-        const existingNoResults = document.querySelector('.no-results');
-        if (existingNoResults) existingNoResults.remove();
+    if (!notesList) return;
 
-        const activeTag = document.querySelector('.tag-filter-item.active-tag-filter');
-        const searchQuery = document.getElementById('searchInput')?.value.trim() || '';
-        let message = 'Keine Notizen gefunden';
+    const existingNoResults = document.querySelector('.no-results');
+    if (existingNoResults) existingNoResults.remove();
 
-        if (activeTag && searchQuery) {
-            message = `Keine Notizen für "${activeTag.dataset.tagName}" mit "${searchQuery}" gefunden`;
-        } else if (activeTag) {
-            message = `Keine Notizen für "${activeTag.dataset.tagName}" gefunden`;
-        } else if (searchQuery) {
-            message = `Keine Notizen mit "${searchQuery}" gefunden`;
-        }
+    const activeTag = document.querySelector('.tag-filter-item.active-tag-filter');
+    const searchQuery = document.getElementById('searchInput')?.value?.trim() || '';
+    let message = 'Keine Notizen gefunden';
 
-        notesList.innerHTML += `<div class="col-12"><div class="no-results text-center p-5 text-muted">${message}</div></div>`;
+    if (activeTag && searchQuery) {
+        message = `Keine Notizen für "${activeTag.dataset.tagName}" mit "${searchQuery}" gefunden`;
+    } else if (activeTag) {
+        message = `Keine Notizen für "${activeTag.dataset.tagName}" gefunden`;
+    } else if (searchQuery) {
+        message = `Keine Notizen mit "${searchQuery}" gefunden`;
     }
+
+    notesList.insertAdjacentHTML('beforeend',
+        `<div class="col-12"><div class="no-results text-center p-5 text-muted">${message}</div></div>`
+    );
 }
 
-/** DEZENTE HERVORHEBUNG */
 function highlightText(note, query) {
     clearHighlight(note);
 
     if (!query) return;
 
-    // Title highlight
-    const title = note.querySelector('h4');
-    if (title) highlightInElement(title, query);
+    const title = note.querySelector('.title');
+    if (title && title.textContent.toLowerCase().includes(query)) {
+        highlightInElement(title, query);
+    }
 
-    // Content highlight
-    const content = note.querySelector('.p-2');
-    if (content) highlightInElement(content, query);
+    const content = note.querySelector('.content');
+    if (content && content.textContent.toLowerCase().includes(query)) {
+        highlightInElement(content, query);
+    }
 }
 
 function highlightInElement(element, query) {
     const text = element.textContent;
-    if (text.toLowerCase().includes(query)) {
-        const regex = new RegExp(`(${query})`, 'gi');
-        element.innerHTML = text.replace(regex, '<mark class="search-highlight-subtle">$1</mark>');
-    }
+    const escapedQuery = query.replace("/[.*+?^${}()|[\$\\$/g, '\\$&'");
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    element.innerHTML = text.replace(regex, '<mark>$1</mark>');
 }
 
 function clearHighlight(note) {
-    const highlights = note.querySelectorAll('.search-highlight-subtle');
-    highlights.forEach(hl => {
-        hl.outerHTML = hl.textContent;
+    const highlights = note.querySelectorAll('mark');
+    highlights.forEach(mark => {
+        mark.outerHTML = mark.textContent;
     });
 }
 
-// Globale Funktionen für externe Verwendung
-window.clearSearch = clearSearch;
-window.performCombinedSearch = performCombinedSearch;
 window.showAllNotes = showAllNotes;
