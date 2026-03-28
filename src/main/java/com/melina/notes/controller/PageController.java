@@ -21,6 +21,11 @@ public class PageController {
     private final NoteService noteService;
     private final TagService tagService;
 
+    @GetMapping("/")
+    public String login() {
+        return "login";
+    }
+
     @GetMapping("/notes")
     public String notesPage(Model model, @AuthenticationPrincipal CustomUserDetails user) {
         model.addAttribute("noteDto", new EditNoteDTO());

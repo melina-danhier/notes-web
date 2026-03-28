@@ -1,0 +1,23 @@
+# Exported from Render on 2026-03-28T12:03:16Z
+version: "1"
+projects:
+  - name: Notes
+    environments:
+      - name: Production
+        services:
+          - type: web
+            name: notes-web
+            runtime: docker
+            repo: https://github.com/melina-danhier/notes-web
+            plan: free
+            envVars:
+              - key: DB_PASSWORD
+                sync: false
+              - key: DB_USER
+                sync: false
+              - key: DB_URL
+                sync: false
+            region: oregon
+            dockerContext: .
+            dockerfilePath: ./Dockerfile
+            autoDeployTrigger: commit
