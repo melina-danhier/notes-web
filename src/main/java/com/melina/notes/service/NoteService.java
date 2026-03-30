@@ -69,7 +69,6 @@ public class NoteService {
 
     public void deleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        tagService.deleteTagsWithNoNotes(note.getTags());
         noteRepository.delete(note);
     }
 

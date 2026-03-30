@@ -46,24 +46,11 @@ public class TagService {
     }
 
     @Transactional
-    public List<TagDTO> getAllTags() {
-        deleteTagsWithNoNotes(tagRepository.findAll());
-        List<Tag> tags = tagRepository.findAll();
-        return tags.stream()
+    public List<TagDTO> getAllTagsByUserId(long userId) {
+        tagRepository.deleteAllWithNoNotes();
+        return tagRepository.findAllByUserId(userId)
+                .stream()
                 .map(tagMapper::toDTO)
                 .toList();
-    }
-
-    @Transactional
-    public void deleteTagsWithNoNotes(List<Tag> tags) {
-        List<Long> emptyTagIds = tags.stream()
-                .map(Tag::getId)
-                .filter(id -> tagRepository.countNotesByTagId(id) == 0)
-                .toList();
-
-        if (!emptyTagIds.isEmpty()) {
-            tagRepository.deleteAllById(emptyTagIds);
-            log.info("Deleted {} empty tags: {}", emptyTagIds.size(), emptyTagIds);
-        }
     }
 }

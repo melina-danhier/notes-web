@@ -51,7 +51,7 @@ public class PageController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalPages", notes.getTotalPages());
         model.addAttribute("displayname", user.getDisplayName());
-        List<TagDTO> tags = tagService.getAllTags();
+        List<TagDTO> tags = tagService.getAllTagsByUserId(user.getId());
         model.addAttribute("allTags", tags);
         return "notes";
     }
