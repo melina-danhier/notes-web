@@ -1,9 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.UpdateUserDTO;
-import com.melina.notes.dto.UserDTO;
 import com.melina.notes.entity.User;
-import com.melina.notes.mapper.UserMapper;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,20 +11,18 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDTO updateUser(Long id, UpdateUserDTO userDTO) {
-        User user = getUser(id);
-        userMapper.update(user,userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user = userRepository.save(user);
-        return userMapper.toDto(user);
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 
-    public void deleteUser(Long id) {
-        User user = getUser(id);
-        userRepository.delete(user);
+    public void createUser(String name, String email, String password) {
+        User user = new User();
+        user.setUsername(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
     }
 
     public User getUser(Long id) {

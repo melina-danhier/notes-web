@@ -7,11 +7,14 @@ import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
 import com.melina.notes.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -21,16 +24,32 @@ public class PageController {
     private final NoteService noteService;
     private final TagService tagService;
 
-    @GetMapping("/")
+    @GetMapping("/login")
     public String login() {
         return "login";
     }
 
+    @GetMapping("/signup")
+    public String signup() {
+        return "signup";
+    }
+
+    @GetMapping("/")
+    public String homeToLogin() {
+        return "login";
+    }
+
     @GetMapping("/notes")
-    public String notesPage(Model model, @AuthenticationPrincipal CustomUserDetails user) {
+    public String notesPage(Model model,
+                            @AuthenticationPrincipal CustomUserDetails user,
+                            @RequestParam(defaultValue = "0") int pageNo,
+                            @RequestParam(defaultValue = "9") int pageSize) {
         model.addAttribute("noteDto", new EditNoteDTO());
-        List<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId());
+        Page<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId(), PageRequest.of(pageNo, pageSize));
         model.addAttribute("notes", notes);
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalPages", notes.getTotalPages());
         model.addAttribute("displayname", user.getDisplayName());
         List<TagDTO> tags = tagService.getAllTags();
         model.addAttribute("allTags", tags);

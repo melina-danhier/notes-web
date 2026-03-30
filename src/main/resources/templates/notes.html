@@ -68,13 +68,13 @@
     </div>
 
     <!-- NO NOTES -->
-    <div class="center-gap m-3" th:if="${notes.isEmpty()}">
+    <div class="center-gap m-3" th:if="${notes.content.isEmpty()}">
         <h5 class="fst-italic">Keine Notizen vorhanden</h5>
     </div>
 
     <!-- NOTE-LIST -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="notesList" th:if="${notes != null}">
-        <div class="col" th:each="note : ${notes}" th:id="'note-' + ${note.id}">
+        <div class="col" th:each="note : ${notes.content}" th:id="'note-' + ${note.id}">
             <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden">
                 <!-- HEADER - Title, Tool buttons -->
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -128,6 +128,24 @@
             </div>
         </div>
     </div>
+
+    <!-- PAGINATION -->
+    <div class="center-gap justify-content-center mt-4" th:if="${totalPages > 1}">
+        <a class="btn btn-outline-secondary"
+           th:classappend="${currentPage == 0} ? 'disabled'"
+           th:href="@{/notes(pageNo=${currentPage - 1}, pageSize=${pageSize})}">
+            ← Zurück
+        </a>
+
+        <span class="text-muted" th:text="|Seite ${currentPage + 1} von ${totalPages}|"></span>
+
+        <a class="btn btn-outline-secondary"
+           th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'"
+           th:href="@{/notes(pageNo=${currentPage + 1}, pageSize=${pageSize})}">
+            Weiter →
+        </a>
+    </div>
+
 </div>
 
 </body>
