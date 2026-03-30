@@ -19,9 +19,9 @@
     <h3 th:text="${noteDto?.id} ? '✏️ Notiz bearbeiten' : '➕ Notiz erstellen'">Notiz erstellen oder bearbeiten</h3>
     <form th:object="${noteDto}">
         <input type="hidden" id="noteIdInput" th:field="*{id}" name="id">
-        <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" size="30" required>
-        <input class="col" type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Tag1, Tag2, ..." size="30">
-        <textarea class="col" id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz..." rows="7" cols="30"></textarea>
+        <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" size="30" autofocus required>
+        <input type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Tag1, Tag2, ..." size="30">
+        <textarea id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz..." rows="7" cols="30" style="resize: none;"></textarea>
         <div class="mt-2">
             <button type="button" id="saveBtn" class="btn btn-success">💾 Speichern</button>
             <button type="button" class="btn btn-secondary" onclick="window.location.href='/notes'">Abbrechen</button>

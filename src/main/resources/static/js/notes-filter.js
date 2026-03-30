@@ -4,147 +4,129 @@ export function initSearchAndFilter() {
     const searchInput = document.getElementById('searchInput');
     if (!searchInput) return;
 
-    // Enter für Suche
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            performCombinedSearch();
-        }
+    // Note-Index einmal beim Init aufbauen
+    let noteIndex = buildNoteIndex();
+    let noResultsEl = null;
+
+    searchInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
     });
 
-    // Automatische Suche bei Input
     let searchTimeout;
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', () => {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performCombinedSearch, 300);
+        searchTimeout = setTimeout(performSearch, 700);
     });
 
-    // Tag Filter
     document.querySelectorAll('.tag-filter-item').forEach(item => {
-        item.onclick = (e) => {
+        item.onclick = e => {
             e.preventDefault();
             e.stopPropagation();
-
-            document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
+            item.closest('.dropdown-menu')
+                .querySelectorAll('.tag-filter-item')
+                .forEach(i => i.classList.remove('active-tag-filter'));
             item.classList.add('active-tag-filter');
             document.getElementById('selectedTagDisplay').textContent = item.dataset.tagName;
-            performCombinedSearch();
+            performSearch();
         };
     });
-}
 
-function performCombinedSearch() {
-    const query = document.getElementById('searchInput')?.value?.toLowerCase().trim() || '';
-    const activeTagFilter = document.querySelector('.tag-filter-item.active-tag-filter');
-    const tagId = activeTagFilter ? activeTagFilter.dataset.tagId : null;
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        const activeTag = document.querySelector('.tag-filter-item.active-tag-filter');
+        const tagId = activeTag?.dataset.tagId || '';
 
-    if (!query && !tagId) {
-        showAllNotes();
-        return;
-    }
+        hideNoResults();
 
-    const notes = document.querySelectorAll('#notesList > div');
-    let hasResults = false;
-
-    notes.forEach(note => {
-        const title = note.querySelector('.title')?.textContent?.toLowerCase() || '';
-        const content = note.querySelector('.content')?.textContent?.toLowerCase() || '';
-        const noteTags = note.querySelectorAll('[data-tag-id]');
-
-        // Tag-Filter
-        let tagMatch = !tagId || tagId === '' || tagId === 'null';
-        if (!tagMatch) {
-            noteTags.forEach(tag => {
-                if (tag.dataset.tagId === tagId) {
-                    tagMatch = true;
-                }
+        if (!query && !tagId) {
+            noteIndex.forEach(({ el }) => {
+                el.style.display = 'block';
+                clearHighlight(el);
             });
+            return;
         }
 
-        // Text-Suche
-        const textMatch = query ? (title.includes(query) || content.includes(query)) : true;
+        let hasResults = false;
 
-        if (tagMatch && textMatch) {
-            note.style.display = 'block';
-            if (query) highlightText(note, query);
-            hasResults = true;
-        } else {
-            note.style.display = 'none';
-            clearHighlight(note);
+        noteIndex.forEach(({ el, title, content, tagIds }) => {
+            const tagMatch = !tagId || tagIds.includes(tagId);
+            const textMatch = !query || title.includes(query) || content.includes(query);
+
+            if (tagMatch && textMatch) {
+                el.style.display = 'block';
+                if (query) highlightText(el, query); else clearHighlight(el);
+                hasResults = true;
+            } else {
+                el.style.display = 'none';
+                clearHighlight(el);
+            }
+        });
+
+        if (!hasResults) showNoResults(activeTag, query);
+    }
+
+    function getOrCreateNoResults() {
+        if (!noResultsEl) {
+            noResultsEl = document.createElement('div');
+            noResultsEl.className = 'col-12';
+            noResultsEl.innerHTML = '<div class="no-results text-center p-5 text-muted"></div>';
+            document.getElementById('notesList')?.appendChild(noResultsEl);
         }
-    });
-
-    if (!hasResults) {
-        showNoResults();
-    }
-}
-
-function showAllNotes() {
-    const notes = document.querySelectorAll('#notesList > div');
-    notes.forEach(note => {
-        note.style.display = 'block';
-        clearHighlight(note);
-    });
-
-    const noResults = document.querySelector('.no-results');
-    if (noResults) noResults.remove();
-
-    document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
-    document.getElementById('selectedTagDisplay').textContent = 'Alle Tags';
-}
-
-function showNoResults() {
-    const notesList = document.getElementById('notesList');
-    if (!notesList) return;
-
-    const existingNoResults = document.querySelector('.no-results');
-    if (existingNoResults) existingNoResults.remove();
-
-    const activeTag = document.querySelector('.tag-filter-item.active-tag-filter');
-    const searchQuery = document.getElementById('searchInput')?.value?.trim() || '';
-    let message = 'Keine Notizen gefunden';
-
-    if (activeTag && searchQuery) {
-        message = `Keine Notizen für "${activeTag.dataset.tagName}" mit "${searchQuery}" gefunden`;
-    } else if (activeTag) {
-        message = `Keine Notizen für "${activeTag.dataset.tagName}" gefunden`;
-    } else if (searchQuery) {
-        message = `Keine Notizen mit "${searchQuery}" gefunden`;
+        return noResultsEl;
     }
 
-    notesList.insertAdjacentHTML('beforeend',
-        `<div class="col-12"><div class="no-results text-center p-5 text-muted">${message}</div></div>`
-    );
+    function showNoResults(activeTag, query) {
+        let message = 'Keine Notizen gefunden';
+        if (activeTag && query) {
+            message = `Keine Notizen für "${activeTag.dataset.tagName}" mit "${query}"`;
+        } else if (activeTag) {
+            message = `Keine Notizen für "${activeTag.dataset.tagName}"`;
+        } else if (query) {
+            message = `Keine Notizen mit "${query}" gefunden`;
+        }
+        const el = getOrCreateNoResults();
+        el.querySelector('.no-results').textContent = message;
+        el.style.display = 'block';
+    }
+
+    function hideNoResults() {
+        if (noResultsEl) noResultsEl.style.display = 'none';
+    }
+
+    window.showAllNotes = function () {
+        noteIndex.forEach(({ el }) => {
+            el.style.display = 'block';
+            clearHighlight(el);
+        });
+        hideNoResults();
+        document.querySelectorAll('.tag-filter-item').forEach(i => i.classList.remove('active-tag-filter'));
+        document.getElementById('selectedTagDisplay').textContent = 'Alle Tags';
+    };
+}
+
+function buildNoteIndex() {
+    return [...document.querySelectorAll('#notesList > div')].map(note => ({
+        el: note,
+        title: note.querySelector('.title')?.textContent?.toLowerCase() || '',
+        content: note.querySelector('.content')?.textContent?.toLowerCase() || '',
+        tagIds: [...note.querySelectorAll('[data-tag-id]')].map(t => t.dataset.tagId)
+    }));
 }
 
 function highlightText(note, query) {
     clearHighlight(note);
-
-    if (!query) return;
-
-    const title = note.querySelector('.title');
-    if (title && title.textContent.toLowerCase().includes(query)) {
-        highlightInElement(title, query);
-    }
-
-    const content = note.querySelector('.content');
-    if (content && content.textContent.toLowerCase().includes(query)) {
-        highlightInElement(content, query);
-    }
-}
-
-function highlightInElement(element, query) {
-    const text = element.textContent;
-    const escapedQuery = query.replace("/[.*+?^${}()|[\$\\$/g, '\\$&'");
-    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    element.innerHTML = text.replace(regex, '<mark>$1</mark>');
-}
-
-function clearHighlight(note) {
-    const highlights = note.querySelectorAll('mark');
-    highlights.forEach(mark => {
-        mark.outerHTML = mark.textContent;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    ['.title', '.content'].forEach(sel => {
+        const el = note.querySelector(sel);
+        if (el?.textContent.toLowerCase().includes(query)) {
+            el.innerHTML = el.textContent.replace(regex, '<mark>$1</mark>');
+        }
     });
 }
 
-window.showAllNotes = showAllNotes;
+function clearHighlight(note) {
+    note.querySelectorAll('mark').forEach(mark => {
+        mark.replaceWith(mark.firstChild);
+    });
+}

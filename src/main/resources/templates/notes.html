@@ -25,7 +25,7 @@
         <h2 sec:authorize="isAuthenticated()" th:text="'👋🏻 Hallo, ' + ${displayname} + '!'">Placeholder</h2>
         <div class="center-gap">
             <!-- TAG FILTER DROPDOWN -->
-            <div class="">
+            <div class="dropdown">
                 <button class="btn btn-outline-primary dropdown-toggle" type="button"
                         id="tagFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
                     <span id="selectedTagDisplay">Alle Tags</span>
@@ -34,7 +34,7 @@
                     <!-- "Alle Tags" Option  -->
                     <li>
                         <a class="dropdown-item fw-semibold tag-filter-item"
-                           data-tag-id="" data-tag-name="Alle Tags" href="javascript:void(0);">
+                           data-tag-id="" data-tag-name="Alle Tags" href="#">
                             Alle Tags
                         </a>
                     </li>
@@ -42,19 +42,30 @@
 
                     <!-- Dynamische Tags aus Thymeleaf -->
                     <li th:each="tag : ${allTags}">
-                        <a class="dropdown-item tag-filter-item"
-                           th:attr="data-tag-id=${tag.id}"
-                           th:data-tag-name="'#' + ${tag.tag}"
-                           th:text="'#' + ${tag.tag}"
-                           href="javascript:void(0);">
+                        <a class="dropdown-item tag-filter-item" th:attr="data-tag-id=${tag.id}"
+                           th:data-tag-name="'#' + ${tag.tag}" th:text="'#' + ${tag.tag}" href="#">
                         </a>
                     </li>
                 </ul>
             </div>
             <!-- SEARCHING -->
             <div class="input-group">
-                <input class="form-control" type="text" id="searchInput"
-                       placeholder="Suche in Notizen..." autocomplete="off">
+                <input class="form-control" type="text" id="searchInput" placeholder="Suche in Notizen..." autocomplete="off">
+            </div>
+            <!-- SORTING -->
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" id="sortBtn">
+                    <span id="selectedSortDisplay">Erstellt ↓</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" id="sortMenu">
+                    <li><a class="dropdown-item active" href="#"
+                           data-sort-field="created" data-sort-dir="desc">Erstellt ↓</a></li>
+                    <li><a class="dropdown-item" href="#"
+                           data-sort-field="updated" data-sort-dir="desc">Geändert ↓</a></li>
+                    <li><a class="dropdown-item" href="#"
+                           data-sort-field="title" data-sort-dir="asc">Titel ↑</a></li>
+                </ul>
             </div>
         </div>
         <div class="center-gap">
@@ -101,16 +112,11 @@
                               th:attr="data-tag-id=${tag.id}"
                               th:text="'#' + ${tag.tag}">
                         </span>
-                        <span class="text-muted bg-secondary-subtle rounded-3 p-1"
-                              th:if="${note.tags == null or #lists.size(note.tags) == 0}">
-                            Keine Tags
-                        </span>
                     </div>
 
                     <!-- CONTENT -->
                     <div class="h-100">
-                        <span th:text="${note.content != null and note.content.length() > 0 ? #strings.abbreviate(note.content, 250) : 'Kein Inhalt'}"
-                              th:classappend="${note.content == null or note.content.length() == 0} ? 'text-muted fst-italic'"
+                        <span th:text="${note.content != null and note.content.length() > 0 ? #strings.abbreviate(note.content, 250) : ''}"
                               class="content">Inhalt
                         </span>
                     </div>
@@ -133,15 +139,13 @@
     <div class="center-gap justify-content-center mt-4" th:if="${totalPages > 1}">
         <a class="btn btn-outline-secondary"
            th:classappend="${currentPage == 0} ? 'disabled'"
-           th:href="@{/notes(pageNo=${currentPage - 1}, pageSize=${pageSize})}">
+           th:href="@{/notes(pageNo=${currentPage - 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir})}">
             ← Zurück
         </a>
 
-        <span class="text-muted" th:text="|Seite ${currentPage + 1} von ${totalPages}|"></span>
-
         <a class="btn btn-outline-secondary"
            th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'"
-           th:href="@{/notes(pageNo=${currentPage + 1}, pageSize=${pageSize})}">
+           th:href="@{/notes(pageNo=${currentPage + 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir})}">
             Weiter →
         </a>
     </div>

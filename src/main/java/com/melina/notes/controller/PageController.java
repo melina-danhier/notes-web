@@ -9,6 +9,7 @@ import com.melina.notes.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,13 +44,18 @@ public class PageController {
     public String notesPage(Model model,
                             @AuthenticationPrincipal CustomUserDetails user,
                             @RequestParam(defaultValue = "0") int pageNo,
-                            @RequestParam(defaultValue = "9") int pageSize) {
+                            @RequestParam(defaultValue = "9") int pageSize,
+                            @RequestParam(defaultValue = "created") String sortField,
+                            @RequestParam(defaultValue = "desc") String sortDir) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
         model.addAttribute("noteDto", new EditNoteDTO());
-        Page<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId(), PageRequest.of(pageNo, pageSize));
+        Page<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId(), PageRequest.of(pageNo, pageSize, sort));
         model.addAttribute("notes", notes);
         model.addAttribute("currentPage", pageNo);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalPages", notes.getTotalPages());
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
         model.addAttribute("displayname", user.getDisplayName());
         List<TagDTO> tags = tagService.getAllTagsByUserId(user.getId());
         model.addAttribute("allTags", tags);
