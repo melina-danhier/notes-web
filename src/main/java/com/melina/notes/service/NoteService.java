@@ -6,13 +6,16 @@ import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.UserNoteMismatchException;
+import com.melina.notes.filter.NoteFilter;
+import com.melina.notes.filter.NoteSpecification;
 import com.melina.notes.mapper.NoteMapper;
 import com.melina.notes.repository.NoteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -41,8 +44,10 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public Page<NoteDTO> getAllNotesByUserId(Long userId, Pageable pageable) {
-        return noteRepository.findAllByUser_Id(userId, pageable).map(noteMapper::toNoteDTO);
+    public Page<NoteDTO> getAllNotes(NoteFilter filter, PageRequest pageRequest) {
+        return noteRepository
+                .findAll(NoteSpecification.build(filter), pageRequest)
+                .map(noteMapper::toNoteDTO);
     }
 
     public NoteDTO getNoteById(Long userId, Long noteId) {

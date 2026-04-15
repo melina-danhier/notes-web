@@ -53,4 +53,8 @@ public class TagService {
                 .map(tagMapper::toDTO)
                 .toList();
     }
+
+    public Tag getTag(String tagAsString) {
+        return tagRepository.findByTag(tagAsString).orElse(null);
+    }
 }

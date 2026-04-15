@@ -28,13 +28,14 @@
             <div class="dropdown">
                 <button class="btn btn-outline-primary dropdown-toggle" type="button"
                         id="tagFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span id="selectedTagDisplay">Alle Tags</span>
+                    <span id="selectedTagDisplay" th:text="${tagFilter != null and tagFilter != ''} ? '#' + ${tagFilter} : 'Alle Tags'">Alle Tags</span>
                 </button>
                 <ul class="dropdown-menu">
                     <!-- "Alle Tags" Option  -->
                     <li>
                         <a class="dropdown-item fw-semibold tag-filter-item"
-                           data-tag-id="" data-tag-name="Alle Tags" href="#">
+                           th:classappend="${tagFilter == null or tagFilter == ''} ? 'active-tag-filter'"
+                           data-tag-id="" data-tag-value="" data-tag-name="Alle Tags" href="#">
                             Alle Tags
                         </a>
                     </li>
@@ -42,7 +43,10 @@
 
                     <!-- Dynamische Tags aus Thymeleaf -->
                     <li th:each="tag : ${allTags}">
-                        <a class="dropdown-item tag-filter-item" th:attr="data-tag-id=${tag.id}"
+                        <a class="dropdown-item tag-filter-item"
+                           th:classappend="${tagFilter != null and tagFilter == tag.tag} ? 'active-tag-filter'"
+                           th:attr="data-tag-id=${tag.id}"
+                           th:data-tag-value="${tag.tag}"
                            th:data-tag-name="'#' + ${tag.tag}" th:text="'#' + ${tag.tag}" href="#">
                         </a>
                     </li>
@@ -50,7 +54,8 @@
             </div>
             <!-- SEARCHING -->
             <div class="input-group">
-                <input class="form-control" type="text" id="searchInput" placeholder="Suche in Notizen..." autocomplete="off">
+                <input class="form-control" type="text" id="searchInput" placeholder="Suche in Notizen..." autocomplete="off"
+                       th:value="${search}">
             </div>
             <!-- SORTING -->
             <div class="dropdown">
@@ -139,13 +144,13 @@
     <div class="center-gap justify-content-center mt-4" th:if="${totalPages > 1}">
         <a class="btn btn-outline-secondary"
            th:classappend="${currentPage == 0} ? 'disabled'"
-           th:href="@{/notes(pageNo=${currentPage - 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir})}">
+           th:href="@{/notes(pageNo=${currentPage - 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir}, tagFilter=${tagFilter}, search=${search})}">
             ← Zurück
         </a>
 
         <a class="btn btn-outline-secondary"
            th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'"
-           th:href="@{/notes(pageNo=${currentPage + 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir})}">
+           th:href="@{/notes(pageNo=${currentPage + 1}, pageSize=${pageSize}, sortField=${sortField}, sortDir=${sortDir}, tagFilter=${tagFilter}, search=${search})}">
             Weiter →
         </a>
     </div>

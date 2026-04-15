@@ -3,6 +3,7 @@ package com.melina.notes.controller;
 import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.dto.TagDTO;
+import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
 import com.melina.notes.service.TagService;
@@ -43,22 +44,33 @@ public class PageController {
     @GetMapping("/notes")
     public String notesPage(Model model,
                             @AuthenticationPrincipal CustomUserDetails user,
-                            @RequestParam(defaultValue = "0") int pageNo,
-                            @RequestParam(defaultValue = "9") int pageSize,
-                            @RequestParam(defaultValue = "created") String sortField,
-                            @RequestParam(defaultValue = "desc") String sortDir) {
+                            @RequestParam(required = false, defaultValue = "0") int pageNo,
+                            @RequestParam(required = false, defaultValue = "9") int pageSize,
+                            @RequestParam(required = false, defaultValue = "created") String sortField,
+                            @RequestParam(required = false, defaultValue = "desc") String sortDir,
+                            @RequestParam(required = false) String tagFilter,
+                            @RequestParam(required = false) String search) {
+
+        NoteFilter filter = new NoteFilter();
+        filter.setUserId(user.getId());
+        filter.setTagFilter(tagFilter);
+        filter.setSearchTerm(search);
+
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
-        model.addAttribute("noteDto", new EditNoteDTO());
-        Page<NoteDTO> notes = noteService.getAllNotesByUserId(user.getId(), PageRequest.of(pageNo, pageSize, sort));
+        Page<NoteDTO> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
+
         model.addAttribute("notes", notes);
         model.addAttribute("currentPage", pageNo);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalPages", notes.getTotalPages());
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDir", sortDir);
-        model.addAttribute("displayname", user.getDisplayName());
+        model.addAttribute("tagFilter", tagFilter);
+        model.addAttribute("search", search);
+
         List<TagDTO> tags = tagService.getAllTagsByUserId(user.getId());
         model.addAttribute("allTags", tags);
+        model.addAttribute("displayname", user.getDisplayName());
         return "notes";
     }
 
@@ -74,5 +86,4 @@ public class PageController {
         model.addAttribute("noteDto", note);
         return "note-view";
     }
-
 }
