@@ -15,13 +15,29 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initSearchAndTagFilter() {
     const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+
     if (searchInput) {
         // Enter → Backend-Request
-        searchInput.addEventListener('keypress', e => {
+        searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 navigateWithSearch(searchInput.value.trim());
             }
+        });
+    }
+
+    if (clearBtn && searchInput) {
+        clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const query = searchInput.value.trim();
+            if (!query) {
+                return;
+            }
+
+            searchInput.value = '';
+            navigateWithSearch('');
         });
     }
 
@@ -30,9 +46,8 @@ function initSearchAndTagFilter() {
         item.onclick = e => {
             e.preventDefault();
             e.stopPropagation();
-            const tagName = item.dataset.tagName;
             const tagValue = item.dataset.tagValue || '';
-            navigateWithTag(tagValue, tagName);
+            navigateWithTag(tagValue);
         };
     });
 }
@@ -48,7 +63,7 @@ function navigateWithSearch(query) {
     window.location.href = url.toString();
 }
 
-function navigateWithTag(tag, displayName) {
+function navigateWithTag(tag) {
     const url = new URL(window.location.href);
     if (tag) {
         url.searchParams.set('tagFilter', tag);
