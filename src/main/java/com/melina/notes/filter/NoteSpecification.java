@@ -4,14 +4,21 @@ import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 public class NoteSpecification {
     public static Specification<Note> build(NoteFilter filter) {
-        return Specification
-                .where(isUser(filter.getUserId()))
-                .and(searchInTitleOrContent(filter.getSearchTerm()))
-                .and(hasTag(filter.getTagFilter()));
+        return (root, query, cb) -> {
+            Predicate predicate = Specification
+                    .where(isUser(filter.getUserId()))
+                    .and(searchInTitleOrContent(filter.getSearchTerm()))
+                    .and(hasTag(filter.getTagFilter()))
+                    .toPredicate(root, query, cb);
+            assert query != null;
+            query.distinct(true);
+            return predicate;
+        };
     }
 
     private static Specification<Note> isUser(Long userId) {
@@ -32,7 +39,7 @@ public class NoteSpecification {
 
     private static Specification<Note> hasTag(String tag) {
         return (root, query, cb) -> {
-            if (tag == null) return null;
+            if (tag == null || tag.isBlank()) return null;
             Join<Note, Tag> tags = root.join("tags", JoinType.LEFT);
             return cb.equal(tags.get("tag"), tag);
         };

@@ -15,14 +15,17 @@
 </head>
 <body class="align-items-center">
 
-<div class="con align-items-center">
-    <h3 th:text="${noteDto?.id} ? '✏️ Notiz bearbeiten' : '➕ Notiz erstellen'">Notiz erstellen oder bearbeiten</h3>
-    <form th:object="${noteDto}">
+<div class="con">
+    <h3 th:text="${noteDto?.id} ? '✏️ Notiz bearbeiten' : '➕ Notiz erstellen'" class="text-center">Notiz erstellen oder bearbeiten</h3>
+    <form th:object="${noteDto}" class="d-flex flex-column gap-2 w-100 mt-0">
         <input type="hidden" id="noteIdInput" th:field="*{id}" name="id">
-        <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" size="30" autofocus required>
-        <input type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Tag1, Tag2, ..." size="30">
-        <textarea id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz..." rows="7" cols="30" style="resize: none;"></textarea>
-        <div class="mt-2">
+        <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz" autofocus required
+               class="form-control">
+        <input type="text" id="tagsInput" th:field="*{tagsRaw}" placeholder="Tag1, Tag2, ..."
+               class="form-control">
+        <textarea id="contentInput" th:field="*{content}" placeholder="Inhalt der Notiz..." rows="8"
+                  class="form-control" style="resize: vertical;"></textarea>
+        <div class="d-flex flex-wrap gap-2 mt-2">
             <button type="button" id="saveBtn" class="btn btn-success">💾 Speichern</button>
             <button type="button" class="btn btn-secondary" onclick="window.location.href='/notes'">Abbrechen</button>
         </div>

@@ -15,16 +15,20 @@
 <body class="align-items-center">
 
 <div class="con align-items-center animate">
-    <h2>Willkommen zurück</h2>
+    <h2 class="mt-1">Willkommen zurück</h2>
     <form id="loginForm" th:action="@{/login}" method="post"
-          class="d-flex flex-column gap-3 my-3">
-        <div>
+          class="d-flex flex-column gap-3 my-2">
+        <div class="d-flex align-items-center border rounded-2 gap-2 px-2">
             <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="email" name="email" placeholder="E-Mail-Adresse" size="30" required>
+            <input type="email" id="email" name="email"
+                   placeholder="E-Mail-Adresse" required
+                   class="form-control border-0 shadow-none">
         </div>
-        <div>
+        <div class="d-flex align-items-center border rounded-2 gap-2 px-2">
             <i class="fa-solid fa-lock"></i>
-            <input type="password" id="password" name="password" placeholder="Passwort" size="30" required>
+            <input type="password" id="password" name="password"
+                   placeholder="Passwort" required
+                   class="form-control border-0 shadow-none">
             <i class="fa-solid fa-eye" onclick="togglePassword()"></i>
         </div>
         <a th:href="@{/resetPassword}" class="text-end link-primary small">Passwort vergessen?</a>
