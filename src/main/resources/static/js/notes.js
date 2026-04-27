@@ -8,7 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initNotesApp()
     initSorting();
     initSearchAndTagFilter();
+    initBinButton();
 });
+
+function initBinButton() {
+    const binButton = document.getElementById('binButton');
+    if (!binButton) return;
+
+    binButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/notes/trash';
+    });
+}
 
 /**
  * Suche & Tag-Filter – leitet an das Backend weiter (URL-Parameter)
@@ -18,7 +29,6 @@ function initSearchAndTagFilter() {
     const clearBtn = document.getElementById('clearSearchBtn');
 
     if (searchInput) {
-        // Enter → Backend-Request
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();

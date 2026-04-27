@@ -55,6 +55,7 @@ public class PageController {
         filter.setUserId(user.getId());
         filter.setTagFilter(tagFilter);
         filter.setSearchTerm(search);
+        filter.setDeleted(false);
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
         Page<NoteDTO> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
@@ -71,7 +72,34 @@ public class PageController {
         List<TagDTO> tags = tagService.getAllTagsByUserId(user.getId());
         model.addAttribute("allTags", tags);
         model.addAttribute("displayname", user.getDisplayName());
+
         return "notes";
+    }
+
+    @GetMapping("/notes/trash")
+    public String trashPage(Model model,
+                            @AuthenticationPrincipal CustomUserDetails user,
+                            @RequestParam(required = false, defaultValue = "0") int pageNo,
+                            @RequestParam(required = false, defaultValue = "9") int pageSize,
+                            @RequestParam(required = false, defaultValue = "created") String sortField,
+                            @RequestParam(required = false, defaultValue = "desc") String sortDir) {
+
+        NoteFilter filter = new NoteFilter();
+        filter.setUserId(user.getId());
+        filter.setDeleted(true);
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
+        Page<NoteDTO> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
+
+        model.addAttribute("notes", notes);
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalPages", notes.getTotalPages());
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("displayname", user.getDisplayName());
+
+        return "trash";
     }
 
     @GetMapping("/notes/new")

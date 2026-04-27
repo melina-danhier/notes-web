@@ -30,7 +30,7 @@ public class NoteController {
         return ResponseEntity.ok(note);
     }
 
-    @PutMapping("/{noteId}")
+    @PatchMapping("/{noteId}")
     public ResponseEntity<NoteDTO> updateNote(@PathVariable Long noteId,
                                               @RequestBody EditNoteDTO noteDTO,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -42,6 +42,26 @@ public class NoteController {
     public ResponseEntity<Void> deleteNote(@PathVariable Long noteId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         noteService.deleteNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{noteId}/delete")
+    public ResponseEntity<NoteDTO> softDeleteNote(@PathVariable Long noteId,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDTO note = noteService.softDeleteNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok(note);
+    }
+
+    @PatchMapping("/{noteId}/restore")
+    public ResponseEntity<NoteDTO> restoreNote(@PathVariable Long noteId,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDTO note = noteService.restoreNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok(note);
+    }
+
+    @DeleteMapping("/trash/empty")
+    public ResponseEntity<Void> emptyTrash(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        noteService.emptyTrashForUser(userDetails.getId());
         return ResponseEntity.ok().build();
     }
 }

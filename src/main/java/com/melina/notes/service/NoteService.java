@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -75,6 +74,24 @@ public class NoteService {
     public void deleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         noteRepository.delete(note);
+    }
+
+    public NoteDTO softDeleteNoteForUser(Long userId, Long noteId) {
+        Note note = getNote(userId, noteId);
+        note.setDeleted(true);
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDTO(note);
+    }
+
+    public NoteDTO restoreNoteForUser(Long id, Long noteId) {
+        Note note = getNote(id, noteId);
+        note.setDeleted(false);
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDTO(note);
+    }
+
+    public void emptyTrashForUser(Long userId) {
+        noteRepository.deleteAllByUserIdAndDeleted(userId, true);
     }
 
     private Note getNote(Long userId, Long noteId) {

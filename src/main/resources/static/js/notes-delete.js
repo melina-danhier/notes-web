@@ -6,8 +6,6 @@ import { showSuccessToast } from './notes-ui.js';
  * GLOBALE deleteNote() Funktion für Thymeleaf
  */
 window.deleteNote = async function(noteId) {
-    if (!confirm('Notiz wirklich löschen?')) return;
-
     const csrfToken = getCsrfToken();
     const csrfHeader = getCsrfHeader();
 
@@ -19,14 +17,14 @@ window.deleteNote = async function(noteId) {
     showLoading(noteId);
 
     try {
-        const response = await fetch(`/api/notes/${noteId}`, {
-            method: 'DELETE',
+        const response = await fetch(`/api/notes/${noteId}/delete`, {
+            method: 'PATCH',
             headers: { [csrfHeader]: csrfToken }
         });
 
         if (response.ok) {
             showSuccessToast('✅ Notiz gelöscht!');
-            setTimeout(() => location.reload(), 1500); // 🎯 Tags + Liste!
+            setTimeout(() => location.reload(), 100); // 🎯 Tags + Liste!
         } else {
             throw new Error(`HTTP ${response.status}`);
         }

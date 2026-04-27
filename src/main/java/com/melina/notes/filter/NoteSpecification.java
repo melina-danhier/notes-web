@@ -14,6 +14,7 @@ public class NoteSpecification {
                     .where(isUser(filter.getUserId()))
                     .and(searchInTitleOrContent(filter.getSearchTerm()))
                     .and(hasTag(filter.getTagFilter()))
+                    .and(isDeleted(filter.getDeleted()))
                     .toPredicate(root, query, cb);
             assert query != null;
             query.distinct(true);
@@ -42,6 +43,15 @@ public class NoteSpecification {
             if (tag == null || tag.isBlank()) return null;
             Join<Note, Tag> tags = root.join("tags", JoinType.LEFT);
             return cb.equal(tags.get("tag"), tag);
+        };
+    }
+
+    private static Specification<Note> isDeleted(Boolean deleted) {
+        return (root, query, cb) -> {
+            if (deleted == null) {
+                return cb.isFalse(root.get("deleted"));
+            }
+            return cb.equal(root.get("deleted"), deleted);
         };
     }
 
