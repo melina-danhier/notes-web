@@ -6,7 +6,6 @@
     gap: 1rem;
 }
 
-/* Card hover effect */
 .card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -15,14 +14,12 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Tag badges */
 .card .bg-primary-subtle {
     font-size: 0.78rem;
     padding: 0.2rem 0.55rem !important;
     white-space: nowrap;
 }
 
-/* Content preview */
 .card .content {
     font-size: 0.9rem;
     color: #555;
@@ -33,7 +30,6 @@
     overflow: hidden;
 }
 
-/* Card header */
 .card-header {
     background: transparent;
     border-bottom: 1px solid rgba(0,0,0,.06);
@@ -47,18 +43,15 @@
     max-width: 60%;
 }
 
-/* Pagination */
 .center-gap .btn-outline-secondary {
     min-width: 6rem;
 }
 
-/* Search input focus ring */
 #searchInput:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
-/* Notes form - note-view page */
 #titleInput, #tagsInput, #contentInput {
     width: 100%;
 }

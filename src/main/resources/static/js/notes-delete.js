@@ -2,9 +2,6 @@
 import { getCsrfToken, getCsrfHeader, showLoading, hideLoading } from './notes-utils.js';
 import { showSuccessToast } from './notes-ui.js';
 
-/**
- * GLOBALE deleteNote() Funktion für Thymeleaf
- */
 window.deleteNote = async function(noteId) {
     const csrfToken = getCsrfToken();
     const csrfHeader = getCsrfHeader();
@@ -24,7 +21,7 @@ window.deleteNote = async function(noteId) {
 
         if (response.ok) {
             showSuccessToast('✅ Notiz gelöscht!');
-            setTimeout(() => location.reload(), 100); // 🎯 Tags + Liste!
+            setTimeout(() => location.reload(), 100);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }

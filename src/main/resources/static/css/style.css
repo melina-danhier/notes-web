@@ -16,7 +16,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Kleine Animation beim Laden */
 .con {
     width: 100%;
     max-width: 1100px;
@@ -63,7 +62,6 @@ i {
     margin: 0.5rem;
 }
 
-/* Buttons smooth transition */
 .btn {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

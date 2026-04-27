@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ public class GlobalExceptionHandler {
         return responseEntityWithErrorResponse(HttpStatus.NOT_FOUND, ex);
     }
 
-    // Validierungsfehler (400)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
@@ -61,28 +59,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Bad Request (400)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
         log.warn("Bad Request: {}", ex.getMessage());
         return responseEntityWithErrorResponse(HttpStatus.BAD_REQUEST, ex);
     }
 
-    // Conflict (409)
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleConflict(IllegalStateException ex) {
         log.warn("Conflict: {}", ex.getMessage());
         return responseEntityWithErrorResponse(HttpStatus.CONFLICT, ex);
     }
 
-    // ✅ HTTP 403 Forbidden
     @ExceptionHandler({AccessDeniedException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<ErrorResponse> handleForbidden(Exception ex) {
         log.warn("Access denied: {}", ex.getMessage());
         return responseEntityWithErrorResponse(HttpStatus.FORBIDDEN, ex);
     }
 
-    // FALLBACK
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         String message = ex.getMessage() != null ? ex.getMessage() : "Unbekannter Fehler";

@@ -7,7 +7,6 @@ export function initSorting() {
     const labels = {created: 'Erstellt', updated: 'Geändert', title: 'Titel'};
 
     function getLabel(field, activeDir) {
-        // Zeigt die entgegengesetzte Richtung als Hinweis
         const oppositeArrow = activeDir === 'asc' ? '↓' : '↑';
         return `${labels[field] ?? field} ${oppositeArrow}`;
     }
@@ -27,19 +26,16 @@ export function initSorting() {
             item.classList.add('active');
 
             item.dataset.sortDir = newDir;
-            // Im Button die aktive Richtung anzeigen
             const activeArrow = newDir === 'asc' ? '↑' : '↓';
             document.getElementById('selectedSortDisplay').textContent =
                 `${labels[item.dataset.sortField] ?? item.dataset.sortField} ${activeArrow}`;
 
-            // Im Dropdown-Item die entgegengesetzte Richtung anzeigen
             item.textContent = getLabel(item.dataset.sortField, newDir);
 
             applySort(item.dataset.sortField, newDir);
         };
     });
 
-    // Zustand aus URL beim Load wiederherstellen
     const params = new URLSearchParams(window.location.search);
     const activeField = params.get('sortField');
     const activeDir = params.get('sortDir');
@@ -57,7 +53,6 @@ export function initSorting() {
             match.textContent = getLabel(activeField, activeDir);
         }
     } else {
-        // Kein URL-Parameter → aktives HTML-Item initialisieren
         const defaultActive = menu.querySelector('.dropdown-item.active');
         if (defaultActive) {
             const field = defaultActive.dataset.sortField;

@@ -11,11 +11,9 @@ function initEditNotesApp() {
         return;
     }
 
-    // Auto-focus Title
     const titleInput = document.getElementById('noteIdInput') || null;
     if (titleInput) titleInput.focus();
 
-    // Event Listener initialisieren
     initSaveButton();
     initAutoResize();
     initKeyboardShortcuts();
@@ -114,21 +112,18 @@ function initAutoResize() {
 
 function initKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + S = Save
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
             saveNote();
             return;
         }
 
-        // Ctrl/Cmd + Enter = Save
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
             saveNote();
             return;
         }
 
-        // Escape = Cancel/Back
         if (e.key === 'Escape') {
             if (confirm('Änderungen verwerfen und zurück?')) {
                 window.history.back();
@@ -184,7 +179,6 @@ function showError(msg) {
 }
 
 function showNotification(msg, type) {
-    // Toast Container erstellen (falls nicht vorhanden)
     let toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
         toastContainer = document.createElement('div');
@@ -193,7 +187,6 @@ function showNotification(msg, type) {
         document.body.appendChild(toastContainer);
     }
 
-    // Toast erstellen
     const toastDiv = document.createElement('div');
     toastDiv.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 shadow-lg`;
     toastDiv.setAttribute('role', 'alert');
@@ -206,11 +199,9 @@ function showNotification(msg, type) {
 
     toastContainer.appendChild(toastDiv);
 
-    // Bootstrap Toast anzeigen
     const toast = new bootstrap.Toast(toastDiv);
     toast.show();
 
-    // Cleanup nach 4 Sekunden
     setTimeout(() => {
         if (toastDiv.parentNode) {
             toastDiv.remove();

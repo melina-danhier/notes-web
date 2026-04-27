@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * UI - Toast, Animationen
- */
 export function showSuccessToast(message) {
     let toast = document.getElementById('successToast');
     if (!toast) {

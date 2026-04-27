@@ -1,13 +1,10 @@
 'use strict';
 import { updateLocalTimes } from './notes-utils.js';
 
-/**
- * APP INITIALISIERUNG & EVENTS
- */
 export function initNotesApp() {
     initNewNoteButton();
     initLogoutForm();
-    updateLocalTimes();     // 🕐 Lokale Zeiten
+    updateLocalTimes();
 }
 
 function initNewNoteButton() {

@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * UTILITIES - CSRF, Zeit, Loading
- */
 export function getCsrfToken() {
     return document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
 }

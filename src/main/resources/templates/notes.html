@@ -20,10 +20,8 @@
 
 <div class="con">
 
-    <!-- HEADER -->
     <div class="">
 
-        <!-- Begrüßung links + Logout rechts -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div class="flex-grow-1" style="min-width:0">
                 <h2 class="fs-5 fs-md-4 fs-lg-2 mb-0 text-truncate"
@@ -42,14 +40,12 @@
 
                     <ul class="dropdown-menu dropdown-menu-end">
 
-                        <!-- Neue Notiz -->
                         <li>
                             <button class="dropdown-item" id="newNoteBtn">
                                 ➕ Neue Notiz
                             </button>
                         </li>
 
-                        <!-- Papierkorb -->
                         <li>
                             <button class="dropdown-item" id="binButton">
                                 🗑️ Papierkorb
@@ -58,7 +54,6 @@
 
                         <li><hr class="dropdown-divider"></li>
 
-                        <!-- Logout -->
                         <li>
                             <form th:action="@{/logout}" method="post" class="px-3">
                                 <input type="hidden"
@@ -75,10 +70,8 @@
             </div>
         </div>
 
-        <!-- SUCHE + BUTTONS -->
         <div class="row g-2 align-items-end">
 
-            <!-- Suche -->
             <div class="col-12 col-lg-8 mb-2 mb-lg-0">
                 <div class="input-group shadow-sm">
                     <input class="form-control border px-3 py-2"
@@ -96,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
             <div class="col-12 col-lg-4">
                 <div class="row g-2">
                     <div class="col-6">
@@ -139,12 +131,10 @@
 
     </div>
 
-    <!-- NO NOTES -->
     <div class="center-gap m-3" th:if="${notes.content.isEmpty()}">
         <h5 class="fst-italic">Keine Notizen vorhanden</h5>
     </div>
 
-    <!-- NOTE-LIST -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3" id="notesList" th:if="${notes != null}">
         <div class="col" th:each="note : ${notes.content}" th:id="'note-' + ${note.id}">
             <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card"
@@ -152,11 +142,8 @@
                  onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.1)';"
                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';"
                  th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\''">
-                <!-- HEADER - Title, Tool buttons -->
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <!-- TITLE -->
                     <h5 class="title m-0" th:text="${note.title}">Notiz</h5>
-                    <!-- TOOL BUTTONS -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-danger px-3 py-1" title="Löschen"
                                 th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'">
@@ -165,7 +152,6 @@
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column justify-content-between gap-2 p-3">
-                    <!-- TAGS -->
                     <div class="d-flex gap-2">
                         <span class="text-primary-emphasis bg-primary-subtle rounded-3 p-1"
                               th:if="${note.tags != null and #lists.size(note.tags) > 0}"
@@ -175,14 +161,12 @@
                         </span>
                     </div>
 
-                    <!-- CONTENT -->
                     <div class="h-100">
                         <span th:text="${note.content != null and note.content.length() > 0 ? #strings.abbreviate(note.content, 250) : ''}"
                               class="content">Inhalt
                         </span>
                     </div>
 
-                    <!-- DETAILS - Erstelldatum und Änderungsdatum -->
                     <div class="text-muted small d-flex flex-column">
                         <span class="local-time" th:if="${note.created != null}">
                             Erstellt: <span th:text="${#temporals.format(note.created, 'dd.MM.yyyy HH:mm')}"></span>
@@ -196,7 +180,6 @@
         </div>
     </div>
 
-    <!-- PAGINATION -->
     <div class="center-gap justify-content-center mt-4" th:if="${totalPages > 1}">
         <a class="btn btn-outline-secondary"
            th:classappend="${currentPage == 0} ? 'disabled'"

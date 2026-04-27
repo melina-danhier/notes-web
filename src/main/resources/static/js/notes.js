@@ -21,9 +21,6 @@ function initBinButton() {
     });
 }
 
-/**
- * Suche & Tag-Filter – leitet an das Backend weiter (URL-Parameter)
- */
 function initSearchAndTagFilter() {
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearchBtn');
@@ -51,7 +48,6 @@ function initSearchAndTagFilter() {
         });
     }
 
-    // Tag-Filter Dropdown
     document.querySelectorAll('.tag-filter-item').forEach(item => {
         item.onclick = e => {
             e.preventDefault();
