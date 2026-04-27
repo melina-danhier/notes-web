@@ -48,6 +48,6 @@ public class Note {
     private User user;
 
     @Column(nullable = false)
-    private boolean deleted = false;
+    private boolean deleted;
 
 }
