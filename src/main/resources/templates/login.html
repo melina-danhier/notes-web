@@ -16,6 +16,28 @@
 
 <div class="con align-items-center animate">
     <h2 class="mt-1">Willkommen zurück</h2>
+
+    <!-- Fehlerbehandlung -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Abmeldungs-Erfolg -->
+    <div th:if="${logout}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${logout}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Registrierungs-Erfolg -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <form id="loginForm" th:action="@{/login}" method="post"
           class="d-flex flex-column gap-3 my-2">
         <div class="d-flex align-items-center border rounded-2 gap-2 px-2">

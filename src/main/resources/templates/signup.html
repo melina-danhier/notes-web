@@ -16,6 +16,14 @@
 
 <div class="con align-items-center animate">
     <h2 class="mt-1">Konto erstellen</h2>
+
+    <!-- Fehlerbehandlung -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <form id="signupForm" th:action="@{/signup}" method="post" class="d-flex flex-column gap-3 my-2">
         <div class="d-flex align-items-center gap-2 border rounded px-2">
             <i class="fa-solid fa-user"></i>
@@ -29,7 +37,7 @@
         </div>
         <div class="d-flex align-items-center gap-2 border rounded px-2">
             <i class="fa-solid fa-lock"></i>
-            <input type="password" id="regPassword" name="password" placeholder="Passwort" required
+            <input type="password" id="regPassword" name="password" placeholder="Passwort (min. 6 Zeichen)" required
                    class="form-control border-0 shadow-none">
             <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
         </div>
