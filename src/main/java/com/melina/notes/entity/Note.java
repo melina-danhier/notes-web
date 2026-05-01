@@ -20,7 +20,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Note {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notes_seq")
+    @SequenceGenerator(name = "notes_seq", sequenceName = "notes_seq", allocationSize = 1)
     private Long id;
 
     private String title;
