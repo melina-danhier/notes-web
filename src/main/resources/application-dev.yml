@@ -16,8 +16,7 @@ spring:
     cache: false
 
   flyway:
-    validate-on-migrate: false
-    out-of-order: true
+    validate-on-migrate: true
 
 logging:
   level:
