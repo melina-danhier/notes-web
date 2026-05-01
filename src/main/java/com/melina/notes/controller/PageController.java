@@ -45,7 +45,7 @@ public class PageController {
 
     @GetMapping("/signup")
     public String signup(Model model, @RequestParam(required = false) String error) {
-        String errorMessage = null;
+        String errorMessage;
         if (error != null) {
             errorMessage = switch(error) {
                 case "empty_name" -> "Bitte geben Sie Ihren Namen ein";

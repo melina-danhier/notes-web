@@ -84,10 +84,6 @@ body.align-items-center .con {
         padding: 1rem;
     }
 
-    body.mobile-fullscreen {
-        padding: 0;
-        align-items: flex-start;
-    }
     body.mobile-fullscreen .con {
         max-width: 100%;
         min-height: 100vh;

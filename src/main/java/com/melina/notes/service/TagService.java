@@ -54,7 +54,4 @@ public class TagService {
                 .toList();
     }
 
-    public Tag getTag(String tagAsString) {
-        return tagRepository.findByTag(tagAsString).orElse(null);
-    }
 }

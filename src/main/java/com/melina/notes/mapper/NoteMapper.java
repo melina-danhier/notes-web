@@ -7,14 +7,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring", uses = TagMapper.class)
 public interface NoteMapper {
     @Mapping(source = "user.id", target = "userId")
     NoteDTO toNoteDTO(Note note);
-
-    List<NoteDTO> toNoteDTO(List<Note> notes);
 
     @Mapping(target = "tags", ignore = true)
     @Mapping(target = "updated", ignore = true)

@@ -72,7 +72,7 @@ class TagServiceTest {
 
         verify(tagRepository).deleteAllWithNoNotes();
         assertEquals(1, result.size());
-        assertSame(dto, result.get(0));
+        assertSame(dto, result.getFirst());
     }
 }
 

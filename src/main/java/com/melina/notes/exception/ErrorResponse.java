@@ -19,12 +19,6 @@ public class ErrorResponse {
     private String message;
     private List<String> details;
 
-    public ErrorResponse(HttpStatus status, String message) {
-        this.timestamp = LocalDateTime.now();
-        this.status = status;
-        this.message = message;
-    }
-
     public static ErrorResponseBuilder builder() {
         return new ErrorResponseBuilder()
                 .timestamp(LocalDateTime.now());

@@ -2,7 +2,6 @@ package com.melina.notes.dto;
 
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.Instant;
 import java.util.List;
 
