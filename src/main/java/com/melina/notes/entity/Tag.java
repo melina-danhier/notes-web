@@ -17,7 +17,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class Tag {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "tags_seq", sequenceName = "tags_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")
     private Long id;
 
     private String tag;
