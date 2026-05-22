@@ -3,6 +3,8 @@ package com.melina.notes.mapper;
 import com.melina.notes.dto.EditNoteDTO;
 import com.melina.notes.dto.NoteDTO;
 import com.melina.notes.entity.Note;
+import com.melina.notes.util.ContentPreviewUtil;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -11,6 +13,13 @@ import org.mapstruct.MappingTarget;
 public interface NoteMapper {
     @Mapping(source = "user.id", target = "userId")
     NoteDTO toNoteDTO(Note note);
+
+    @AfterMapping
+    default void setContentPreview(Note note, @MappingTarget NoteDTO noteDTO) {
+        if (note.getContent() != null) {
+            noteDTO.setContentPreview(ContentPreviewUtil.createPreview(note.getContent()));
+        }
+    }
 
     @Mapping(target = "tags", ignore = true)
     @Mapping(target = "updated", ignore = true)

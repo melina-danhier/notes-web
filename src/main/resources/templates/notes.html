@@ -162,7 +162,7 @@
                     </div>
 
                     <div class="h-100">
-                        <span th:text="${note.content != null and note.content.length() > 0 ? #strings.abbreviate(note.content, 250) : ''}"
+                        <span th:text="${note.contentPreview != null and note.contentPreview.length() > 0 ? note.contentPreview : ''}"
                               class="content">Inhalt
                         </span>
                     </div>

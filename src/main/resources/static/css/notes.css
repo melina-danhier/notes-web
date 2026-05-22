@@ -14,6 +14,19 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
+.note-editor-page .card,
+.note-editor-page .card:hover {
+    transform: none;
+}
+
+.note-editor-page .card {
+    transition: box-shadow 0.15s ease;
+}
+
+.note-editor-page .card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
 .card .bg-primary-subtle {
     font-size: 0.78rem;
     padding: 0.2rem 0.55rem !important;
@@ -28,6 +41,8 @@
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
+    word-break: break-word;
 }
 
 .card-header {
@@ -55,3 +70,622 @@
 #titleInput, #tagsInput, #contentInput {
     width: 100%;
 }
+
+/* ======================== EDITOR STYLES ======================== */
+
+.note-editor-page .con {
+    max-width: 1280px;
+    padding: 1.5rem;
+}
+
+.note-editor-page .tooltip {
+    --bs-tooltip-bg: rgba(17, 24, 39, 0.88);
+    --bs-tooltip-color: #f9fafb;
+    --bs-tooltip-opacity: 1;
+}
+
+.note-editor-page .tooltip .tooltip-inner {
+    max-width: 14rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.35;
+    border-radius: 0.45rem;
+    box-shadow: 0 0.35rem 1rem rgba(15, 23, 42, 0.18);
+}
+
+.note-editor-page .tooltip .tooltip-arrow::before {
+    opacity: 0.95;
+}
+
+.note-editor-shell {
+    gap: 0.75rem;
+}
+
+.note-editor-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.15);
+}
+
+.note-editor-header h3 {
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.note-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.form-label {
+    font-size: 0.9rem;
+    color: #1f2937;
+    margin-bottom: 0.2rem;
+}
+
+.icon-tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    background: transparent;
+    color: rgba(102, 126, 234, 0.7);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: help;
+    margin-left: 0.3rem;
+    opacity: 0.75;
+}
+
+.icon-tooltip:hover {
+    color: rgba(102, 126, 234, 0.95);
+    opacity: 1;
+}
+
+.note-editor-form .form-control {
+    min-height: 2.5rem;
+    font-size: 0.95rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    padding: 0.6rem 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.note-editor-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-with-hint {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.input-with-hint .form-control,
+.input-with-hint .tag-input-field {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.input-with-hint-compact {
+    align-items: center;
+}
+
+.hint-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: rgba(102, 126, 234, 0.12);
+    color: rgba(79, 70, 229, 0.9);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.hint-marker:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #4f46e5;
+}
+
+.hinted-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.hinted-button .hint-marker-button {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.68rem;
+}
+
+.btn.btn-outline-primary.hinted-button .hint-marker-button {
+    background: rgba(102, 126, 234, 0.16);
+    color: #4f46e5;
+}
+
+.btn.btn-outline-secondary.hinted-button .hint-marker-button {
+    background: rgba(107, 114, 128, 0.16);
+    color: #4b5563;
+}
+
+.btn.btn-success.hinted-button .hint-marker-button {
+    background: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.markdown-panel .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.split-editor .markdown-panel,
+.split-preview .markdown-panel {
+    height: 100%;
+}
+
+/* ======================== TAG INPUT STYLES ======================== */
+
+.tag-input-container {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    padding: 0.6rem;
+    min-height: 2.6rem;
+    transition: all 0.2s ease;
+}
+
+.tag-input-container:focus-within {
+    border-color: #667eea;
+    background: #f3f4f6;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.tag-chips-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+    min-height: 2rem;
+}
+
+.tag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 1.75rem;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tag-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25);
+}
+
+.tag-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    line-height: 1;
+    transition: all 0.1s ease;
+    font-size: 0.8rem;
+}
+
+.tag-chip-remove:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.tag-input-field {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    outline: none;
+    background: #fff;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.9rem;
+    border-radius: 0.35rem;
+    color: #1f2937;
+    box-sizing: border-box;
+}
+
+.tag-input-field::placeholder {
+    color: #d1d5db;
+}
+
+/* ======================== EDITOR CONTROLS & TOGGLES ======================== */
+
+.editor-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.editor-controls .btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    transition: all 0.15s ease;
+}
+
+.editor-controls .btn.collapsed {
+    opacity: 0.7;
+}
+
+/* ======================== MARKDOWN TOOLBAR ======================== */
+
+.markdown-toolbar {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+.markdown-toolbar .card-body {
+    padding: 0.75rem;
+}
+
+.markdown-toolbar .btn {
+    min-width: 3rem;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    transition: all 0.1s ease;
+}
+
+.markdown-toolbar .btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ======================== MARKDOWN PANELS ======================== */
+
+.markdown-panel {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #fafbfc;
+}
+
+.markdown-panel .card-body {
+    padding: 0.75rem;
+}
+
+.markdown-split-view {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    --split-divider-width: 12px;
+    --split-ratio: 0.55;
+}
+
+.split-pane {
+    min-width: 0;
+}
+
+.split-editor {
+    flex: 1 1 auto;
+}
+
+.split-preview {
+    flex: 1 1 auto;
+}
+
+.split-divider {
+    display: none;
+    flex: 0 0 var(--split-divider-width);
+    width: var(--split-divider-width);
+    cursor: col-resize;
+    background: linear-gradient(180deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+    border-radius: 999px;
+    position: relative;
+    user-select: none;
+    touch-action: none;
+}
+
+.split-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 42px;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    background: rgba(102, 126, 234, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.split-divider:hover,
+.split-divider:active {
+    background: linear-gradient(180deg, rgba(102, 126, 234, 0.16), rgba(118, 75, 162, 0.16));
+}
+
+body.split-resizing,
+body.split-resizing * {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+/* Preview offen: Split View mit variablem Verhältnis */
+.markdown-split-view.preview-open .split-editor {
+    flex-basis: calc((100% - var(--split-divider-width)) * var(--split-ratio));
+}
+
+.markdown-split-view.preview-open .split-preview {
+    flex-basis: calc((100% - var(--split-divider-width)) * (1 - var(--split-ratio)));
+}
+
+.markdown-split-view.preview-open .split-divider {
+    display: block;
+}
+
+.markdown-split-view.preview-open #previewContainer {
+    display: block;
+}
+
+/* Preview zu: Editor volle Breite */
+.markdown-split-view:not(.preview-open) .split-editor {
+    flex: 1 1 100%;
+}
+
+.markdown-split-view:not(.preview-open) #previewContainer,
+.markdown-split-view:not(.preview-open) .split-divider {
+    display: none !important;
+}
+
+.markdown-editor-textarea {
+    width: 100%;
+    min-height: 28rem;
+    resize: none;
+    overflow: hidden;
+    font-family: 'Consolas', 'SFMono-Regular', 'Menlo', monospace;
+    line-height: 1.45;
+    border: none;
+    border-radius: 0.4rem;
+    padding: 0.75rem;
+    background: white;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+}
+
+.markdown-editor-textarea:focus {
+    border: none;
+    outline: none;
+    background: white;
+}
+
+.markdown-preview {
+    min-height: 28rem;
+    overflow: auto;
+    padding-right: 0.2rem;
+    color: #1f2937;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.markdown-preview .markdown-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28rem;
+    text-align: center;
+    color: #d1d5db;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+    margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.markdown-preview h1 { font-size: 1.6rem; }
+.markdown-preview h2 { font-size: 1.4rem; }
+.markdown-preview h3 { font-size: 1.2rem; }
+.markdown-preview h4 { font-size: 1.1rem; }
+.markdown-preview h5 { font-size: 1rem; }
+.markdown-preview h6 { font-size: 0.95rem; }
+
+.markdown-preview p {
+    margin-bottom: 0.7rem;
+}
+
+.markdown-preview blockquote {
+    border-left: 3px solid #667eea;
+    background: rgba(102, 126, 234, 0.05);
+    padding: 0.7rem 0.9rem;
+    border-radius: 0.4rem;
+    margin: 0.8rem 0;
+    font-style: italic;
+    color: #4b5563;
+}
+
+.markdown-preview ul,
+.markdown-preview ol {
+    padding-left: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.markdown-preview li + li {
+    margin-top: 0.2rem;
+}
+
+.markdown-preview pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 0.4rem;
+    padding: 0.8rem;
+    overflow: auto;
+    margin: 0.8rem 0;
+    border: 1px solid #1e293b;
+    font-size: 0.85rem;
+}
+
+.markdown-preview code {
+    background: rgba(15, 23, 42, 0.08);
+    border-radius: 0.3rem;
+    padding: 0.1rem 0.3rem;
+    font-size: 0.9em;
+    color: #0f172a;
+}
+
+.markdown-preview pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.markdown-preview a {
+    color: #4f46e5;
+    word-break: break-word;
+    text-decoration: underline;
+}
+
+.markdown-preview a:hover {
+    color: #667eea;
+}
+
+/* ======================== ACTION BUTTONS ======================== */
+
+.note-editor-form .btn-success,
+.note-editor-form .btn-outline-secondary {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.95rem;
+}
+
+/* ======================== RESPONSIVE ======================== */
+
+@media (max-width: 991.98px) {
+    .markdown-split-view,
+    .markdown-split-view.preview-open {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .split-divider {
+        display: none !important;
+    }
+
+    .split-editor,
+    .split-preview {
+        flex: 1 1 100%;
+    }
+
+    .markdown-editor-textarea,
+    .markdown-preview {
+        min-height: 18rem;
+    }
+
+    .note-editor-page .con {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .note-editor-header {
+        gap: 0.5rem;
+    }
+
+    .note-editor-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .editor-controls {
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .editor-controls .btn {
+        width: 100%;
+        font-size: 0.8rem;
+    }
+
+    .markdown-toolbar .btn {
+        min-width: 0;
+        flex: 1 1 calc(50% - 0.25rem);
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    .markdown-preview,
+    .markdown-editor-textarea {
+        min-height: 15rem;
+    }
+
+    .tag-chip {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.65rem;
+    }
+
+    .tag-chip-remove {
+        width: 0.9rem;
+        height: 0.9rem;
+    }
+
+    .tag-input-field {
+        font-size: 0.85rem;
+    }
+}
+
+
