@@ -14,6 +14,15 @@
     <link rel="stylesheet" href="/css/notes.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initNotePreviewModal, viewNote, closeNoteModal, editFromModal } from '/js/note-preview.js';
+
+        window.viewNote = viewNote;
+        window.closeNoteModal = closeNoteModal;
+        window.editFromModal = editFromModal;
+
+        document.addEventListener('DOMContentLoaded', initNotePreviewModal);
+    </script>
     <script src="/js/notes.js" type="module"></script>
 </head>
 <body>
@@ -141,10 +150,15 @@
                  style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
                  onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.1)';"
                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';"
-                 th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\''">
+                 th:onclick="'viewNote(' + ${note.id} + '); event.stopPropagation();'"
+                 th:data-note-id="${note.id}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="title m-0" th:text="${note.title}">Notiz</h5>
                     <div class="btn-group btn-group-sm">
+                        <button class="btn btn-primary px-3 py-1" title="Bearbeiten"
+                                th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\'; event.stopPropagation();'">
+                            ✏️
+                        </button>
                         <button class="btn btn-danger px-3 py-1" title="Löschen"
                                 th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'">
                             🗑️
@@ -194,6 +208,27 @@
         </a>
     </div>
 
+</div>
+
+<!-- Modal für Notiz-Anzeige -->
+<div id="noteViewModal" class="note-view-modal" style="display: none;">
+    <div class="note-view-modal-backdrop"></div>
+    <div class="note-view-modal-dialog">
+        <div class="note-view-modal-content">
+            <div class="note-view-modal-header">
+                <h3 id="modalTitle" class="m-0"></h3>
+                <button type="button" class="note-view-close-btn" onclick="closeNoteModal()" title="Schließen">×</button>
+            </div>
+            <div class="note-view-modal-body">
+                <div id="modalTags" class="note-modal-tags mb-3"></div>
+                <div id="modalContent" class="note-modal-content"></div>
+            </div>
+            <div class="note-view-modal-footer">
+                <div id="modalTimestamp" class="note-modal-timestamp text-muted small"></div>
+                <button type="button" class="btn btn-primary" id="modalEditBtn" onclick="editFromModal()">✏️ Bearbeiten</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>

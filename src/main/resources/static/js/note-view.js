@@ -554,14 +554,7 @@ function showNotification(msg, type) {
     toastBody.className = 'toast-body';
     toastBody.textContent = msg;
 
-    const closeButton = document.createElement('button');
-    closeButton.type = 'button';
-    closeButton.className = 'btn-close btn-close-white me-2 m-auto';
-    closeButton.setAttribute('data-bs-dismiss', 'toast');
-    closeButton.setAttribute('aria-label', 'Schließen');
-
     toastBodyWrapper.appendChild(toastBody);
-    toastBodyWrapper.appendChild(closeButton);
     toastDiv.appendChild(toastBodyWrapper);
     toastContainer.appendChild(toastDiv);
 
