@@ -74,7 +74,7 @@
 /* ======================== EDITOR STYLES ======================== */
 
 .note-editor-page .con {
-    max-width: 1280px;
+    max-width: 1100px;
     padding: 1.5rem;
 }
 
@@ -127,6 +127,17 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+}
+
+.note-meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.note-title-section,
+.note-tags-section {
+    min-width: 0;
 }
 
 .form-label {
@@ -382,6 +393,23 @@
     padding: 0.75rem;
 }
 
+.markdown-toolbar-group {
+    width: 100%;
+}
+
+.markdown-toolbar-primary,
+.markdown-toolbar-secondary {
+    align-items: center;
+}
+
+.markdown-toolbar-more-row {
+    width: 100%;
+}
+
+.toolbar-more-toggle {
+    white-space: nowrap;
+}
+
 .markdown-toolbar .btn {
     min-width: 3rem;
     font-size: 0.75rem;
@@ -464,11 +492,11 @@ body.split-resizing * {
 
 /* Preview offen: Split View mit variablem Verhältnis */
 .markdown-split-view.preview-open .split-editor {
-    flex-basis: calc((100% - var(--split-divider-width)) * var(--split-ratio));
+    flex-basis: calc((100% - var(--split-divider-width)) * (1 - var(--split-ratio)));
 }
 
 .markdown-split-view.preview-open .split-preview {
-    flex-basis: calc((100% - var(--split-divider-width)) * (1 - var(--split-ratio)));
+    flex-basis: calc((100% - var(--split-divider-width)) * var(--split-ratio));
 }
 
 .markdown-split-view.preview-open .split-divider {
@@ -617,6 +645,10 @@ body.split-resizing * {
 /* ======================== RESPONSIVE ======================== */
 
 @media (max-width: 991.98px) {
+    .note-meta-row {
+        flex-direction: column;
+    }
+
     .markdown-split-view,
     .markdown-split-view.preview-open {
         display: flex;
@@ -642,6 +674,15 @@ body.split-resizing * {
     }
 }
 
+@media (min-width: 992px) {
+    .note-meta-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+        align-items: start;
+        gap: 1rem;
+    }
+}
+
 @media (max-width: 576px) {
     .note-editor-header {
         gap: 0.5rem;
@@ -663,9 +704,34 @@ body.split-resizing * {
 
     .markdown-toolbar .btn {
         min-width: 0;
-        flex: 1 1 calc(50% - 0.25rem);
         font-size: 0.7rem;
         padding: 0.25rem 0.4rem;
+    }
+
+    .markdown-toolbar-primary .btn {
+        flex: 1 1 calc(50% - 0.25rem);
+    }
+
+    .markdown-toolbar-more-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-more-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .markdown-toolbar-secondary {
+        display: none !important;
+    }
+
+    .markdown-toolbar.toolbar-extras-expanded .markdown-toolbar-secondary {
+        display: flex !important;
+    }
+
+    .markdown-toolbar-secondary .btn {
+        flex: 1 1 calc(50% - 0.25rem);
     }
 
     .markdown-preview,
@@ -685,6 +751,12 @@ body.split-resizing * {
 
     .tag-input-field {
         font-size: 0.85rem;
+    }
+}
+
+@media (min-width: 577px) {
+    .markdown-toolbar-secondary {
+        display: flex !important;
     }
 }
 

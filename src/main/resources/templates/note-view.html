@@ -16,34 +16,33 @@
 </head>
 <body class="note-editor-page">
 
-<div class="con note-editor-shell animate">
-    <div class="note-editor-header">
-        <h3 th:text="${noteDto?.id} ? '✏️ Notiz bearbeiten' : '➕ Notiz erstellen'" class="mb-0">Notiz erstellen oder bearbeiten</h3>
-    </div>
+<div class="con animate">
 
     <form th:object="${noteDto}" class="note-editor-form">
         <input type="hidden" id="noteIdInput" th:field="*{id}" name="id">
 
-        <div class="form-group-section">
-            <div class="input-with-hint">
-                <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz (optional)"
-                       autofocus
-                       class="form-control">
-                <span class="hint-marker hint-marker-input" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="Maximal 200 Zeichen" aria-hidden="true">?</span>
+        <div class="note-meta-row">
+            <div class="form-group-section note-title-section">
+                <div class="input-with-hint">
+                    <input type="text" id="titleInput" th:field="*{title}" placeholder="Titel der Notiz (optional)"
+                           autofocus
+                           class="form-control">
+                    <span class="hint-marker hint-marker-input" data-bs-toggle="tooltip" data-bs-placement="top"
+                          title="Maximal 200 Zeichen" aria-hidden="true">?</span>
+                </div>
             </div>
-        </div>
 
-        <div class="form-group-section">
-            <div class="tag-input-container">
-                <input type="hidden" id="tagsInput" th:field="*{tagsRaw}" name="tagsRaw">
-                <div class="tag-chips-wrapper">
-                    <div id="tagChipsContainer" class="tag-chips"></div>
-                    <div class="input-with-hint input-with-hint-compact">
-                        <input type="text" id="tagInputField" placeholder="Tag hinzufügen..."
-                               class="tag-input-field">
-                        <span class="hint-marker hint-marker-input" data-bs-toggle="tooltip" data-bs-placement="top"
-                              title="Tag eingeben und Enter oder Komma drücken" aria-hidden="true">?</span>
+            <div class="form-group-section note-tags-section">
+                <div class="tag-input-container">
+                    <input type="hidden" id="tagsInput" th:field="*{tagsRaw}" name="tagsRaw">
+                    <div class="tag-chips-wrapper">
+                        <div class="input-with-hint input-with-hint-compact">
+                            <input type="text" id="tagInputField" placeholder="Tag hinzufügen..."
+                                   class="tag-input-field">
+                            <span class="hint-marker hint-marker-input" data-bs-toggle="tooltip" data-bs-placement="top"
+                                  title="Tag eingeben und Enter oder Komma drücken" aria-hidden="true">?</span>
+                        </div>
+                        <div id="tagChipsContainer" class="tag-chips"></div>
                     </div>
                 </div>
             </div>
@@ -69,66 +68,72 @@
             <!-- Toolbar (einklappbar) -->
             <div id="toolbarContainer" class="markdown-toolbar card border-0 shadow-sm" style="display: none;">
                 <div class="card-body py-2">
-                    <div class="d-flex flex-wrap gap-2 align-items-center" role="toolbar"
-                         aria-label="Markdown-Werkzeugleiste">
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="heading-1">
-                            H1 <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Überschrift 1" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="heading-2">
-                            H2 <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Überschrift 2" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="bold">
-                            B <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                  data-bs-placement="top" title="Fett (Strg+B)" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="italic">
-                            I <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Kursiv (Strg+I)" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="inline-code">
-                            &lt;/&gt; <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                           data-bs-placement="top" title="Inline-Code" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="code-block">
-                            Code <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                       data-bs-placement="top" title="Codeblock" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="link">
-                            🔗 Link <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                          data-bs-placement="top" title="Link einfügen" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="quote">
-                            ❝ Zitat <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                          data-bs-placement="top" title="Zitat" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="bullet-list">
-                            • Liste <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                          data-bs-placement="top" title="Aufzählung" aria-hidden="true">?</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="ordered-list">
-                            1. Liste <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
-                                           data-bs-placement="top" title="Nummerierte Liste" aria-hidden="true">?</span>
-                        </button>
+                    <div class="d-flex flex-column gap-2" role="toolbar" aria-label="Markdown-Werkzeugleiste">
+                        <div class="markdown-toolbar-group markdown-toolbar-primary d-flex flex-wrap gap-2 align-items-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="heading-1">
+                                H1 <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Überschrift 1" aria-hidden="true">?</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="heading-2">
+                                H2 <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Überschrift 2" aria-hidden="true">?</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="heading-3">
+                                H3 <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Überschrift 3" aria-hidden="true">?</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="bold">
+                                B <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                      data-bs-placement="top" title="Fett (Strg+B)" aria-hidden="true">?</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="italic">
+                                I <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Kursiv (Strg+I)" aria-hidden="true">?</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="link">
+                                🔗 Link <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                              data-bs-placement="top" title="Link einfügen" aria-hidden="true">?</span>
+                            </button>
+                        </div>
+
+                        <div class="markdown-toolbar-more-row d-flex flex-wrap align-items-center gap-2">
+                            <button type="button" id="toggleToolbarExtras" class="btn btn-outline-secondary btn-sm toolbar-more-toggle hinted-button d-md-none"
+                                    aria-expanded="false" aria-controls="toolbarExtras">
+                                Mehr Tools
+                                <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                      data-bs-placement="top" title="Zusätzliche Formatierungswerkzeuge ein- oder ausblenden"
+                                      aria-hidden="true">?</span>
+                            </button>
+
+                            <div id="toolbarExtras" class="markdown-toolbar-group markdown-toolbar-secondary d-flex flex-wrap gap-2 align-items-center">
+                                <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="inline-code">
+                                    &lt;/&gt; <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                                   data-bs-placement="top" title="Inline-Code" aria-hidden="true">?</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="code-block">
+                                    Code <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                               data-bs-placement="top" title="Codeblock" aria-hidden="true">?</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="quote">
+                                    ❝ Zitat <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                                  data-bs-placement="top" title="Zitat" aria-hidden="true">?</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="bullet-list">
+                                    • Liste <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                                  data-bs-placement="top" title="Aufzählung" aria-hidden="true">?</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm hinted-button" data-md-action="ordered-list">
+                                    1. Liste <span class="hint-marker hint-marker-button" data-bs-toggle="tooltip"
+                                                   data-bs-placement="top" title="Nummerierte Liste" aria-hidden="true">?</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Editor & Preview Split View -->
             <div class="markdown-split-view" id="splitRoot">
-                <div class="split-pane split-editor" id="editorColumn">
-                    <div class="card h-100 markdown-panel shadow-sm">
-                        <div class="card-body">
-                            <textarea id="contentInput" th:field="*{content}" placeholder="Schreiben Sie Ihre Notiz hier..."
-                                      class="form-control markdown-editor-textarea"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="split-divider" id="splitDivider" role="separator" aria-orientation="vertical"
-                     aria-label="Bereichsbreite anpassen"></div>
-
                 <div class="split-pane split-preview" id="previewContainer" style="display: none;">
                     <div class="card h-100 markdown-panel shadow-sm">
                         <div class="card-body">
@@ -137,6 +142,18 @@
                                     Hier erscheint die Vorschau.
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="split-divider" id="splitDivider" role="separator" aria-orientation="vertical"
+                     aria-label="Bereichsbreite anpassen"></div>
+
+                <div class="split-pane split-editor" id="editorColumn">
+                    <div class="card h-100 markdown-panel shadow-sm">
+                        <div class="card-body">
+                            <textarea id="contentInput" th:field="*{content}" placeholder="Schreiben Sie Ihre Notiz hier..."
+                                      class="form-control markdown-editor-textarea"></textarea>
                         </div>
                     </div>
                 </div>

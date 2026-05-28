@@ -18,6 +18,7 @@ function initEditNotesApp() {
     initAutoResize();
     initMarkdownPreview();
     initMarkdownToolbar();
+    initToolbarExtrasToggle();
     initToggleButtons();
     initSplitResize();
     initTagInput();
@@ -152,6 +153,9 @@ function handleMarkdownAction(action, textarea) {
             break;
         case 'heading-2':
             prefixMarkdownLines(textarea, '## ');
+            break;
+        case 'heading-3':
+            prefixMarkdownLines(textarea, '### ');
             break;
         case 'bold':
             insertMarkdownWrap(textarea, '**', '**', 'fett');
@@ -393,23 +397,28 @@ function isMarkdownBlockBoundary(line) {
 }
 
 function renderMarkdownInline(text) {
-    let output = escapeHtml(text);
+    let output = String(text ?? '');
     const codeSegments = [];
+    const linkSegments = [];
+
+    output = output.replace(/\[([^\]\n]+)]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, function(match, label, url, title) {
+        const safeUrl = sanitizeMarkdownUrl(url);
+        if (!safeUrl) {
+            return match;
+        }
+
+        const token = `@@LINK_${linkSegments.length}@@`;
+        const titleAttribute = title ? ` title="${escapeHtml(title)}"` : '';
+        linkSegments.push(`<a href="${escapeHtml(safeUrl)}"${titleAttribute} target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`);
+        return token;
+    });
+
+    output = escapeHtml(output);
 
     output = output.replace(/`([^`\n]+)`/g, function(match, code) {
         const token = `@@CODE_${codeSegments.length}@@`;
         codeSegments.push(`<code>${escapeHtml(code)}</code>`);
         return token;
-    });
-
-    output = output.replace(/\[([^]]+)]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, function(match, label, url, title) {
-        const safeUrl = sanitizeMarkdownUrl(url);
-        if (!safeUrl) {
-            return label;
-        }
-
-        const titleAttribute = title ? ` title="${escapeHtml(title)}"` : '';
-        return `<a href="${escapeHtml(safeUrl)}"${titleAttribute} target="_blank" rel="noopener noreferrer">${label}</a>`;
     });
 
     output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -419,6 +428,10 @@ function renderMarkdownInline(text) {
 
     output = output.replace(/@@CODE_(\d+)@@/g, function(match, index) {
         return codeSegments[Number(index)] || '';
+    });
+
+    output = output.replace(/@@LINK_(\d+)@@/g, function(match, index) {
+        return linkSegments[Number(index)] || '';
     });
 
     return output;
@@ -433,6 +446,10 @@ function sanitizeMarkdownUrl(url) {
 
     if (/^(https?:|mailto:|tel:)/i.test(trimmed) || /^[/.#?]/.test(trimmed)) {
         return trimmed;
+    }
+
+    if (/^(?:www\.|localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+)(?::\d+)?(?:[/?#]|$)/i.test(trimmed)) {
+        return `https://${trimmed}`;
     }
 
     return null;
@@ -618,6 +635,27 @@ function initToggleButtons() {
     }
 }
 
+function initToolbarExtrasToggle() {
+    const toolbarContainer = document.getElementById('toolbarContainer');
+    const toggleExtras = document.getElementById('toggleToolbarExtras');
+    const extras = document.getElementById('toolbarExtras');
+
+    if (!toolbarContainer || !toggleExtras || !extras) return;
+
+    const applyState = function(isExpanded) {
+        toolbarContainer.classList.toggle('toolbar-extras-expanded', isExpanded);
+        toggleExtras.setAttribute('aria-expanded', String(isExpanded));
+        toggleExtras.classList.toggle('collapsed', !isExpanded);
+    };
+
+    toggleExtras.addEventListener('click', function(e) {
+        e.preventDefault();
+        applyState(!toolbarContainer.classList.contains('toolbar-extras-expanded'));
+    });
+
+    applyState(false);
+}
+
 // ======================== SPLIT RESIZE ========================
 
 function initSplitResize() {
@@ -649,8 +687,8 @@ function initSplitResize() {
         const rect = splitRoot.getBoundingClientRect();
         const dividerWidth = parseFloat(getComputedStyle(splitRoot).getPropertyValue('--split-divider-width')) || 12;
         const availableWidth = Math.max(rect.width - dividerWidth, 1);
-        const leftWidth = event.clientX - rect.left;
-        const ratio = clamp(leftWidth / availableWidth, minRatio, maxRatio);
+        const previewWidth = event.clientX - rect.left;
+        const ratio = clamp(previewWidth / availableWidth, minRatio, maxRatio);
 
         setSplitRatio(splitRoot, ratio);
         localStorage.setItem('noteEditorSplitRatio', ratio.toFixed(3));
