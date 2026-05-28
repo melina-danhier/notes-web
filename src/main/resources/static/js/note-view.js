@@ -92,12 +92,8 @@ function getFormData() {
 }
 
 function isValidForm(data) {
-    if (!data.title) {
-        showError('Titel ist erforderlich!');
-        document.getElementById('titleInput')?.focus();
-        return false;
-    }
-    if (data.title.length > 200) {
+    // Titel ist optional. Nur Länge validieren, falls gesetzt.
+    if (data.title && data.title.length > 200) {
         showError('Titel zu lang (max 200 Zeichen)!');
         return false;
     }
@@ -477,9 +473,10 @@ function initFormValidation() {
     const titleInput = document.getElementById('titleInput');
     if (!titleInput) return;
 
+    // Keine Pflichtvalidierung für den Titel mehr; Länge wird beim Speichern geprüft.
     titleInput.addEventListener('blur', function() {
-        if (!this.value.trim()) {
-            showError('Titel ist erforderlich!');
+        if (this.value && this.value.trim().length > 200) {
+            showError('Titel zu lang (max 200 Zeichen)!');
         }
     });
 }

@@ -18,6 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -31,8 +33,14 @@ public class NoteService {
     private final UserService userService;
 
     public NoteDTO createNoteForUser(Long userId, EditNoteDTO noteDTO) {
+        String title = noteDTO.getTitle();
+        if (title == null || title.isBlank()) {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            title = "Notiz " + LocalDate.now().format(fmt);
+        }
+
         Note note = Note.builder()
-                .title(noteDTO.getTitle())
+                .title(title)
                 .content(noteDTO.getContent())
                 .created(Instant.now())
                 .updated(Instant.now())
