@@ -85,9 +85,33 @@ export function displayNoteModal(note) {
         timestamp.innerHTML = timestampHtml;
     }
 
-    document.getElementById('modalEditBtn').onclick = () => {
-        window.location.href = `/notes/${note.id}`;
-    };
+    // Check if we're on notes page (edit button exists)
+    const editBtn = document.getElementById('modalEditBtn');
+    if (editBtn) {
+        editBtn.onclick = () => {
+            window.location.href = `/notes/${note.id}`;
+        };
+    }
+
+    // Check if we're on trash page (restore/delete buttons exist)
+    const restoreBtn = document.getElementById('modalRestoreBtn');
+    const deleteBtn = document.getElementById('modalDeleteBtn');
+    if (restoreBtn && deleteBtn) {
+        restoreBtn.onclick = () => {
+            if (window.restoreNote) {
+                window.restoreNote(note.id);
+            } else {
+                alert('Fehler: Wiederherstellen-Funktion nicht verfügbar');
+            }
+        };
+        deleteBtn.onclick = () => {
+            if (window.forceDeleteNote) {
+                window.forceDeleteNote(note.id);
+            } else {
+                alert('Fehler: Löschen-Funktion nicht verfügbar');
+            }
+        };
+    }
 
     modal.style.display = 'flex';
 }
