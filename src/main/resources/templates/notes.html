@@ -14,14 +14,19 @@
     <link rel="stylesheet" href="/css/notes.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/+esm"></script>
     <script type="module">
         import { initNotePreviewModal, viewNote, closeNoteModal, editFromModal } from '/js/note-preview.js';
+        import { renderMarkdownPreviews } from '/js/markdown-preview.js';
 
         window.viewNote = viewNote;
         window.closeNoteModal = closeNoteModal;
         window.editFromModal = editFromModal;
 
-        document.addEventListener('DOMContentLoaded', initNotePreviewModal);
+        document.addEventListener('DOMContentLoaded', () => {
+            initNotePreviewModal();
+            renderMarkdownPreviews();
+        });
     </script>
     <script src="/js/notes.js" type="module"></script>
 </head>
@@ -50,12 +55,6 @@
                     <ul class="dropdown-menu dropdown-menu-end">
 
                         <li>
-                            <button class="dropdown-item" id="newNoteBtn">
-                                ➕ Neue Notiz
-                            </button>
-                        </li>
-
-                        <li>
                             <button class="dropdown-item" id="binButton">
                                 🗑️ Papierkorb
                             </button>
@@ -81,7 +80,7 @@
 
         <div class="row g-2 align-items-end">
 
-            <div class="col-12 col-lg-8 mb-2 mb-lg-0">
+            <div class="col-12 col-lg-6 mb-2 mb-lg-0">
                 <div class="input-group shadow-sm">
                     <input class="form-control border px-3 py-2"
                            type="text"
@@ -98,9 +97,9 @@
                 </div>
             </div>
 
-            <div class="col-12 col-lg-4">
+            <div class="col-12 col-lg-6">
                 <div class="row g-2">
-                    <div class="col-6">
+                    <div class="col-6 col-lg-4">
                         <div class="dropdown">
                             <button class="btn btn-outline-primary w-100 shadow-sm dropdown-toggle text-truncate"
                                     data-bs-toggle="dropdown" id="tagFilterBtn">
@@ -121,7 +120,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-6 col-lg-4">
                         <div class="dropdown">
                             <button class="btn btn-outline-secondary w-100 shadow-sm dropdown-toggle text-truncate"
                                     data-bs-toggle="dropdown" id="sortBtn">
@@ -133,6 +132,11 @@
                                 <li><a class="dropdown-item" href="#" data-sort-field="title" data-sort-dir="asc">Titel ↑</a></li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <button class="btn btn-primary w-100 shadow-sm" id="newNoteBtn" title="Neue Notiz">
+                            ➕ Neue Notiz
+                        </button>
                     </div>
                 </div>
             </div>
@@ -176,9 +180,10 @@
                     </div>
 
                     <div class="h-100">
-                        <span th:text="${note.contentPreview != null and note.contentPreview.length() > 0 ? note.contentPreview : ''}"
-                              class="content">Inhalt
-                        </span>
+                        <div class="card-preview-markdown"
+                             th:if="${note.contentPreview != null and note.contentPreview.length() > 0}"
+                             th:attr="data-markdown=${note.contentPreview}"></div>
+                        <span th:if="${note.contentPreview == null or note.contentPreview.length() == 0}" class="content text-muted">Keine Vorschau</span>
                     </div>
 
                     <div class="text-muted small d-flex flex-column">

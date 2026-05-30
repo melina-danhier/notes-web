@@ -45,6 +45,81 @@
     word-break: break-word;
 }
 
+.card-preview-markdown {
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.card-preview-markdown h1,
+.card-preview-markdown h2,
+.card-preview-markdown h3,
+.card-preview-markdown h4,
+.card-preview-markdown h5,
+.card-preview-markdown h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.25rem 0;
+    color: #1f2937;
+}
+
+.card-preview-markdown strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.card-preview-markdown em {
+    font-style: italic;
+}
+
+.card-preview-markdown code {
+    background: rgba(15, 23, 42, 0.08);
+    border-radius: 0.2rem;
+    padding: 0.05rem 0.2rem;
+    font-size: 0.85em;
+    color: #0f172a;
+    font-family: 'Consolas', 'SFMono-Regular', 'Menlo', monospace;
+}
+
+.card-preview-markdown pre {
+    background: #f3f4f6;
+    border-radius: 0.3rem;
+    padding: 0.4rem;
+    margin: 0.25rem 0;
+    overflow: hidden;
+    font-size: 0.8rem;
+    border: 1px solid #e5e7eb;
+}
+
+.card-preview-markdown pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.card-preview-markdown ul,
+.card-preview-markdown ol {
+    padding-left: 1rem;
+    margin: 0.25rem 0;
+}
+
+.card-preview-markdown li {
+    margin: 0.1rem 0;
+}
+
+.card-preview-markdown blockquote {
+    border-left: 2px solid #667eea;
+    padding-left: 0.5rem;
+    margin: 0.25rem 0;
+    color: #4b5563;
+    font-style: italic;
+}
+
 .card-header {
     background: transparent;
     border-bottom: 1px solid rgba(0,0,0,.06);
