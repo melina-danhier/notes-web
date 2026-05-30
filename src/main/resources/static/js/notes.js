@@ -3,12 +3,16 @@
 import { initNotesApp } from './notes-init.js';
 import './notes-delete.js';
 import { initSorting } from './note-sort.js';
+import { highlightText } from './notes-utils.js';
+
+let currentSearchTerm = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initNotesApp()
     initSorting();
     initSearchAndTagFilter();
     initBinButton();
+    initSearchHighlighting();
 });
 
 function initBinButton() {
@@ -78,4 +82,20 @@ function navigateWithTag(tag) {
     }
     url.searchParams.set('pageNo', '0');
     window.location.href = url.toString();
+}
+
+function initSearchHighlighting() {
+    const url = new URL(window.location.href);
+    currentSearchTerm = url.searchParams.get('search');
+    
+    if (!currentSearchTerm) return;
+    
+    document.querySelectorAll('.click-card .title').forEach(titleElement => {
+        const originalText = titleElement.textContent;
+        titleElement.innerHTML = highlightText(originalText, currentSearchTerm);
+    });
+}
+
+export function getCurrentSearchTerm() {
+    return currentSearchTerm;
 }

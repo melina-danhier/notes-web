@@ -4,6 +4,9 @@
  * Markdown-Rendering und Note-Preview Modal Logic
  */
 
+import { highlightText, highlightMarkdownContent } from './notes-utils.js';
+import { getCurrentSearchTerm } from './notes.js';
+
 let currentEditNoteId = null;
 
 export function initNotePreviewModal() {
@@ -45,7 +48,16 @@ export function displayNoteModal(note) {
     const modal = document.getElementById('noteViewModal');
     if (!modal) return;
 
-    document.getElementById('modalTitle').textContent = note.title || '(Untitled)';
+    const searchTerm = getCurrentSearchTerm();
+    
+    const titleElement = document.getElementById('modalTitle');
+    if (titleElement) {
+        if (searchTerm) {
+            titleElement.innerHTML = highlightText(note.title || '(Untitled)', searchTerm);
+        } else {
+            titleElement.textContent = note.title || '(Untitled)';
+        }
+    }
 
     const tagsContainer = document.getElementById('modalTags');
     if (tagsContainer && note.tags && note.tags.length > 0) {
@@ -59,7 +71,11 @@ export function displayNoteModal(note) {
 
     const contentContainer = document.getElementById('modalContent');
     if (contentContainer) {
-        contentContainer.innerHTML = renderMarkdownPreview(note.content || '');
+        let html = renderMarkdownPreview(note.content || '');
+        if (searchTerm) {
+            html = highlightMarkdownContent(html, searchTerm);
+        }
+        contentContainer.innerHTML = html;
     }
 
     const timestamp = document.getElementById('modalTimestamp');

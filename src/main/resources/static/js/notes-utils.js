@@ -40,3 +40,28 @@ export function hideLoading(noteId) {
         btn.disabled = false;
     }
 }
+
+export function highlightText(text, searchTerm) {
+    if (!searchTerm || !text) return escapeHtml(text || '');
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+}
+
+export function highlightMarkdownContent(html, searchTerm) {
+    if (!searchTerm || !html) return html;
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return html.replace(regex, '<mark>$1</mark>');
+}
+
+export function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
