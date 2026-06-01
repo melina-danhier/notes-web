@@ -4,6 +4,7 @@ import { initNotesApp } from './notes-init.js';
 import './notes-delete.js';
 import { initSorting } from './note-sort.js';
 import { highlightText } from './notes-utils.js';
+import './notes-pin.js';
 
 let currentSearchTerm = null;
 

@@ -1132,4 +1132,83 @@ body.split-resizing * {
     }
 }
 
+/* ======================== PIN BUTTON STYLES ======================== */
 
+.pin-btn {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
+    color: #4b5563 !important;
+    border: 1px solid #bfdbfe !important;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.pin-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #d1d5db 0%, #bfdbfe 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.pin-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.pin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pin-btn.btn-warning {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    color: white !important;
+    border: 1px solid #f59e0b !important;
+}
+
+.pin-btn.btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important;
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.35);
+}
+
+.pin-icon {
+    opacity: 0.75;
+    margin-right: 0.25rem;
+}
+
+/* ======================== END PIN BUTTON STYLES ======================== */
+
+/* ======================== PINNED NOTES SECTION ======================== */
+
+.pinned-notes-section {
+    margin-bottom: 1.5rem;
+}
+
+.pinned-card {
+    border-left: 4px solid #f59e0b !important;
+}
+
+.pinned-card:hover {
+    border-left-color: #f97316 !important;
+}
+
+.pinned-divider {
+    margin: 2rem 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d1d5db 20%, #d1d5db 80%, transparent);
+    position: relative;
+}
+
+.pinned-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -8px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+/* ======================== END PINNED NOTES SECTION ======================== */

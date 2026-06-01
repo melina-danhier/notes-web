@@ -116,10 +116,22 @@ public class PageController {
 
     private void addToModel(Model model, String sortDir, String sortField, NoteFilter filter, CustomUserDetails user,
                             int pageNo, int pageSize, String tagFilter, String search, boolean trashPage) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
+        // First sort by pinned descending (unpinned false comes after pinned true), then by the selected field
+        Sort sort = Sort.by(Sort.Direction.DESC, "pinned")
+                .and(Sort.by(Sort.Direction.fromString(sortDir), sortField));
         Page<NoteDTO> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
 
+        // Split notes into pinned and unpinned
+        List<NoteDTO> pinnedNotes = notes.getContent().stream()
+                .filter(NoteDTO::isPinned)
+                .toList();
+        List<NoteDTO> unpinnedNotes = notes.getContent().stream()
+                .filter(note -> !note.isPinned())
+                .toList();
+
         model.addAttribute("notes", notes);
+        model.addAttribute("pinnedNotes", pinnedNotes);
+        model.addAttribute("unpinnedNotes", unpinnedNotes);
         model.addAttribute("currentPage", pageNo);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalPages", notes.getTotalPages());

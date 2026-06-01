@@ -12,6 +12,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring", uses = TagMapper.class)
 public interface NoteMapper {
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(target = "contentPreview", ignore = true)
     NoteDTO toNoteDTO(Note note);
 
     @AfterMapping
@@ -25,6 +26,8 @@ public interface NoteMapper {
     @Mapping(target = "updated", ignore = true)
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "pinned", ignore = true)
     void updateNote(@MappingTarget Note note, EditNoteDTO noteDTO);
 
     @Mapping(target = "tagsRaw", ignore = true)

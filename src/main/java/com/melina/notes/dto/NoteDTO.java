@@ -15,4 +15,5 @@ public class NoteDTO {
     private Instant updated;
     private List<TagDTO> tags;
     private Long userId;
+    private boolean pinned;
 }

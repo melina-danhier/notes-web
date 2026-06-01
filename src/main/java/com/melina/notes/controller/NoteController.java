@@ -64,4 +64,11 @@ public class NoteController {
         noteService.emptyTrashForUser(userDetails.getId());
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{noteId}/pin")
+    public ResponseEntity<NoteDTO> togglePin(@PathVariable Long noteId,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDTO note = noteService.togglePinNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok(note);
+    }
 }

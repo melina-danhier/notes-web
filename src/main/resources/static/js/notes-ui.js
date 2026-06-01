@@ -17,3 +17,39 @@ export function showSuccessToast(message) {
     }
     new bootstrap.Toast(toast).show();
 }
+
+// Allgemeine Benachrichtigungsfunktionen, die auch von anderen Skripten genutzt werden
+export function showNotification(msg, type) {
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toastDiv = document.createElement('div');
+    toastDiv.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 shadow-lg`;
+    toastDiv.setAttribute('role', 'alert');
+    toastDiv.setAttribute('aria-live', 'assertive');
+    toastDiv.setAttribute('aria-atomic', 'true');
+
+    const toastBodyWrapper = document.createElement('div');
+    toastBodyWrapper.className = 'd-flex';
+
+    const toastBody = document.createElement('div');
+    toastBody.className = 'toast-body';
+    toastBody.textContent = msg;
+
+    toastBodyWrapper.appendChild(toastBody);
+    toastDiv.appendChild(toastBodyWrapper);
+    toastContainer.appendChild(toastDiv);
+
+    const toast = new bootstrap.Toast(toastDiv);
+    toast.show();
+
+    setTimeout(() => { if (toastDiv.parentNode) { toastDiv.remove(); } }, 4000);
+}
+
+export function showSuccess(msg) { showNotification(msg, 'success'); }
+export function showError(msg) { showNotification(msg, 'error'); }

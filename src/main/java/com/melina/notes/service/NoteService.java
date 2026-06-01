@@ -102,6 +102,13 @@ public class NoteService {
         noteRepository.deleteAllByUserIdAndDeleted(userId, true);
     }
 
+    public NoteDTO togglePinNoteForUser(Long userId, Long noteId) {
+        Note note = getNote(userId, noteId);
+        note.setPinned(!note.isPinned());
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDTO(note);
+    }
+
     private Note getNote(Long userId, Long noteId) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new NoteNotFoundException(noteId));

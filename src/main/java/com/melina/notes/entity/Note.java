@@ -51,4 +51,8 @@ public class Note {
     @Column(nullable = false)
     private boolean deleted;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean pinned = false;
+
 }
