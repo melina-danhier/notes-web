@@ -28,6 +28,7 @@ public interface NoteMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "pinned", ignore = true)
+    @Mapping(target = "archived", ignore = true)
     void updateNote(@MappingTarget Note note, EditNoteDTO noteDTO);
 
     @Mapping(target = "tagsRaw", ignore = true)

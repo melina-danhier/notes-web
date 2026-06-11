@@ -10,4 +10,5 @@ public class NoteFilter {
     private String tagFilter;
     private String searchTerm;
     private Boolean deleted;
+    private Boolean archived;
 }

@@ -122,6 +122,8 @@ class NoteServiceTest {
                 .id(10L)
                 .title("Titel")
                 .deleted(false)
+                .archived(true)
+                .pinned(true)
                 .user(owner)
                 .build();
 
@@ -139,6 +141,8 @@ class NoteServiceTest {
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
         verify(noteRepository).save(noteCaptor.capture());
         assertTrue(noteCaptor.getValue().isDeleted());
+        assertFalse(noteCaptor.getValue().isArchived());
+        assertFalse(noteCaptor.getValue().isPinned());
     }
 
     @Test
@@ -150,6 +154,7 @@ class NoteServiceTest {
                 .id(10L)
                 .title("Titel")
                 .deleted(true)
+                .archived(true)
                 .user(owner)
                 .build();
 
@@ -167,6 +172,7 @@ class NoteServiceTest {
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
         verify(noteRepository).save(noteCaptor.capture());
         assertFalse(noteCaptor.getValue().isDeleted());
+        assertFalse(noteCaptor.getValue().isArchived());
     }
 
     @Test
@@ -174,6 +180,66 @@ class NoteServiceTest {
         noteService.emptyTrashForUser(7L);
 
         verify(noteRepository).deleteAllByUserIdAndDeleted(7L, true);
+    }
+
+    @Test
+    void archiveNoteForUser_setsArchivedFlagToTrueAndClearsPin() {
+        User owner = new User();
+        owner.setId(1L);
+
+        Note note = Note.builder()
+                .id(10L)
+                .title("Titel")
+                .deleted(false)
+                .archived(false)
+                .pinned(true)
+                .user(owner)
+                .build();
+
+        NoteDTO mappedDto = new NoteDTO();
+        mappedDto.setId(10L);
+
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
+
+        NoteDTO result = noteService.archiveNoteForUser(1L, 10L);
+
+        assertSame(mappedDto, result);
+
+        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
+        verify(noteRepository).save(noteCaptor.capture());
+        assertTrue(noteCaptor.getValue().isArchived());
+        assertFalse(noteCaptor.getValue().isDeleted());
+        assertFalse(noteCaptor.getValue().isPinned());
+    }
+
+    @Test
+    void unarchiveNoteForUser_setsArchivedFlagToFalse() {
+        User owner = new User();
+        owner.setId(1L);
+
+        Note note = Note.builder()
+                .id(10L)
+                .title("Titel")
+                .archived(true)
+                .user(owner)
+                .build();
+
+        NoteDTO mappedDto = new NoteDTO();
+        mappedDto.setId(10L);
+
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
+
+        NoteDTO result = noteService.unarchiveNoteForUser(1L, 10L);
+
+        assertSame(mappedDto, result);
+
+        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
+        verify(noteRepository).save(noteCaptor.capture());
+        assertFalse(noteCaptor.getValue().isArchived());
     }
 }
 

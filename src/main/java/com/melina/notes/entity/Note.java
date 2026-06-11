@@ -55,4 +55,8 @@ public class Note {
     @Builder.Default
     private boolean pinned = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean archived = false;
+
 }

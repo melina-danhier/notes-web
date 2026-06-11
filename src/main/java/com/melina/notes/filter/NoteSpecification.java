@@ -15,6 +15,7 @@ public class NoteSpecification {
                     .and(searchInTitleOrContent(filter.getSearchTerm()))
                     .and(hasTag(filter.getTagFilter()))
                     .and(isDeleted(filter.getDeleted()))
+                    .and(isArchived(filter.getArchived()))
                     .toPredicate(root, query, cb);
             assert query != null;
             query.distinct(true);
@@ -53,6 +54,11 @@ public class NoteSpecification {
             }
             return cb.equal(root.get("deleted"), deleted);
         };
+    }
+
+    private static Specification<Note> isArchived(Boolean archived) {
+        return (root, query, cb) -> archived == null ? null :
+                cb.equal(root.get("archived"), archived);
     }
 
 }

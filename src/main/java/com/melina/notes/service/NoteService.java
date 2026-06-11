@@ -87,6 +87,8 @@ public class NoteService {
     public NoteDTO softDeleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setDeleted(true);
+        note.setArchived(false);
+        note.setPinned(false);
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }
@@ -94,6 +96,7 @@ public class NoteService {
     public NoteDTO restoreNoteForUser(Long id, Long noteId) {
         Note note = getNote(id, noteId);
         note.setDeleted(false);
+        note.setArchived(false);
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }
@@ -105,6 +108,22 @@ public class NoteService {
     public NoteDTO togglePinNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setPinned(!note.isPinned());
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDTO(note);
+    }
+
+    public NoteDTO archiveNoteForUser(Long userId, Long noteId) {
+        Note note = getNote(userId, noteId);
+        note.setArchived(true);
+        note.setDeleted(false);
+        note.setPinned(false);
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDTO(note);
+    }
+
+    public NoteDTO unarchiveNoteForUser(Long userId, Long noteId) {
+        Note note = getNote(userId, noteId);
+        note.setArchived(false);
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }

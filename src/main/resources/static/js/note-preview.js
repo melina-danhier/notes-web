@@ -110,6 +110,17 @@ export function displayNoteModal(note) {
         };
     }
 
+    const archiveBtn = document.getElementById('modalArchiveBtn');
+    if (archiveBtn) {
+        archiveBtn.onclick = () => {
+            if (window.archiveNote) {
+                window.archiveNote(note.id);
+            } else {
+                alert('Fehler: Archivieren-Funktion nicht verfÃ¼gbar');
+            }
+        };
+    }
+
      // Check if we're on notes page and add pin button functionality
      const pinBtn = document.getElementById('modalPinBtn');
      if (pinBtn) {
@@ -145,6 +156,25 @@ export function displayNoteModal(note) {
                 window.forceDeleteNote(note.id);
             } else {
                 alert('Fehler: Löschen-Funktion nicht verfügbar');
+            }
+        };
+    }
+
+    const unarchiveBtn = document.getElementById('modalUnarchiveBtn');
+    const archiveDeleteBtn = document.getElementById('modalArchiveDeleteBtn');
+    if (unarchiveBtn && archiveDeleteBtn) {
+        unarchiveBtn.onclick = () => {
+            if (window.unarchiveNote) {
+                window.unarchiveNote(note.id);
+            } else {
+                alert('Fehler: Wiederherstellen-Funktion nicht verfÃ¼gbar');
+            }
+        };
+        archiveDeleteBtn.onclick = () => {
+            if (window.deleteArchivedNote) {
+                window.deleteArchivedNote(note.id);
+            } else {
+                alert('Fehler: LÃ¶schen-Funktion nicht verfÃ¼gbar');
             }
         };
     }

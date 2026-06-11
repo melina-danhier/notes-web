@@ -81,9 +81,26 @@ public class PageController {
                 .tagFilter(tagFilter)
                 .searchTerm(search)
                 .deleted(false)
+                .archived(false)
                 .build();
         addToModel(model, sortDir, sortField, filter, user, pageNo, pageSize, tagFilter, search, false);
         return "notes";
+    }
+
+    @GetMapping("/notes/archive")
+    public String archivePage(Model model,
+                              @AuthenticationPrincipal CustomUserDetails user,
+                              @RequestParam(required = false, defaultValue = "0") int pageNo,
+                              @RequestParam(required = false, defaultValue = "6") int pageSize,
+                              @RequestParam(required = false, defaultValue = "created") String sortField,
+                              @RequestParam(required = false, defaultValue = "desc") String sortDir) {
+        NoteFilter filter = NoteFilter.builder()
+                .userId(user.getId())
+                .deleted(false)
+                .archived(true)
+                .build();
+        addToModel(model, sortDir, sortField, filter, user, pageNo, pageSize, null, null, true);
+        return "archive";
     }
 
     @GetMapping("/notes/trash")

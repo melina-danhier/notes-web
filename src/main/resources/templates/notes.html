@@ -57,6 +57,12 @@
                     <ul class="dropdown-menu dropdown-menu-end">
 
                         <li>
+                            <button class="dropdown-item" id="archiveButton">
+                                🗃️ Archiv
+                            </button>
+                        </li>
+
+                        <li>
                             <button class="dropdown-item" id="binButton">
                                 🗑️ Papierkorb
                             </button>
@@ -166,19 +172,23 @@
                             <span class="pin-icon" title="Angeheftet">📌</span>
                             <h5 class="title m-0" th:text="${note.title}">Notiz</h5>
                         </div>
-                        <div class="btn-group btn-group-sm">
-                            <button th:class="${note.pinned} ? 'btn btn-warning px-3 py-1 pin-btn' : 'btn btn-secondary px-3 py-1 pin-btn'"
+                        <div class="d-flex align-items-center gap-1 note-card-toolbar">
+                            <button th:class="${note.pinned} ? 'btn btn-warning pin-btn' : 'btn btn-secondary pin-btn'"
                                     th:title="${note.pinned} ? 'Trennen' : 'Anheften'"
                                     th:onclick="'togglePin(' + ${note.id} + '); event.stopPropagation();'"
                                     th:data-note-id="${note.id}"
                                     th:attr="data-pinned=${note.pinned}">
                                 <span th:text="${note.pinned} ? '📍' : '📌'">📌</span>
                             </button>
-                            <button class="btn btn-primary px-3 py-1" title="Bearbeiten"
+                            <button class="btn btn-primary" title="Bearbeiten"
                                     th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\'; event.stopPropagation();'">
                                 ✏️
                             </button>
-                            <button class="btn btn-danger px-3 py-1" title="Löschen"
+                            <button class="btn btn-warning text-dark" title="Archivieren"
+                                    th:onclick="'archiveNote(' + ${note.id} + '); event.stopPropagation();'">
+                                🗃️
+                            </button>
+                            <button class="btn btn-danger" title="Löschen"
                                     th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'">
                                 🗑️
                             </button>
@@ -200,14 +210,15 @@
                                  th:attr="data-markdown=${note.contentPreview}"></div>
                             <span th:if="${note.contentPreview == null or note.contentPreview.length() == 0}" class="content text-muted">Keine Vorschau</span>
                         </div>
-
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
                         <div class="text-muted small d-flex flex-column">
-                            <span class="local-time" th:if="${note.created != null}">
-                                Erstellt: <span th:text="${#temporals.format(note.created, 'dd.MM.yyyy HH:mm')}"></span>
-                            </span>
+                        <span class="local-time" th:if="${note.created != null}">
+                            Erstellt: <span th:text="${#temporals.format(note.created, 'dd.MM.yyyy HH:mm')}"></span>
+                        </span>
                             <span class="local-time" th:if="${note.updated != null}">
-                                Zuletzt geändert: <span th:text="${#temporals.format(note.updated, 'dd.MM.yyyy HH:mm')}"></span>
-                            </span>
+                            Zuletzt geändert: <span th:text="${#temporals.format(note.updated, 'dd.MM.yyyy HH:mm')}"></span>
+                        </span>
                         </div>
                     </div>
                 </div>
@@ -231,19 +242,23 @@
                     <div class="d-flex align-items-center gap-2">
                         <h5 class="title m-0" th:text="${note.title}">Notiz</h5>
                     </div>
-                    <div class="btn-group btn-group-sm">
-                        <button th:class="${note.pinned} ? 'btn btn-warning px-3 py-1 pin-btn' : 'btn btn-secondary px-3 py-1 pin-btn'"
+                    <div class="d-flex align-items-center gap-1 note-card-toolbar">
+                        <button th:class="${note.pinned} ? 'btn btn-warning pin-btn' : 'btn btn-secondary pin-btn'"
                                 th:title="${note.pinned} ? 'Trennen' : 'Anheften'"
                                 th:onclick="'togglePin(' + ${note.id} + '); event.stopPropagation();'"
                                 th:data-note-id="${note.id}"
                                 th:attr="data-pinned=${note.pinned}">
                             <span th:text="${note.pinned} ? '📍' : '📌'">📌</span>
                         </button>
-                        <button class="btn btn-primary px-3 py-1" title="Bearbeiten"
+                        <button class="btn btn-primary" title="Bearbeiten"
                                 th:onclick="'window.location.href=\'/notes/' + ${note.id} + '\'; event.stopPropagation();'">
                             ✏️
                         </button>
-                        <button class="btn btn-danger px-3 py-1" title="Löschen"
+                        <button class="btn btn-warning text-dark" title="Archivieren"
+                                th:onclick="'archiveNote(' + ${note.id} + '); event.stopPropagation();'">
+                            🗃️
+                        </button>
+                        <button class="btn btn-danger" title="Löschen"
                                 th:onclick="'deleteNote(' + ${note.id} + '); event.stopPropagation();'">
                             🗑️
                         </button>
@@ -265,7 +280,8 @@
                              th:attr="data-markdown=${note.contentPreview}"></div>
                         <span th:if="${note.contentPreview == null or note.contentPreview.length() == 0}" class="content text-muted">Keine Vorschau</span>
                     </div>
-
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
                     <div class="text-muted small d-flex flex-column">
                         <span class="local-time" th:if="${note.created != null}">
                             Erstellt: <span th:text="${#temporals.format(note.created, 'dd.MM.yyyy HH:mm')}"></span>
@@ -313,6 +329,7 @@
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary btn-sm" id="modalPinBtn" onclick="modalTogglePin(); event.stopPropagation();" style="display:none;">📌 Pin</button>
                     <button type="button" class="btn btn-primary btn-sm" id="modalEditBtn" onclick="editFromModal()">✏️ Bearbeiten</button>
+                    <button type="button" class="btn btn-warning text-dark btn-sm" id="modalArchiveBtn">Archivieren</button>
                 </div>
             </div>
         </div>

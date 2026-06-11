@@ -2,6 +2,7 @@
 
 import { initNotesApp } from './notes-init.js';
 import './notes-delete.js';
+import './notes-archive.js';
 import { initSorting } from './note-sort.js';
 import { highlightText } from './notes-utils.js';
 import './notes-pin.js';
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSorting();
     initSearchAndTagFilter();
     initBinButton();
+    initArchiveButton();
     initSearchHighlighting();
 });
 
@@ -23,6 +25,16 @@ function initBinButton() {
     binButton.addEventListener('click', (e) => {
         e.preventDefault();
         window.location.href = '/notes/trash';
+    });
+}
+
+function initArchiveButton() {
+    const archiveButton = document.getElementById('archiveButton');
+    if (!archiveButton) return;
+
+    archiveButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/notes/archive';
     });
 }
 

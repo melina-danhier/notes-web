@@ -59,6 +59,20 @@ public class NoteController {
         return ResponseEntity.ok(note);
     }
 
+    @PatchMapping("/{noteId}/archive")
+    public ResponseEntity<NoteDTO> archiveNote(@PathVariable Long noteId,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDTO note = noteService.archiveNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok(note);
+    }
+
+    @PatchMapping("/{noteId}/unarchive")
+    public ResponseEntity<NoteDTO> unarchiveNote(@PathVariable Long noteId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDTO note = noteService.unarchiveNoteForUser(userDetails.getId(), noteId);
+        return ResponseEntity.ok(note);
+    }
+
     @DeleteMapping("/trash/empty")
     public ResponseEntity<Void> emptyTrash(@AuthenticationPrincipal CustomUserDetails userDetails) {
         noteService.emptyTrashForUser(userDetails.getId());

@@ -133,6 +133,20 @@
     max-width: 60%;
 }
 
+.note-card-toolbar .btn {
+    padding: 0.18rem 0.45rem;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    min-height: 1.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-card-toolbar .pin-btn {
+    min-width: 1.9rem;
+}
+
 .center-gap .btn-outline-secondary {
     min-width: 6rem;
 }
