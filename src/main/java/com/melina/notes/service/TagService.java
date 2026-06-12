@@ -1,6 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.TagDTO;
+import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -20,21 +19,28 @@ public class TagService {
     private final TagMapper tagMapper;
 
     public List<Tag> getOrCreateTags(String rawTags) {
-        if (rawTags == null || rawTags.trim().isEmpty()) {
+        if (rawTags == null || rawTags.isBlank()) {
             return new ArrayList<>();
         }
 
-        List<Tag> tags = new ArrayList<>();
+        Set<String> uniqueTagNames = new LinkedHashSet<>();
         String[] rawTagsList = rawTags.split(",");
-
         for (String rawTag : rawTagsList) {
             String trimmedTag = rawTag.trim();
-            if (trimmedTag.isEmpty()) continue;
 
-            Tag tag = tagRepository.findByTag(trimmedTag)
-                    .orElseGet(() -> createTag(trimmedTag));
+            if (!trimmedTag.isBlank()) {
+                uniqueTagNames.add(trimmedTag);
+            }
+        }
+
+        List<Tag> tags = new ArrayList<>();
+        for (String tagName : uniqueTagNames) {
+            Tag tag = tagRepository.findByTag(tagName)
+                    .orElseGet(() -> createTag(tagName));
+
             tags.add(tag);
         }
+
         return tags;
     }
 
@@ -46,7 +52,7 @@ public class TagService {
     }
 
     @Transactional
-    public List<TagDTO> getAllTagsByUserId(long userId) {
+    public List<TagDto> getAllTagsByUserId(long userId) {
         tagRepository.deleteAllWithNoNotes();
         return tagRepository.findAllByUserId(userId)
                 .stream()

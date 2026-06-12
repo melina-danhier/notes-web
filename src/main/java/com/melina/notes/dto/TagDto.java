@@ -3,7 +3,7 @@ package com.melina.notes.dto;
 import lombok.Data;
 
 @Data
-public class TagDTO {
+public class TagDto {
     private Long id;
     private String tag;
 }

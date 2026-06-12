@@ -1,8 +1,8 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.EditNoteDTO;
-import com.melina.notes.dto.NoteDTO;
-import com.melina.notes.dto.TagDTO;
+import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.TagDto;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
@@ -120,13 +120,13 @@ public class PageController {
 
     @GetMapping("/notes/new")
     public String newNote(Model model) {
-        model.addAttribute("noteDto", new EditNoteDTO());
+        model.addAttribute("noteDto", new CreateUpdateNoteDto());
         return "note-view";
     }
 
     @GetMapping("/notes/{id}")
     public String editNote(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails user) {
-        EditNoteDTO note = noteService.getNoteByIdForView(user.getId(), id);
+        CreateUpdateNoteDto note = noteService.getNoteByIdForView(user.getId(), id);
         model.addAttribute("noteDto", note);
         return "note-view";
     }
@@ -136,13 +136,13 @@ public class PageController {
         // First sort by pinned descending (unpinned false comes after pinned true), then by the selected field
         Sort sort = Sort.by(Sort.Direction.DESC, "pinned")
                 .and(Sort.by(Sort.Direction.fromString(sortDir), sortField));
-        Page<NoteDTO> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
+        Page<NoteDto> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
 
         // Split notes into pinned and unpinned
-        List<NoteDTO> pinnedNotes = notes.getContent().stream()
-                .filter(NoteDTO::isPinned)
+        List<NoteDto> pinnedNotes = notes.getContent().stream()
+                .filter(NoteDto::isPinned)
                 .toList();
-        List<NoteDTO> unpinnedNotes = notes.getContent().stream()
+        List<NoteDto> unpinnedNotes = notes.getContent().stream()
                 .filter(note -> !note.isPinned())
                 .toList();
 
@@ -157,7 +157,7 @@ public class PageController {
         model.addAttribute("displayname", user.getDisplayName());
 
         if (!trashPage) {
-            List<TagDTO> tags = tagService.getAllTagsByUserId(user.getId());
+            List<TagDto> tags = tagService.getAllTagsByUserId(user.getId());
             model.addAttribute("allTags", tags);
             model.addAttribute("tagFilter", tagFilter);
             model.addAttribute("search", search);

@@ -1,7 +1,7 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.EditNoteDTO;
-import com.melina.notes.dto.NoteDTO;
+import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.entity.User;
@@ -49,7 +49,7 @@ class NoteServiceTest {
 
     @Test
     void createNoteForUser_savesNewNoteAndReturnsMappedDto() {
-        EditNoteDTO input = new EditNoteDTO();
+        CreateUpdateNoteDto input = new CreateUpdateNoteDto();
         input.setTitle("Titel");
         input.setContent("Inhalt");
         input.setTagsRaw("work");
@@ -66,7 +66,7 @@ class NoteServiceTest {
                 .user(user)
                 .build();
 
-        NoteDTO mappedDto = new NoteDTO();
+        NoteDto mappedDto = new NoteDto();
         mappedDto.setId(100L);
 
         when(tagService.getOrCreateTags("work")).thenReturn(List.of(tag));
@@ -74,7 +74,7 @@ class NoteServiceTest {
         when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
         when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
 
-        NoteDTO result = noteService.createNoteForUser(5L, input);
+        NoteDto result = noteService.createNoteForUser(5L, input);
 
         assertSame(mappedDto, result);
 
@@ -127,14 +127,14 @@ class NoteServiceTest {
                 .user(owner)
                 .build();
 
-        NoteDTO mappedDto = new NoteDTO();
+        NoteDto mappedDto = new NoteDto();
         mappedDto.setId(10L);
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
-        NoteDTO result = noteService.softDeleteNoteForUser(1L, 10L);
+        NoteDto result = noteService.softDeleteNoteForUser(1L, 10L);
 
         assertSame(mappedDto, result);
 
@@ -158,14 +158,14 @@ class NoteServiceTest {
                 .user(owner)
                 .build();
 
-        NoteDTO mappedDto = new NoteDTO();
+        NoteDto mappedDto = new NoteDto();
         mappedDto.setId(10L);
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
-        NoteDTO result = noteService.restoreNoteForUser(1L, 10L);
+        NoteDto result = noteService.restoreNoteForUser(1L, 10L);
 
         assertSame(mappedDto, result);
 
@@ -196,14 +196,14 @@ class NoteServiceTest {
                 .user(owner)
                 .build();
 
-        NoteDTO mappedDto = new NoteDTO();
+        NoteDto mappedDto = new NoteDto();
         mappedDto.setId(10L);
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
-        NoteDTO result = noteService.archiveNoteForUser(1L, 10L);
+        NoteDto result = noteService.archiveNoteForUser(1L, 10L);
 
         assertSame(mappedDto, result);
 
@@ -226,14 +226,14 @@ class NoteServiceTest {
                 .user(owner)
                 .build();
 
-        NoteDTO mappedDto = new NoteDTO();
+        NoteDto mappedDto = new NoteDto();
         mappedDto.setId(10L);
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
-        NoteDTO result = noteService.unarchiveNoteForUser(1L, 10L);
+        NoteDto result = noteService.unarchiveNoteForUser(1L, 10L);
 
         assertSame(mappedDto, result);
 

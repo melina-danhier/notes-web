@@ -1,7 +1,7 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.EditNoteDTO;
-import com.melina.notes.dto.NoteDTO;
+import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.exception.NoteNotFoundException;
@@ -32,7 +32,7 @@ public class NoteService {
     private final TagService tagService;
     private final UserService userService;
 
-    public NoteDTO createNoteForUser(Long userId, EditNoteDTO noteDTO) {
+    public NoteDto createNoteForUser(Long userId, CreateUpdateNoteDto noteDTO) {
         String title = noteDTO.getTitle();
         if (title == null || title.isBlank()) {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -51,26 +51,26 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public Page<NoteDTO> getAllNotes(NoteFilter filter, PageRequest pageRequest) {
+    public Page<NoteDto> getAllNotes(NoteFilter filter, PageRequest pageRequest) {
         return noteRepository
                 .findAll(NoteSpecification.build(filter), pageRequest)
                 .map(noteMapper::toNoteDTO);
     }
 
-    public NoteDTO getNoteById(Long userId, Long noteId) {
+    public NoteDto getNoteById(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         return noteMapper.toNoteDTO(note);
     }
 
-    public EditNoteDTO getNoteByIdForView(Long userId, Long noteId) {
+    public CreateUpdateNoteDto getNoteByIdForView(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        EditNoteDTO editNote = noteMapper.toEditNoteDto(note);
+        CreateUpdateNoteDto editNote = noteMapper.toEditNoteDto(note);
         List<String> tagsAsStrings = note.getTags().stream().map(Tag::getTag).toList();
         editNote.setTagsRaw(String.join(", ", tagsAsStrings));
         return editNote;
     }
 
-    public NoteDTO updateNoteForUser(Long userId, Long noteId, EditNoteDTO noteDTO) {
+    public NoteDto updateNoteForUser(Long userId, Long noteId, CreateUpdateNoteDto noteDTO) {
         Note note = getNote(userId, noteId);
         noteMapper.updateNote(note,noteDTO);
         note.setTags(tagService.getOrCreateTags(noteDTO.getTagsRaw()));
@@ -84,7 +84,7 @@ public class NoteService {
         noteRepository.delete(note);
     }
 
-    public NoteDTO softDeleteNoteForUser(Long userId, Long noteId) {
+    public NoteDto softDeleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setDeleted(true);
         note.setArchived(false);
@@ -93,7 +93,7 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDTO restoreNoteForUser(Long id, Long noteId) {
+    public NoteDto restoreNoteForUser(Long id, Long noteId) {
         Note note = getNote(id, noteId);
         note.setDeleted(false);
         note.setArchived(false);
@@ -105,14 +105,14 @@ public class NoteService {
         noteRepository.deleteAllByUserIdAndDeleted(userId, true);
     }
 
-    public NoteDTO togglePinNoteForUser(Long userId, Long noteId) {
+    public NoteDto togglePinNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setPinned(!note.isPinned());
         note = noteRepository.save(note);
         return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDTO archiveNoteForUser(Long userId, Long noteId) {
+    public NoteDto archiveNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setArchived(true);
         note.setDeleted(false);
@@ -121,7 +121,7 @@ public class NoteService {
         return noteMapper.toNoteDTO(note);
     }
 
-    public NoteDTO unarchiveNoteForUser(Long userId, Long noteId) {
+    public NoteDto unarchiveNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         note.setArchived(false);
         note = noteRepository.save(note);

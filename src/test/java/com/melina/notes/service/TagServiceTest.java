@@ -1,11 +1,15 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.TagDTO;
+import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,9 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
@@ -33,11 +35,14 @@ class TagServiceTest {
     @InjectMocks
     private TagService tagService;
 
-    @Test
-    void getOrCreateTags_returnsEmptyListForBlankInput() {
-        List<Tag> result = tagService.getOrCreateTags("   ");
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "   ", "\t", "\n"})
+    void getOrCreateTags_returnsEmptyListForBlankInputOrNull(String testTags) {
+        List<Tag> result = tagService.getOrCreateTags(testTags);
 
         assertTrue(result.isEmpty());
+        verifyNoInteractions(tagRepository);
     }
 
     @Test
@@ -51,28 +56,62 @@ class TagServiceTest {
 
         List<Tag> result = tagService.getOrCreateTags("work, new");
 
+        ArgumentCaptor<Tag> tagCaptor = ArgumentCaptor.forClass(Tag.class);
+        verify(tagRepository).save(tagCaptor.capture());
+
+        Tag savedTag = tagCaptor.getValue();
+
+        assertEquals("new", savedTag.getTag());
+
         assertEquals(2, result.size());
         assertSame(existingTag, result.get(0));
         assertSame(createdTag, result.get(1));
-
-        verify(tagRepository, times(1)).save(any(Tag.class));
     }
 
     @Test
-    void getAllTagsByUserId_removesOrphansAndMapsToDto() {
-        Tag userTag = Tag.builder().id(3L).tag("backend").build();
-        TagDTO dto = new TagDTO();
+    void getAllTagsByUserId_callsRemoveOrphansMethodAndMapsToDto() {
+        Tag userTag = Tag.builder().id(3L).tag("tag1").build();
+        TagDto dto = new TagDto();
         dto.setId(3L);
-        dto.setTag("backend");
-
-        when(tagRepository.findAllByUserId(11L)).thenReturn(List.of(userTag));
+        dto.setTag("tag1");
+        when(tagRepository.findAllByUserId(1L)).thenReturn(List.of(userTag));
         when(tagMapper.toDTO(userTag)).thenReturn(dto);
 
-        List<TagDTO> result = tagService.getAllTagsByUserId(11L);
+        List<TagDto> result = tagService.getAllTagsByUserId(1L);
 
         verify(tagRepository).deleteAllWithNoNotes();
+        verify(tagRepository).findAllByUserId(1L);
+        verify(tagMapper).toDTO(userTag);
         assertEquals(1, result.size());
         assertSame(dto, result.getFirst());
+    }
+
+    @Test
+    void getOrCreateTags_trimsTagsBeforeSearching() {
+        Tag existingTag = Tag.builder().id(1L).tag("work").build();
+
+        when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
+
+        List<Tag> result = tagService.getOrCreateTags("  work  ");
+
+        assertEquals(1, result.size());
+        assertSame(existingTag, result.getFirst());
+        verify(tagRepository).findByTag("work");
+    }
+
+    @Test
+    void getOrCreateTags_ignoresEmptyTagsBetweenCommas() {
+        Tag existingTag = Tag.builder().id(1L).tag("work").build();
+
+        when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
+
+        List<Tag> result = tagService.getOrCreateTags("work, , ,");
+
+        assertEquals(1, result.size());
+        assertSame(existingTag, result.getFirst());
+
+        verify(tagRepository).findByTag("work");
+        verify(tagRepository).findByTag(anyString());
     }
 }
 

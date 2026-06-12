@@ -1,7 +1,7 @@
 package com.melina.notes.mapper;
 
-import com.melina.notes.dto.EditNoteDTO;
-import com.melina.notes.dto.NoteDTO;
+import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.util.ContentPreviewUtil;
 import org.mapstruct.AfterMapping;
@@ -13,10 +13,10 @@ import org.mapstruct.MappingTarget;
 public interface NoteMapper {
     @Mapping(source = "user.id", target = "userId")
     @Mapping(target = "contentPreview", ignore = true)
-    NoteDTO toNoteDTO(Note note);
+    NoteDto toNoteDTO(Note note);
 
     @AfterMapping
-    default void setContentPreview(Note note, @MappingTarget NoteDTO noteDTO) {
+    default void setContentPreview(Note note, @MappingTarget NoteDto noteDTO) {
         if (note.getContent() != null) {
             noteDTO.setContentPreview(ContentPreviewUtil.createPreview(note.getContent()));
         }
@@ -29,8 +29,8 @@ public interface NoteMapper {
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "pinned", ignore = true)
     @Mapping(target = "archived", ignore = true)
-    void updateNote(@MappingTarget Note note, EditNoteDTO noteDTO);
+    void updateNote(@MappingTarget Note note, CreateUpdateNoteDto noteDTO);
 
     @Mapping(target = "tagsRaw", ignore = true)
-    EditNoteDTO toEditNoteDto(Note note);
+    CreateUpdateNoteDto toEditNoteDto(Note note);
 }

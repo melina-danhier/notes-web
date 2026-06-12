@@ -1,6 +1,7 @@
 package com.melina.notes.service;
 
 import com.melina.notes.entity.User;
+import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,6 +28,6 @@ public class UserService {
 
     public User getUser(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + id));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 }

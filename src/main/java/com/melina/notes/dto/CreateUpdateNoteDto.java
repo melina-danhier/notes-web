@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class EditNoteDTO {
+public class CreateUpdateNoteDto {
     private Long id;
 
     @NotBlank(message = "Titel ist erforderlich")
