@@ -30,28 +30,37 @@ class UserServiceTest {
 
     @Test
     void emailExists_existingEmail_returnsTrue() {
-        User user = createTestUser(1L, "Test", "test@mail.com", "1234");
-
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail("test@mail.com")).thenReturn(true);
 
         boolean result = userService.emailExists("test@mail.com");
 
         assertTrue(result);
-        verify(userRepository).findByEmail("test@mail.com");
+        verify(userRepository).existsByEmail("test@mail.com");
     }
 
     @Test
     void emailExists_unknownEmail_returnsFalse() {
-        when(userRepository.findByEmail("test2@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.existsByEmail("test2@mail.com")).thenReturn(false);
 
         boolean result = userService.emailExists("test2@mail.com");
 
         assertFalse(result);
-        verify(userRepository).findByEmail("test2@mail.com");
+        verify(userRepository).existsByEmail("test2@mail.com");
+    }
+
+    @Test
+    void emailExists_normalizesEmailBeforeSearching() {
+        when(userRepository.existsByEmail("test@mail.com")).thenReturn(true);
+
+        boolean result = userService.emailExists("  Test@Mail.com  ");
+
+        assertTrue(result);
+        verify(userRepository).existsByEmail("test@mail.com");
     }
 
     @Test
     void createUser_validInput_encodesPasswordAndSavesUser() {
+        when(userRepository.existsByEmail("melina@mail.com")).thenReturn(false);
         when(passwordEncoder.encode("1234")).thenReturn("encodedPassword");
 
         userService.createUser("Melina", "melina@mail.com", "1234");
@@ -64,15 +73,52 @@ class UserServiceTest {
         assertAll(
                 () -> assertEquals("Melina", savedUser.getUsername()),
                 () -> assertEquals("melina@mail.com", savedUser.getEmail()),
-                () -> assertEquals("encodedPassword", savedUser.getPassword())
+                () -> assertEquals("encodedPassword", savedUser.getPassword()),
+                () -> assertEquals("ROLE_USER", savedUser.getRole())
         );
 
+        verify(userRepository).existsByEmail("melina@mail.com");
         verify(passwordEncoder).encode("1234");
     }
 
     @Test
+    void createUser_trimsNameAndNormalizesEmailBeforeSaving() {
+        when(userRepository.existsByEmail("melina@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("1234")).thenReturn("encodedPassword");
+
+        userService.createUser("  Melina  ", "  Melina@Mail.com  ", "1234");
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        User savedUser = userCaptor.getValue();
+
+        assertAll(
+                () -> assertEquals("Melina", savedUser.getUsername()),
+                () -> assertEquals("melina@mail.com", savedUser.getEmail()),
+                () -> assertEquals("encodedPassword", savedUser.getPassword()),
+                () -> assertEquals("ROLE_USER", savedUser.getRole())
+        );
+
+        verify(userRepository).existsByEmail("melina@mail.com");
+        verify(passwordEncoder).encode("1234");
+    }
+
+    @Test
+    void createUser_existingEmail_throwsExceptionAndDoesNotSaveUser() {
+        when(userRepository.existsByEmail("melina@mail.com")).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.createUser("Melina", "melina@mail.com", "1234"));
+
+        verify(userRepository).existsByEmail("melina@mail.com");
+        verifyNoInteractions(passwordEncoder);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void getUser_existingId_returnsUser() {
-        User user = createTestUser(2L, "Test4", "test4@mail.com", "encryptedPassword");
+        User user = createUser(2L, "Test", "test@mail.com", "encodedPassword");
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(user));
 
@@ -92,13 +138,13 @@ class UserServiceTest {
         verify(userRepository).findById(3L);
     }
 
-    private User createTestUser(Long id, String username, String email, String password) {
+    private User createUser(Long id, String username, String email, String password) {
         User user = new User();
         user.setId(id);
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
-        user.setRole("USER");
+        user.setRole("ROLE_USER");
         return user;
     }
 }

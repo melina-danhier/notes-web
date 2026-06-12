@@ -3,10 +3,10 @@ package com.melina.notes.repository;
 import com.melina.notes.entity.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
 
-@Repository
+import java.util.List;
+
 public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificationExecutor<Note> {
 
-    void deleteAllByUserIdAndDeleted(Long userId, boolean deleted);
+    List<Note> findAllByUserIdAndDeleted(Long userId, boolean deleted);
 }

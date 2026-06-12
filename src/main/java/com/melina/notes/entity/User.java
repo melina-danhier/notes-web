@@ -1,11 +1,12 @@
 package com.melina.notes.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
+@Builder
+@AllArgsConstructor
 @Data
 @NoArgsConstructor
 public class User {
