@@ -4,30 +4,59 @@ import com.melina.notes.entity.User;
 import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public boolean emailExists(String email) {
-        return userRepository.findByEmail(email).isPresent();
+        return userRepository.existsByEmail(normalizeEmail(email));
     }
 
     public void createUser(String name, String email, String password) {
-        User user = new User();
-        user.setUsername(name);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        String normalizedEmail = normalizeEmail(email);
+
+        if (emailExists(normalizedEmail)) {
+            throw new IllegalArgumentException("Email already exists: " + normalizedEmail);
+        }
+
+        User user = User.builder()
+                .username(normalizeName(name))
+                .email(normalizedEmail)
+                .password(passwordEncoder.encode(password))
+                .role("ROLE_USER")
+                .build();
+
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public User getUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email must not be blank");
+        }
+
+        return email.trim().toLowerCase();
+    }
+
+    private String normalizeName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Name must not be blank");
+        }
+
+        return name.trim();
     }
 }

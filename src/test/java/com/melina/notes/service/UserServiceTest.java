@@ -52,6 +52,7 @@ class UserServiceTest {
 
     @Test
     void createUser_validInput_encodesPasswordAndSavesUser() {
+        when(userRepository.findByEmail("melina@mail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("1234")).thenReturn("encodedPassword");
 
         userService.createUser("Melina", "melina@mail.com", "1234");
@@ -64,10 +65,27 @@ class UserServiceTest {
         assertAll(
                 () -> assertEquals("Melina", savedUser.getUsername()),
                 () -> assertEquals("melina@mail.com", savedUser.getEmail()),
-                () -> assertEquals("encodedPassword", savedUser.getPassword())
+                () -> assertEquals("encodedPassword", savedUser.getPassword()),
+                () -> assertEquals("ROLE_USER", savedUser.getRole())
         );
 
+        verify(userRepository).findByEmail("melina@mail.com");
         verify(passwordEncoder).encode("1234");
+    }
+
+    @Test
+    void createUser_existingEmail_throwsExceptionAndDoesNotSaveUser() {
+        User existingUser = createTestUser(1L, "Melina", "melina@mail.com", "pw");
+
+        when(userRepository.findByEmail("melina@mail.com"))
+                .thenReturn(Optional.of(existingUser));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.createUser("Melina", "melina@mail.com", "1234"));
+
+        verify(userRepository).findByEmail("melina@mail.com");
+        verifyNoInteractions(passwordEncoder);
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -98,7 +116,7 @@ class UserServiceTest {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
-        user.setRole("USER");
+        user.setRole("ROLE_USER");
         return user;
     }
 }

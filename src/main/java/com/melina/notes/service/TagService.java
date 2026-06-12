@@ -4,36 +4,30 @@ import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TagService {
+
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
     public List<Tag> getOrCreateTags(String rawTags) {
-        if (rawTags == null || rawTags.isBlank()) {
-            return new ArrayList<>();
-        }
-
-        Set<String> uniqueTagNames = new LinkedHashSet<>();
-        String[] rawTagsList = rawTags.split(",");
-        for (String rawTag : rawTagsList) {
-            String trimmedTag = rawTag.trim();
-
-            if (!trimmedTag.isBlank()) {
-                uniqueTagNames.add(trimmedTag);
-            }
-        }
+        Set<String> uniqueTagNames = parseTagNames(rawTags);
 
         List<Tag> tags = new ArrayList<>();
+
         for (String tagName : uniqueTagNames) {
             Tag tag = tagRepository.findByTag(tagName)
                     .orElseGet(() -> createTag(tagName));
@@ -44,20 +38,43 @@ public class TagService {
         return tags;
     }
 
-    private Tag createTag(String tagString) {
-        Tag tag = Tag.builder()
-                .tag(tagString.trim())
-                .build();
-        return tagRepository.save(tag);
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TagDto> getAllTagsByUserId(long userId) {
-        tagRepository.deleteAllWithNoNotes();
         return tagRepository.findAllByUserId(userId)
                 .stream()
                 .map(tagMapper::toDTO)
                 .toList();
     }
 
+    public void deleteAllWithNoNotes() {
+        tagRepository.deleteAllWithNoNotes();
+    }
+
+    private Tag createTag(String tagName) {
+        Tag tag = Tag.builder()
+                .tag(tagName)
+                .build();
+
+        return tagRepository.save(tag);
+    }
+
+    private Set<String> parseTagNames(String rawTags) {
+        Set<String> uniqueTagNames = new LinkedHashSet<>();
+
+        if (rawTags == null || rawTags.isBlank()) {
+            return uniqueTagNames;
+        }
+
+        String[] rawTagsList = rawTags.split(",");
+
+        for (String rawTag : rawTagsList) {
+            String trimmedTag = rawTag.trim();
+
+            if (!trimmedTag.isBlank()) {
+                uniqueTagNames.add(trimmedTag);
+            }
+        }
+
+        return uniqueTagNames;
+    }
 }

@@ -17,9 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -47,8 +45,15 @@ class TagServiceTest {
 
     @Test
     void getOrCreateTags_reusesExistingAndCreatesMissingTags() {
-        Tag existingTag = Tag.builder().id(1L).tag("work").build();
-        Tag createdTag = Tag.builder().id(2L).tag("new").build();
+        Tag existingTag = Tag.builder()
+                .id(1L)
+                .tag("work")
+                .build();
+
+        Tag createdTag = Tag.builder()
+                .id(2L)
+                .tag("new")
+                .build();
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
         when(tagRepository.findByTag("new")).thenReturn(Optional.empty());
@@ -61,34 +66,23 @@ class TagServiceTest {
 
         Tag savedTag = tagCaptor.getValue();
 
-        assertEquals("new", savedTag.getTag());
+        assertAll(
+                () -> assertEquals("new", savedTag.getTag()),
+                () -> assertEquals(2, result.size()),
+                () -> assertSame(existingTag, result.getFirst()),
+                () -> assertSame(createdTag, result.get(1))
+        );
 
-        assertEquals(2, result.size());
-        assertSame(existingTag, result.get(0));
-        assertSame(createdTag, result.get(1));
-    }
-
-    @Test
-    void getAllTagsByUserId_callsRemoveOrphansMethodAndMapsToDto() {
-        Tag userTag = Tag.builder().id(3L).tag("tag1").build();
-        TagDto dto = new TagDto();
-        dto.setId(3L);
-        dto.setTag("tag1");
-        when(tagRepository.findAllByUserId(1L)).thenReturn(List.of(userTag));
-        when(tagMapper.toDTO(userTag)).thenReturn(dto);
-
-        List<TagDto> result = tagService.getAllTagsByUserId(1L);
-
-        verify(tagRepository).deleteAllWithNoNotes();
-        verify(tagRepository).findAllByUserId(1L);
-        verify(tagMapper).toDTO(userTag);
-        assertEquals(1, result.size());
-        assertSame(dto, result.getFirst());
+        verify(tagRepository).findByTag("work");
+        verify(tagRepository).findByTag("new");
     }
 
     @Test
     void getOrCreateTags_trimsTagsBeforeSearching() {
-        Tag existingTag = Tag.builder().id(1L).tag("work").build();
+        Tag existingTag = Tag.builder()
+                .id(1L)
+                .tag("work")
+                .build();
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
 
@@ -96,12 +90,18 @@ class TagServiceTest {
 
         assertEquals(1, result.size());
         assertSame(existingTag, result.getFirst());
+
         verify(tagRepository).findByTag("work");
+        verify(tagRepository, never()).findByTag("  work  ");
+        verify(tagRepository, never()).save(any(Tag.class));
     }
 
     @Test
     void getOrCreateTags_ignoresEmptyTagsBetweenCommas() {
-        Tag existingTag = Tag.builder().id(1L).tag("work").build();
+        Tag existingTag = Tag.builder()
+                .id(1L)
+                .tag("work")
+                .build();
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
 
@@ -110,8 +110,65 @@ class TagServiceTest {
         assertEquals(1, result.size());
         assertSame(existingTag, result.getFirst());
 
-        verify(tagRepository).findByTag("work");
-        verify(tagRepository).findByTag(anyString());
+        verify(tagRepository, times(1)).findByTag("work");
+        verify(tagRepository, times(1)).findByTag(anyString());
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    void getOrCreateTags_removesDuplicateTagsAndKeepsOrder() {
+        Tag workTag = Tag.builder()
+                .id(1L)
+                .tag("work")
+                .build();
+
+        Tag homeTag = Tag.builder()
+                .id(2L)
+                .tag("home")
+                .build();
+
+        when(tagRepository.findByTag("work")).thenReturn(Optional.of(workTag));
+        when(tagRepository.findByTag("home")).thenReturn(Optional.of(homeTag));
+
+        List<Tag> result = tagService.getOrCreateTags("work, home, work,  home ");
+
+        assertEquals(2, result.size());
+        assertSame(workTag, result.get(0));
+        assertSame(homeTag, result.get(1));
+
+        verify(tagRepository, times(1)).findByTag("work");
+        verify(tagRepository, times(1)).findByTag("home");
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    void getAllTagsByUserId_mapsTagsToDtos() {
+        Tag userTag = Tag.builder()
+                .id(3L)
+                .tag("tag1")
+                .build();
+
+        TagDto dto = new TagDto();
+        dto.setId(3L);
+        dto.setTag("tag1");
+
+        when(tagRepository.findAllByUserId(1L)).thenReturn(List.of(userTag));
+        when(tagMapper.toDTO(userTag)).thenReturn(dto);
+
+        List<TagDto> result = tagService.getAllTagsByUserId(1L);
+
+        assertEquals(1, result.size());
+        assertSame(dto, result.getFirst());
+
+        verify(tagRepository).findAllByUserId(1L);
+        verify(tagMapper).toDTO(userTag);
+        verify(tagRepository, never()).deleteAllWithNoNotes();
+    }
+
+    @Test
+    void deleteAllWithNoNotes_delegatesToRepository() {
+        tagService.deleteAllWithNoNotes();
+
+        verify(tagRepository).deleteAllWithNoNotes();
     }
 }
-
