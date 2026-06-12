@@ -34,7 +34,7 @@
 
             <div class="form-group-section note-tags-section">
                 <div class="tag-input-container">
-                    <input type="hidden" id="tagsInput" th:field="*{tagsRaw}" name="tagsRaw">
+                    <input type="hidden" id="tagsInput" name="tags" th:value="${tagsInputValue}">
                     <div class="tag-chips-wrapper">
                         <div class="input-with-hint input-with-hint-compact">
                             <input type="text" id="tagInputField" placeholder="Tag hinzufügen..."

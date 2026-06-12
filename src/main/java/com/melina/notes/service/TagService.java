@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Slf4j
@@ -23,8 +24,8 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
-    public List<Tag> getOrCreateTags(String rawTags) {
-        Set<String> uniqueTagNames = parseTagNames(rawTags);
+    public List<Tag> getOrCreateTags(List<String> rawTags) {
+        Set<String> uniqueTagNames = normalizeTagNames(rawTags);
 
         List<Tag> tags = new ArrayList<>();
 
@@ -58,17 +59,19 @@ public class TagService {
         return tagRepository.save(tag);
     }
 
-    private Set<String> parseTagNames(String rawTags) {
+    private Set<String> normalizeTagNames(List<String> rawTags) {
         Set<String> uniqueTagNames = new LinkedHashSet<>();
 
-        if (rawTags == null || rawTags.isBlank()) {
+        if (rawTags == null || rawTags.isEmpty()) {
             return uniqueTagNames;
         }
 
-        String[] rawTagsList = rawTags.split(",");
+        for (String rawTag : rawTags) {
+            if (rawTag == null) {
+                continue;
+            }
 
-        for (String rawTag : rawTagsList) {
-            String trimmedTag = rawTag.trim();
+            String trimmedTag = rawTag.trim().toLowerCase(Locale.ROOT);
 
             if (!trimmedTag.isBlank()) {
                 uniqueTagNames.add(trimmedTag);

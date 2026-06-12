@@ -1,6 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
@@ -54,14 +54,14 @@ class NoteServiceTest {
 
     @Test
     void createNoteForUser_savesNewNoteAndReturnsMappedDto() {
-        CreateUpdateNoteDto input = createInput("Titel", "Inhalt", "work");
+        CreateNoteDto input = createInput("Titel", "Inhalt", List.of("work"));
 
         Tag tag = createTag(10L, "work");
         User user = createUser(5L);
         Note savedNote = createNote(100L, user);
         NoteDto mappedDto = createNoteDto(100L);
 
-        when(tagService.getOrCreateTags("work")).thenReturn(List.of(tag));
+        when(tagService.getOrCreateTags(List.of("work"))).thenReturn(List.of(tag));
         when(userService.getUser(5L)).thenReturn(user);
         when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
         when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
@@ -88,20 +88,20 @@ class NoteServiceTest {
                 () -> assertNotNull(noteToSave.getUpdated())
         );
 
-        verify(tagService).getOrCreateTags("work");
+        verify(tagService).getOrCreateTags(List.of("work"));
         verify(userService).getUser(5L);
         verify(noteMapper).toNoteDTO(savedNote);
     }
 
     @Test
     void createNoteForUser_blankTitle_usesDefaultTitle() {
-        CreateUpdateNoteDto input = createInput("   ", "Inhalt", "");
+        CreateNoteDto input = createInput("   ", "Inhalt", List.of());
 
         User user = createUser(5L);
         Note savedNote = createNote(100L, user);
         NoteDto mappedDto = createNoteDto(100L);
 
-        when(tagService.getOrCreateTags("")).thenReturn(List.of());
+        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
         when(userService.getUser(5L)).thenReturn(user);
         when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
         when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
@@ -116,13 +116,13 @@ class NoteServiceTest {
 
     @Test
     void createNoteForUser_titleWithSpaces_trimsTitle() {
-        CreateUpdateNoteDto input = createInput("  Titel  ", "Inhalt", "");
+        CreateNoteDto input = createInput("  Titel  ", "Inhalt", List.of());
 
         User user = createUser(5L);
         Note savedNote = createNote(100L, user);
         NoteDto mappedDto = createNoteDto(100L);
 
-        when(tagService.getOrCreateTags("")).thenReturn(List.of());
+        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
         when(userService.getUser(5L)).thenReturn(user);
         when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
         when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
@@ -212,7 +212,7 @@ class NoteServiceTest {
     }
 
     @Test
-    void getNoteByIdForView_mapsNoteAndSetsTagsRaw() {
+    void getNoteByIdForView_returnsMappedEditDto() {
         User owner = createUser(1L);
 
         Note note = createNote(10L, owner);
@@ -221,15 +221,15 @@ class NoteServiceTest {
                 createTag(2L, "home")
         )));
 
-        CreateUpdateNoteDto editDto = createInput("Titel", "Inhalt", null);
+        CreateNoteDto editDto = createInput("Titel", "Inhalt", List.of("work", "home"));
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
         when(noteMapper.toEditNoteDto(note)).thenReturn(editDto);
 
-        CreateUpdateNoteDto result = noteService.getNoteByIdForView(1L, 10L);
+        CreateNoteDto result = noteService.getNoteByIdForView(1L, 10L);
 
         assertSame(editDto, result);
-        assertEquals("work, home", result.getTagsRaw());
+        assertEquals(List.of("work", "home"), result.getTags());
 
         verify(noteRepository).findById(10L);
         verify(noteMapper).toEditNoteDto(note);
@@ -243,7 +243,7 @@ class NoteServiceTest {
         note.setContent("Alt Content");
         note.setTags(new ArrayList<>(List.of(createTag(1L, "old"))));
 
-        CreateUpdateNoteDto input = createInput("Neu", "Neuer Content", "work");
+        CreateNoteDto input = createInput("Neu", "Neuer Content", List.of("work"));
         Tag newTag = createTag(2L, "work");
         NoteDto mappedDto = createNoteDto(10L);
 
@@ -251,13 +251,13 @@ class NoteServiceTest {
 
         doAnswer(invocation -> {
             Note target = invocation.getArgument(0);
-            CreateUpdateNoteDto dto = invocation.getArgument(1);
+            CreateNoteDto dto = invocation.getArgument(1);
             target.setTitle(dto.getTitle());
             target.setContent(dto.getContent());
             return null;
         }).when(noteMapper).updateNote(note, input);
 
-        when(tagService.getOrCreateTags("work")).thenReturn(List.of(newTag));
+        when(tagService.getOrCreateTags(List.of("work"))).thenReturn(List.of(newTag));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
@@ -286,20 +286,20 @@ class NoteServiceTest {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
 
-        CreateUpdateNoteDto input = createInput("   ", "Neuer Content", "");
+        CreateNoteDto input = createInput("   ", "Neuer Content", List.of());
         NoteDto mappedDto = createNoteDto(10L);
 
         when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
 
         doAnswer(invocation -> {
             Note target = invocation.getArgument(0);
-            CreateUpdateNoteDto dto = invocation.getArgument(1);
+            CreateNoteDto dto = invocation.getArgument(1);
             target.setTitle(dto.getTitle());
             target.setContent(dto.getContent());
             return null;
         }).when(noteMapper).updateNote(note, input);
 
-        when(tagService.getOrCreateTags("")).thenReturn(List.of());
+        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
 
@@ -506,18 +506,18 @@ class NoteServiceTest {
         );
     }
 
-    private CreateUpdateNoteDto createInput(String title, String content, String tagsRaw) {
-        CreateUpdateNoteDto dto = new CreateUpdateNoteDto();
+    private CreateNoteDto createInput(String title, String content, List<String> tags) {
+        CreateNoteDto dto = new CreateNoteDto();
         dto.setTitle(title);
         dto.setContent(content);
-        dto.setTagsRaw(tagsRaw);
+        dto.setTags(tags);
         return dto;
     }
 
     private NoteDto createNoteDto(Long id) {
-        NoteDto dto = new NoteDto();
-        dto.setId(id);
-        return dto;
+        return NoteDto.builder()
+                .id(id)
+                .build();
     }
 
     private User createUser(Long id) {

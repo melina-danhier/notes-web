@@ -1,9 +1,8 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
-import com.melina.notes.entity.Tag;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.filter.NoteFilter;
@@ -33,7 +32,7 @@ public class NoteService {
     private final TagService tagService;
     private final UserService userService;
 
-    public NoteDto createNoteForUser(Long userId, CreateUpdateNoteDto noteDTO) {
+    public NoteDto createNoteForUser(Long userId, CreateNoteDto noteDTO) {
         String title = resolveTitle(noteDTO.getTitle());
 
         Note note = Note.builder()
@@ -41,7 +40,7 @@ public class NoteService {
                 .content(noteDTO.getContent())
                 .created(Instant.now())
                 .updated(Instant.now())
-                .tags(tagService.getOrCreateTags(noteDTO.getTagsRaw()))
+                .tags(tagService.getOrCreateTags(noteDTO.getTags()))
                 .user(userService.getUser(userId))
                 .deleted(false)
                 .archived(false)
@@ -66,26 +65,17 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public CreateUpdateNoteDto getNoteByIdForView(Long userId, Long noteId) {
+    public CreateNoteDto getNoteByIdForView(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-
-        CreateUpdateNoteDto editNote = noteMapper.toEditNoteDto(note);
-
-        List<String> tagsAsStrings = note.getTags()
-                .stream()
-                .map(Tag::getTag)
-                .toList();
-
-        editNote.setTagsRaw(String.join(", ", tagsAsStrings));
-        return editNote;
+        return noteMapper.toEditNoteDto(note);
     }
 
-    public NoteDto updateNoteForUser(Long userId, Long noteId, CreateUpdateNoteDto noteDTO) {
+    public NoteDto updateNoteForUser(Long userId, Long noteId, CreateNoteDto noteDTO) {
         Note note = getNote(userId, noteId);
 
         noteMapper.updateNote(note, noteDTO);
         note.setTitle(resolveTitle(note.getTitle()));
-        note.setTags(tagService.getOrCreateTags(noteDTO.getTagsRaw()));
+        note.setTags(tagService.getOrCreateTags(noteDTO.getTags()));
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);

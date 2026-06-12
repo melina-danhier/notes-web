@@ -1,9 +1,10 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,9 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public ResponseEntity<NoteDto> createNote(@RequestBody CreateUpdateNoteDto noteDTO,
+    public ResponseEntity<NoteDto> createNote(@Valid @RequestBody CreateNoteDto noteDTO,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
-        NoteDto note = noteService.createNoteForUser(userDetails.getId(),noteDTO);
+        NoteDto note = noteService.createNoteForUser(userDetails.getId(), noteDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
 
@@ -32,7 +33,7 @@ public class NoteController {
 
     @PatchMapping("/{noteId}")
     public ResponseEntity<NoteDto> updateNote(@PathVariable Long noteId,
-                                              @RequestBody CreateUpdateNoteDto noteDTO,
+                                              @Valid @RequestBody CreateNoteDto noteDTO,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         NoteDto note = noteService.updateNoteForUser(userDetails.getId(), noteId, noteDTO);
         return ResponseEntity.ok(note);

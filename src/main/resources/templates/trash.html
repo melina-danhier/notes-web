@@ -76,7 +76,7 @@
                         <span class="text-primary-emphasis bg-primary-subtle rounded-3 p-1"
                               th:if="${note.tags != null and #lists.size(note.tags) > 0}"
                               th:each="tag : ${note.tags}"
-                              th:text="'#' + ${tag.tag}">
+                              th:text="'#' + ${tag}">
                         </span>
                     </div>
 

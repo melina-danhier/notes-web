@@ -1,6 +1,6 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.dto.TagDto;
 import com.melina.notes.filter.NoteFilter;
@@ -120,15 +120,25 @@ public class PageController {
 
     @GetMapping("/notes/new")
     public String newNote(Model model) {
-        model.addAttribute("noteDto", new CreateUpdateNoteDto());
+        model.addAttribute("noteDto", new CreateNoteDto());
+        model.addAttribute("tagsInputValue", "");
         return "note-view";
     }
 
     @GetMapping("/notes/{id}")
     public String editNote(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails user) {
-        CreateUpdateNoteDto note = noteService.getNoteByIdForView(user.getId(), id);
+        CreateNoteDto note = noteService.getNoteByIdForView(user.getId(), id);
         model.addAttribute("noteDto", note);
+        model.addAttribute("tagsInputValue", joinTags(note.getTags()));
         return "note-view";
+    }
+
+    private String joinTags(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return "";
+        }
+
+        return String.join(", ", tags);
     }
 
     private void addToModel(Model model, String sortDir, String sortField, NoteFilter filter, CustomUserDetails user,

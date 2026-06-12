@@ -64,7 +64,7 @@ export function displayNoteModal(note) {
     if (tagsContainer && note.tags && note.tags.length > 0) {
         tagsContainer.innerHTML = note.tags
             .map(tag => `<span class="text-primary-emphasis bg-primary-subtle rounded-3 p-1">` +
-                        `#${escapeHtml(tag.tag)}</span>`)
+                        `#${escapeHtml(tag)}</span>`)
             .join('');
     } else {
         tagsContainer.innerHTML = '';

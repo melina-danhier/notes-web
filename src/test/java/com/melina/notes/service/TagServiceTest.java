@@ -7,8 +7,8 @@ import com.melina.notes.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,9 +34,9 @@ class TagServiceTest {
     private TagService tagService;
 
     @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "   ", "\t", "\n"})
-    void getOrCreateTags_blankOrNullInput_returnsEmptyList(String rawTags) {
+    @NullSource
+    @EmptySource
+    void getOrCreateTags_blankOrNullInput_returnsEmptyList(List<String> rawTags) {
         List<Tag> result = tagService.getOrCreateTags(rawTags);
 
         assertTrue(result.isEmpty());
@@ -52,7 +52,7 @@ class TagServiceTest {
         when(tagRepository.findByTag("new")).thenReturn(Optional.empty());
         when(tagRepository.save(any(Tag.class))).thenReturn(createdTag);
 
-        List<Tag> result = tagService.getOrCreateTags("work, new");
+        List<Tag> result = tagService.getOrCreateTags(List.of("work", "new"));
 
         ArgumentCaptor<Tag> tagCaptor = ArgumentCaptor.forClass(Tag.class);
         verify(tagRepository).save(tagCaptor.capture());
@@ -76,7 +76,7 @@ class TagServiceTest {
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
 
-        List<Tag> result = tagService.getOrCreateTags("  work  ");
+        List<Tag> result = tagService.getOrCreateTags(List.of("  work  "));
 
         assertEquals(1, result.size());
         assertSame(existingTag, result.getFirst());
@@ -92,7 +92,7 @@ class TagServiceTest {
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
 
-        List<Tag> result = tagService.getOrCreateTags("work, , ,");
+        List<Tag> result = tagService.getOrCreateTags(List.of("work", "", "   ", ""));
 
         assertEquals(1, result.size());
         assertSame(existingTag, result.getFirst());
@@ -108,7 +108,7 @@ class TagServiceTest {
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(workTag));
         when(tagRepository.findByTag("home")).thenReturn(Optional.of(homeTag));
 
-        List<Tag> result = tagService.getOrCreateTags("work, home, work,  home ");
+        List<Tag> result = tagService.getOrCreateTags(List.of("work", "home", "work", "  home "));
 
         assertEquals(2, result.size());
         assertSame(workTag, result.get(0));
@@ -117,6 +117,18 @@ class TagServiceTest {
         verify(tagRepository, times(1)).findByTag("work");
         verify(tagRepository, times(1)).findByTag("home");
         verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    void getOrCreateTags_normalizesCaseBeforeRemovingDuplicates() {
+        Tag workTag = createTag(1L, "work");
+
+        when(tagRepository.findByTag("work")).thenReturn(Optional.of(workTag));
+
+        List<Tag> result = tagService.getOrCreateTags(List.of("Work", "WORK", " work "));
+
+        assertEquals(List.of(workTag), result);
+        verify(tagRepository, only()).findByTag("work");
     }
 
     @Test

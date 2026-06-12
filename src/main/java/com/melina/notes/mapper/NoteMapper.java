@@ -1,6 +1,6 @@
 package com.melina.notes.mapper;
 
-import com.melina.notes.dto.CreateUpdateNoteDto;
+import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.util.ContentPreviewUtil;
@@ -29,8 +29,8 @@ public interface NoteMapper {
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "pinned", ignore = true)
     @Mapping(target = "archived", ignore = true)
-    void updateNote(@MappingTarget Note note, CreateUpdateNoteDto noteDTO);
+    @Mapping(target = "id", ignore = true)
+    void updateNote(@MappingTarget Note note, CreateNoteDto noteDTO);
 
-    @Mapping(target = "tagsRaw", ignore = true)
-    CreateUpdateNoteDto toEditNoteDto(Note note);
+    CreateNoteDto toEditNoteDto(Note note);
 }

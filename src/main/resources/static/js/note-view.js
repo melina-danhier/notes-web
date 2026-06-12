@@ -91,7 +91,7 @@ function getFormData() {
         id: document.getElementById('noteIdInput')?.value || null,
         title: document.getElementById('titleInput')?.value?.trim() || '',
         content: document.getElementById('contentInput')?.value || '',
-        tagsRaw: document.getElementById('tagsInput')?.value?.trim() || ''
+        tags: parseTagsField(document.getElementById('tagsInput')?.value)
     };
 }
 
@@ -490,6 +490,33 @@ function clamp(value, min, max) {
 
 // ======================== TAG INPUT SYSTEM ========================
 
+function parseTagsField(rawValue) {
+    if (!rawValue) {
+        return [];
+    }
+
+    const normalizedValue = rawValue.trim();
+    if (!normalizedValue) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(normalizedValue);
+        if (Array.isArray(parsed)) {
+            return parsed
+                .map(tag => typeof tag === 'string' ? tag.trim() : '')
+                .filter(tag => tag.length > 0);
+        }
+    } catch (error) {
+        // Fallback auf alte/kommagetrennte Werte.
+    }
+
+    return normalizedValue
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+}
+
 function initTagInput() {
     const tagsInput = document.getElementById('tagsInput');
     const tagInputField = document.getElementById('tagInputField');
@@ -498,9 +525,7 @@ function initTagInput() {
     if (!tagInputField || !tagChipsContainer || !tagsInput) return;
 
     // Parse initial tags aus dem hidden input feld
-    const initialTags = tagsInput.value
-        ? tagsInput.value.split(',').map(t => t.trim()).filter(t => t.length > 0)
-        : [];
+    const initialTags = parseTagsField(tagsInput.value);
 
     let currentTags = [];
 
@@ -519,7 +544,7 @@ function initTagInput() {
         });
 
         // Update hidden input field
-        tagsInput.value = currentTags.join(', ');
+        tagsInput.value = JSON.stringify(currentTags);
     }
 
     function addTag(tag) {
@@ -539,8 +564,23 @@ function initTagInput() {
 
         currentTags.push(trimmed);
         renderTags();
-        tagInputField.value = '';
-        tagInputField.focus();
+        return true;
+    }
+
+    function addTagsFromInput(value) {
+        const tagsToAdd = parseTagsField(value);
+        let addedAny = false;
+
+        tagsToAdd.forEach(function(tag) {
+            if (addTag(tag)) {
+                addedAny = true;
+            }
+        });
+
+        if (addedAny) {
+            tagInputField.value = '';
+            tagInputField.focus();
+        }
     }
 
     function removeTag(index) {
@@ -553,7 +593,7 @@ function initTagInput() {
     tagInputField.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            addTag(this.value);
+            addTagsFromInput(this.value);
         }
 
         if (e.key === 'Backspace' && this.value === '' && currentTags.length > 0) {
@@ -561,11 +601,10 @@ function initTagInput() {
         }
     });
 
-    // "+" Button simulation via komma
+    // Komma erlaubt das schnelle Hinzufügen mehrerer Tags, auch beim Einfügen von Listen.
     tagInputField.addEventListener('keyup', function() {
         if (this.value.includes(',')) {
-            const tag = this.value.replace(/,/g, '');
-            addTag(tag);
+            addTagsFromInput(this.value);
         }
     });
 
