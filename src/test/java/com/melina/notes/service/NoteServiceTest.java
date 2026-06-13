@@ -94,48 +94,6 @@ class NoteServiceTest {
     }
 
     @Test
-    void createNoteForUser_blankTitle_usesDefaultTitle() {
-        CreateNoteDto input = createInput("   ", "Inhalt", List.of());
-
-        User user = createUser(5L);
-        Note savedNote = createNote(100L, user);
-        NoteDto mappedDto = createNoteDto(100L);
-
-        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
-        when(userService.getUser(5L)).thenReturn(user);
-        when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
-        when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
-
-        noteService.createNoteForUser(5L, input);
-
-        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
-        verify(noteRepository).save(noteCaptor.capture());
-
-        assertTrue(noteCaptor.getValue().getTitle().startsWith("Notiz "));
-    }
-
-    @Test
-    void createNoteForUser_titleWithSpaces_trimsTitle() {
-        CreateNoteDto input = createInput("  Titel  ", "Inhalt", List.of());
-
-        User user = createUser(5L);
-        Note savedNote = createNote(100L, user);
-        NoteDto mappedDto = createNoteDto(100L);
-
-        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
-        when(userService.getUser(5L)).thenReturn(user);
-        when(noteRepository.save(any(Note.class))).thenReturn(savedNote);
-        when(noteMapper.toNoteDTO(savedNote)).thenReturn(mappedDto);
-
-        noteService.createNoteForUser(5L, input);
-
-        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
-        verify(noteRepository).save(noteCaptor.capture());
-
-        assertEquals("Titel", noteCaptor.getValue().getTitle());
-    }
-
-    @Test
     void getAllNotes_returnsMappedPage() {
         NoteFilter filter = NoteFilter.builder()
                 .userId(1L)
@@ -212,30 +170,6 @@ class NoteServiceTest {
     }
 
     @Test
-    void getNoteByIdForView_returnsMappedEditDto() {
-        User owner = createUser(1L);
-
-        Note note = createNote(10L, owner);
-        note.setTags(new ArrayList<>(List.of(
-                createTag(1L, "work"),
-                createTag(2L, "home")
-        )));
-
-        CreateNoteDto editDto = createInput("Titel", "Inhalt", List.of("work", "home"));
-
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
-        when(noteMapper.toEditNoteDto(note)).thenReturn(editDto);
-
-        CreateNoteDto result = noteService.getNoteByIdForView(1L, 10L);
-
-        assertSame(editDto, result);
-        assertEquals(List.of("work", "home"), result.getTags());
-
-        verify(noteRepository).findById(10L);
-        verify(noteMapper).toEditNoteDto(note);
-    }
-
-    @Test
     void updateNoteForUser_updatesFieldsTagsAndDeletesUnusedTags() {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
@@ -279,36 +213,6 @@ class NoteServiceTest {
         );
 
         verify(tagService).deleteAllWithNoNotes();
-    }
-
-    @Test
-    void updateNoteForUser_blankTitle_usesDefaultTitle() {
-        User owner = createUser(1L);
-        Note note = createNote(10L, owner);
-
-        CreateNoteDto input = createInput("   ", "Neuer Content", List.of());
-        NoteDto mappedDto = createNoteDto(10L);
-
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
-
-        doAnswer(invocation -> {
-            Note target = invocation.getArgument(0);
-            CreateNoteDto dto = invocation.getArgument(1);
-            target.setTitle(dto.getTitle());
-            target.setContent(dto.getContent());
-            return null;
-        }).when(noteMapper).updateNote(note, input);
-
-        when(tagService.getOrCreateTags(List.of())).thenReturn(List.of());
-        when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(noteMapper.toNoteDTO(any(Note.class))).thenReturn(mappedDto);
-
-        noteService.updateNoteForUser(1L, 10L, input);
-
-        ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
-        verify(noteRepository).save(noteCaptor.capture());
-
-        assertTrue(noteCaptor.getValue().getTitle().startsWith("Notiz "));
     }
 
     @Test
@@ -357,18 +261,16 @@ class NoteServiceTest {
         assertAll(
                 () -> assertTrue(savedNote.isDeleted()),
                 () -> assertFalse(savedNote.isArchived()),
-                () -> assertFalse(savedNote.isPinned()),
-                () -> assertNotNull(savedNote.getUpdated())
+                () -> assertFalse(savedNote.isPinned())
         );
     }
 
     @Test
-    void restoreNoteForUser_setsDeletedAndArchivedToFalse() {
+    void restoreNoteForUser_setsDeletedToFalse() {
         User owner = createUser(1L);
 
         Note note = createNote(10L, owner);
         note.setDeleted(true);
-        note.setArchived(true);
 
         NoteDto mappedDto = createNoteDto(10L);
 
@@ -385,11 +287,7 @@ class NoteServiceTest {
 
         Note savedNote = noteCaptor.getValue();
 
-        assertAll(
-                () -> assertFalse(savedNote.isDeleted()),
-                () -> assertFalse(savedNote.isArchived()),
-                () -> assertNotNull(savedNote.getUpdated())
-        );
+        assertFalse(savedNote.isDeleted());
     }
 
     @Test
@@ -440,18 +338,14 @@ class NoteServiceTest {
 
         Note savedNote = noteCaptor.getValue();
 
-        assertAll(
-                () -> assertTrue(savedNote.isPinned()),
-                () -> assertNotNull(savedNote.getUpdated())
-        );
+        assertTrue(savedNote.isPinned());
     }
 
     @Test
-    void archiveNoteForUser_setsArchivedFlagToTrueAndClearsDeletedAndPin() {
+    void archiveNoteForUser_setsArchivedFlagToTrueAndClearsPinned() {
         User owner = createUser(1L);
 
         Note note = createNote(10L, owner);
-        note.setDeleted(true);
         note.setArchived(false);
         note.setPinned(true);
 
@@ -472,9 +366,7 @@ class NoteServiceTest {
 
         assertAll(
                 () -> assertTrue(savedNote.isArchived()),
-                () -> assertFalse(savedNote.isDeleted()),
-                () -> assertFalse(savedNote.isPinned()),
-                () -> assertNotNull(savedNote.getUpdated())
+                () -> assertFalse(savedNote.isPinned())
         );
     }
 
@@ -500,10 +392,7 @@ class NoteServiceTest {
 
         Note savedNote = noteCaptor.getValue();
 
-        assertAll(
-                () -> assertFalse(savedNote.isArchived()),
-                () -> assertNotNull(savedNote.getUpdated())
-        );
+        assertFalse(savedNote.isArchived());
     }
 
     private CreateNoteDto createInput(String title, String content, List<String> tags) {

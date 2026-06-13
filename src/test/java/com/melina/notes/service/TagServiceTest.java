@@ -87,7 +87,7 @@ class TagServiceTest {
     }
 
     @Test
-    void getOrCreateTags_ignoresEmptyTagsBetweenCommas() {
+    void getOrCreateTags_ignoresEmptyTags() {
         Tag existingTag = createTag(1L, "work");
 
         when(tagRepository.findByTag("work")).thenReturn(Optional.of(existingTag));
