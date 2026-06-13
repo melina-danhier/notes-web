@@ -24,35 +24,33 @@ class NoteRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void findAllByUserIdAndDeleted_returnsOnlyDeletedNotesOfGivenUser() {
+    void findAllByUserIdAndDeleted_deletedTrue_returnsOnlyDeletedNotesOfGivenUser() {
         User user = createAndSaveUser("user@mail.com");
         User otherUser = createAndSaveUser("other@mail.com");
 
-        Note activeNote = createAndSaveNote(user, "Aktive Notiz", false);
+        createAndSaveNote(user, "Aktive Notiz", false);
         Note deletedNote = createAndSaveNote(user, "Gelöschte Notiz", true);
-        Note deletedNoteOfOtherUser = createAndSaveNote(otherUser, "Andere gelöschte Notiz", true);
+        createAndSaveNote(otherUser, "Andere gelöschte Notiz", true);
 
         List<Note> result = noteRepository.findAllByUserIdAndDeleted(user.getId(), true);
 
         assertEquals(1, result.size());
         assertEquals(deletedNote.getId(), result.getFirst().getId());
-
-        assertFalse(result.stream().anyMatch(note -> note.getId().equals(activeNote.getId())));
-        assertFalse(result.stream().anyMatch(note -> note.getId().equals(deletedNoteOfOtherUser.getId())));
     }
 
     @Test
-    void findAllByUserIdAndDeleted_returnsOnlyActiveNotesOfGivenUser() {
+    void findAllByUserIdAndDeleted_deletedFalse_returnsOnlyActiveNotesOfGivenUser() {
         User user = createAndSaveUser("user@mail.com");
+        User otherUser = createAndSaveUser("other@mail.com");
 
         Note activeNote = createAndSaveNote(user, "Aktive Notiz", false);
         createAndSaveNote(user, "Gelöschte Notiz", true);
+        createAndSaveNote(otherUser, "Andere aktive Notiz", false);
 
         List<Note> result = noteRepository.findAllByUserIdAndDeleted(user.getId(), false);
 
         assertEquals(1, result.size());
         assertEquals(activeNote.getId(), result.getFirst().getId());
-        assertFalse(result.getFirst().isDeleted());
     }
 
     private User createAndSaveUser(String email) {

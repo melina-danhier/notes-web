@@ -17,6 +17,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         from Tag t
         join t.notes n
         where n.user.id = :userId
+          and n.deleted = false
     """)
     List<Tag> findAllByUserId(Long userId);
 
@@ -25,5 +26,5 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         delete from Tag t
         where t.notes is empty
     """)
-    void deleteAllWithNoNotes();
+    int deleteAllWithNoNotes();
 }

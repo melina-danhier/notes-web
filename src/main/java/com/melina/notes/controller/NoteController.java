@@ -43,7 +43,7 @@ public class NoteController {
     public ResponseEntity<Void> deleteNote(@PathVariable Long noteId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         noteService.deleteNoteForUser(userDetails.getId(), noteId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{noteId}/delete")
