@@ -54,13 +54,19 @@ class TagRepositoryTest {
     }
 
     @Test
-    void findAllByUserId_returnsOnlyTagsOfGivenUser() {
+    void findAllByUserId_returnsOnlyTagsAttachedToActiveNotesOfGivenUser() {
         User user = createAndSaveUser("user@mail.com");
         User user2 = createAndSaveUser("user2@mail.com");
 
         Note note = createAndSaveNote(user);
         createAndSaveTag(note, "work");
         createAndSaveTag(note, "home");
+        tagRepository.saveAndFlush(Tag.builder().tag("unused").build());
+
+        Note deletedNote = createAndSaveNote(user);
+        deletedNote.setDeleted(true);
+        noteRepository.saveAndFlush(deletedNote);
+        createAndSaveTag(deletedNote, "deleted-only");
 
         List<Tag> tags = tagRepository.findAllByUserId(user.getId());
         List<Tag> tags2 = tagRepository.findAllByUserId(user2.getId());
@@ -68,6 +74,8 @@ class TagRepositoryTest {
         assertEquals(2, tags.size());
         assertTrue(tags.stream().anyMatch(tag -> tag.getTag().equals("work")));
         assertTrue(tags.stream().anyMatch(tag -> tag.getTag().equals("home")));
+        assertTrue(tags.stream().noneMatch(tag -> tag.getTag().equals("unused")));
+        assertTrue(tags.stream().noneMatch(tag -> tag.getTag().equals("deleted-only")));
         assertTrue(tags2.isEmpty());
     }
 

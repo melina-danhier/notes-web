@@ -1,14 +1,11 @@
 package com.melina.notes.service;
 
-import com.melina.notes.controller.NoteController;
 import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

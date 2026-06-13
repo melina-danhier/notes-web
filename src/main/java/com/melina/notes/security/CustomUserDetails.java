@@ -10,6 +10,16 @@ import java.util.List;
 
 public record CustomUserDetails(User user) implements UserDetails {
 
+    public CustomUserDetails(long id, String mail, String password, String role) {
+        this(User.builder()
+                .id(id)
+                .username(mail)
+                .email(mail)
+                .password(password)
+                .role(role)
+                .build());
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(user.getRole()));

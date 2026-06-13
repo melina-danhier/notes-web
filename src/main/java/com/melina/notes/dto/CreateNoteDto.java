@@ -1,5 +1,6 @@
 package com.melina.notes.dto;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +14,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateNoteDto {
-    private Long id;
-
-    @Size(max = 200, message = "Titel zu lang (max 200 Zeichen)")
+    @Size(max = 30, message = "Titel zu lang (max 30 Zeichen)")
+    @NotNull
     private String title;
 
+    @Size(max = 10000, message = "Inhalt zu lang (max 10000 Zeichen)")
+    @NotNull
     private String content;
 
-    private List<@Size(max = 50, message = "Tag zu lang (max 50 Zeichen)") String> tags;
+    @NotNull
+    private List<
+            @Size(max = 20, message = "Tag zu lang (max 20 Zeichen)")
+            @NotNull
+                    String
+            > tags;
 }

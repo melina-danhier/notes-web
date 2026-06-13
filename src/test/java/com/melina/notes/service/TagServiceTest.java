@@ -132,7 +132,7 @@ class TagServiceTest {
     }
 
     @Test
-    void getAllTagsByUserId_mapsTagsToDtos() {
+    void getAllTagsByUserId_mapsAttachedTagsWithoutRunningCleanup() {
         Tag tag = createTag(3L, "tag1");
 
         TagDto dto = new TagDto();
