@@ -3,6 +3,8 @@ package com.melina.notes.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +47,38 @@ public class GlobalExceptionHandler {
         return responseEntityWithErrorResponse(HttpStatus.FORBIDDEN, ex);
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        log.warn("Registration conflict: {}", ex.getMessage());
+        return responseEntityWithErrorResponse(HttpStatus.CONFLICT, ex);
+    }
+
+    @ExceptionHandler({
+            InvalidNoteStateException.class,
+            NoteDeletedException.class,
+            NoteNotInTrashException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNoteConflict(RuntimeException ex) {
+        log.warn("Invalid note state: {}", ex.getMessage());
+        return responseEntityWithErrorResponse(HttpStatus.CONFLICT, ex);
+    }
+
+    @ExceptionHandler(TagLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleTagLimitExceeded(TagLimitExceededException ex) {
+        log.warn("Tag limit exceeded: {}", ex.getMessage());
+        return responseEntityWithErrorResponse(HttpStatus.BAD_REQUEST, ex);
+    }
+
+    @ExceptionHandler({InvalidRequestBodyException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidRequestBody(Exception ex) {
+        log.warn("Invalid request body: {}", ex.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Ungültiger Request-Body")
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
@@ -77,10 +110,22 @@ public class GlobalExceptionHandler {
         return responseEntityWithErrorResponse(HttpStatus.CONFLICT, ex);
     }
 
-    @ExceptionHandler({AccessDeniedException.class, HttpRequestMethodNotSupportedException.class})
-    public ResponseEntity<ErrorResponse> handleForbidden(Exception ex) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
         return responseEntityWithErrorResponse(HttpStatus.FORBIDDEN, ex);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        log.warn("Method not allowed: {}", ex.getMessage());
+        return responseEntityWithErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, ex);
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<ErrorResponse> handleRegistration(RegistrationException ex) {
+        log.error("Registration failed", ex);
+        return responseEntityWithErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
 
     @ExceptionHandler(Exception.class)

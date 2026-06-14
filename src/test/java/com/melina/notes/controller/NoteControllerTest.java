@@ -3,6 +3,7 @@ package com.melina.notes.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
+import com.melina.notes.exception.InvalidNoteStateException;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.security.CustomUserDetails;
 import com.melina.notes.service.NoteService;
@@ -71,6 +72,28 @@ class NoteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(note)))
                 .andExpect(status().isBadRequest());
+
+        verify(noteService, never()).createNoteForUser(anyLong(), any(CreateNoteDto.class));
+    }
+
+    @Test
+    void createNote_withMoreThanTenTags_returnsBadRequest() throws Exception {
+        CreateNoteDto note = createCreateNoteDto("Titel");
+        note.setTags(java.util.stream.IntStream.rangeClosed(1, 11)
+                .mapToObj(number -> "tag" + number)
+                .toList());
+        CustomUserDetails userDetails = createCustomUserDetails();
+
+        mockMvc.perform(post("/api/notes")
+                        .with(csrf())
+                        .with(user(userDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(note)))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        jsonPath("$.details[0]")
+                                .value(org.hamcrest.Matchers.containsString("höchstens 10 Tags"))
+                );
 
         verify(noteService, never()).createNoteForUser(anyLong(), any(CreateNoteDto.class));
     }
@@ -206,6 +229,44 @@ class NoteControllerTest {
                 .andExpect(jsonPath("$.id").value(10L));
 
         verify(noteService).restoreNoteForUser(userDetails.getId(), 10L);
+    }
+
+    @Test
+    void restoreNote_withInvalidState_returnsConflict() throws Exception {
+        CustomUserDetails userDetails = createCustomUserDetails();
+        when(noteService.restoreNoteForUser(userDetails.getId(), 10L))
+                .thenThrow(new InvalidNoteStateException(10L, "Nicht im Papierkorb"));
+
+        mockMvc.perform(patch("/api/notes/10/restore").with(csrf()).with(user(userDetails)))
+                .andExpectAll(
+                        status().isConflict(),
+                        jsonPath("$.status").value("CONFLICT")
+                );
+    }
+
+    @Test
+    void createNote_withMalformedJson_returnsBadRequest() throws Exception {
+        CustomUserDetails userDetails = createCustomUserDetails();
+
+        mockMvc.perform(post("/api/notes")
+                        .with(csrf())
+                        .with(user(userDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{"))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        jsonPath("$.message").value("Ungültiger Request-Body")
+                );
+    }
+
+    @Test
+    void unsupportedMethod_returnsMethodNotAllowed() throws Exception {
+        CustomUserDetails userDetails = createCustomUserDetails();
+
+        mockMvc.perform(post("/api/notes/10")
+                        .with(csrf())
+                        .with(user(userDetails)))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

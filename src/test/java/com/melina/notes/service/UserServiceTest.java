@@ -1,6 +1,8 @@
 package com.melina.notes.service;
 
 import com.melina.notes.entity.User;
+import com.melina.notes.exception.EmailAlreadyExistsException;
+import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -108,11 +110,22 @@ class UserServiceTest {
     void createUser_existingEmail_throwsExceptionAndDoesNotSaveUser() {
         when(userRepository.existsByEmail("melina@mail.com")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(EmailAlreadyExistsException.class,
                 () -> userService.createUser("Melina", "melina@mail.com", "1234"));
 
         verify(userRepository).existsByEmail("melina@mail.com");
         verifyNoInteractions(passwordEncoder);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void createUser_passwordEncodingFails_throwsRegistrationException() {
+        when(userRepository.existsByEmail("melina@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("1234")).thenThrow(new IllegalStateException("Encoder unavailable"));
+
+        assertThrows(RegistrationException.class,
+                () -> userService.createUser("Melina", "melina@mail.com", "1234"));
+
         verify(userRepository, never()).save(any(User.class));
     }
 

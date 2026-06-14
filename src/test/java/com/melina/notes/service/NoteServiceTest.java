@@ -5,7 +5,10 @@ import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.entity.User;
+import com.melina.notes.exception.InvalidNoteStateException;
+import com.melina.notes.exception.NoteDeletedException;
 import com.melina.notes.exception.NoteNotFoundException;
+import com.melina.notes.exception.NoteNotInTrashException;
 import com.melina.notes.exception.UserNoteMismatchException;
 
 import com.melina.notes.filter.NoteFilter;
@@ -219,6 +222,7 @@ class NoteServiceTest {
     void deleteNoteForUser_clearsTagsDeletesNoteAndDeletesUnusedTags() {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
+        note.setDeleted(true);
         note.setTags(new ArrayList<>(List.of(
                 createTag(1L, "work"),
                 createTag(2L, "home")
@@ -232,6 +236,18 @@ class NoteServiceTest {
 
         verify(noteRepository).delete(note);
         verify(tagService).deleteAllWithNoNotes();
+    }
+
+    @Test
+    void deleteNoteForUser_noteOutsideTrash_throwsException() {
+        Note note = createNote(10L, createUser(1L));
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+
+        assertThrows(NoteNotInTrashException.class,
+                () -> noteService.deleteNoteForUser(1L, 10L));
+
+        verify(noteRepository, never()).delete(any(Note.class));
+        verifyNoInteractions(tagService);
     }
 
     @Test
@@ -291,6 +307,31 @@ class NoteServiceTest {
     }
 
     @Test
+    void restoreNoteForUser_activeNote_throwsException() {
+        Note note = createNote(10L, createUser(1L));
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+
+        assertThrows(InvalidNoteStateException.class,
+                () -> noteService.restoreNoteForUser(1L, 10L));
+
+        verify(noteRepository, never()).save(any());
+    }
+
+    @Test
+    void updateNoteForUser_deletedNote_throwsException() {
+        Note note = createNote(10L, createUser(1L));
+        note.setDeleted(true);
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+
+        assertThrows(NoteDeletedException.class,
+                () -> noteService.updateNoteForUser(
+                        1L, 10L, createInput("Titel", "Inhalt", List.of())));
+
+        verifyNoInteractions(noteMapper, tagService);
+        verify(noteRepository, never()).save(any());
+    }
+
+    @Test
     void emptyTrashForUser_deletesSoftDeletedNotesAndUnusedTags() {
         User owner = createUser(7L);
 
@@ -339,6 +380,18 @@ class NoteServiceTest {
         Note savedNote = noteCaptor.getValue();
 
         assertTrue(savedNote.isPinned());
+    }
+
+    @Test
+    void togglePinNoteForUser_archivedNote_throwsException() {
+        Note note = createNote(10L, createUser(1L));
+        note.setArchived(true);
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+
+        assertThrows(InvalidNoteStateException.class,
+                () -> noteService.togglePinNoteForUser(1L, 10L));
+
+        verify(noteRepository, never()).save(any());
     }
 
     @Test

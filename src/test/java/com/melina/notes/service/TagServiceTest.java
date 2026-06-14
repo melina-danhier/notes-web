@@ -1,6 +1,7 @@
 package com.melina.notes.service;
 
 import com.melina.notes.entity.Tag;
+import com.melina.notes.exception.TagLimitExceededException;
 import com.melina.notes.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -124,6 +125,17 @@ class TagServiceTest {
 
         assertEquals(List.of(workTag), result);
         verify(tagRepository, only()).findByTag("work");
+    }
+
+    @Test
+    void getOrCreateTags_moreThanMaximumUniqueTags_throwsException() {
+        List<String> tags = java.util.stream.IntStream.rangeClosed(1, TagService.MAX_TAGS_PER_NOTE + 1)
+                .mapToObj(number -> "tag" + number)
+                .toList();
+
+        assertThrows(TagLimitExceededException.class, () -> tagService.getOrCreateTags(tags));
+
+        verifyNoInteractions(tagRepository);
     }
 
     @Test

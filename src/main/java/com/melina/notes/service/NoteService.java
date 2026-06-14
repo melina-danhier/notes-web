@@ -3,7 +3,10 @@ package com.melina.notes.service;
 import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
+import com.melina.notes.exception.InvalidNoteStateException;
+import com.melina.notes.exception.NoteDeletedException;
 import com.melina.notes.exception.NoteNotFoundException;
+import com.melina.notes.exception.NoteNotInTrashException;
 import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.filter.NoteSpecification;
@@ -72,6 +75,7 @@ public class NoteService {
 
     public NoteDto updateNoteForUser(Long userId, Long noteId, CreateNoteDto noteDTO) {
         Note note = getNote(userId, noteId);
+        ensureNotDeleted(note, "bearbeitet");
 
         noteMapper.updateNote(note, noteDTO);
         note.setTitle(resolveTitle(note.getTitle()));
@@ -87,6 +91,9 @@ public class NoteService {
 
     public void deleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        if (!note.isDeleted()) {
+            throw new NoteNotInTrashException(noteId);
+        }
 
         note.getTags().clear();
         noteRepository.delete(note);
@@ -96,6 +103,9 @@ public class NoteService {
 
     public NoteDto softDeleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        if (note.isDeleted()) {
+            throw new InvalidNoteStateException(noteId, "Die Notiz befindet sich bereits im Papierkorb");
+        }
 
         note.setDeleted(true);
         note.setArchived(false);
@@ -108,6 +118,9 @@ public class NoteService {
 
     public NoteDto restoreNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        if (!note.isDeleted()) {
+            throw new InvalidNoteStateException(noteId, "Nur Notizen im Papierkorb können wiederhergestellt werden");
+        }
 
         note.setDeleted(false);
         note.setArchived(false);
@@ -130,6 +143,10 @@ public class NoteService {
 
     public NoteDto togglePinNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        ensureNotDeleted(note, "angepinnt");
+        if (note.isArchived()) {
+            throw new InvalidNoteStateException(noteId, "Archivierte Notizen können nicht angepinnt werden");
+        }
 
         note.setPinned(!note.isPinned());
         note.setUpdated(Instant.now());
@@ -140,6 +157,10 @@ public class NoteService {
 
     public NoteDto archiveNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        ensureNotDeleted(note, "archiviert");
+        if (note.isArchived()) {
+            throw new InvalidNoteStateException(noteId, "Die Notiz ist bereits archiviert");
+        }
 
         note.setArchived(true);
         note.setDeleted(false);
@@ -152,6 +173,10 @@ public class NoteService {
 
     public NoteDto unarchiveNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
+        ensureNotDeleted(note, "aus dem Archiv entfernt");
+        if (!note.isArchived()) {
+            throw new InvalidNoteStateException(noteId, "Die Notiz ist nicht archiviert");
+        }
 
         note.setArchived(false);
         note.setUpdated(Instant.now());
@@ -169,6 +194,12 @@ public class NoteService {
         }
 
         return note;
+    }
+
+    private void ensureNotDeleted(Note note, String action) {
+        if (note.isDeleted()) {
+            throw new NoteDeletedException(note.getId(), action);
+        }
     }
 
     private String resolveTitle(String title) {

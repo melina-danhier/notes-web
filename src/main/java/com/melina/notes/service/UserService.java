@@ -1,9 +1,13 @@
 package com.melina.notes.service;
 
 import com.melina.notes.entity.User;
+import com.melina.notes.exception.EmailAlreadyExistsException;
+import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +29,25 @@ public class UserService {
         String normalizedEmail = normalizeEmail(email);
 
         if (emailExists(normalizedEmail)) {
-            throw new IllegalArgumentException("Email already exists: " + normalizedEmail);
+            throw new EmailAlreadyExistsException(normalizedEmail);
         }
 
-        User user = User.builder()
-                .username(normalizeName(name))
-                .email(normalizedEmail)
-                .password(passwordEncoder.encode(password))
-                .role("ROLE_USER")
-                .build();
+        try {
+            User user = User.builder()
+                    .username(normalizeName(name))
+                    .email(normalizedEmail)
+                    .password(passwordEncoder.encode(password))
+                    .role("ROLE_USER")
+                    .build();
 
-        userRepository.save(user);
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new EmailAlreadyExistsException(normalizedEmail);
+        } catch (DataAccessException ex) {
+            throw new RegistrationException(ex);
+        } catch (RuntimeException ex) {
+            throw new RegistrationException(ex);
+        }
     }
 
     @Transactional(readOnly = true)

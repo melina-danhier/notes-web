@@ -1,6 +1,8 @@
 package com.melina.notes.controller;
 
 import com.melina.notes.dto.SignupDto;
+import com.melina.notes.exception.EmailAlreadyExistsException;
+import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +24,16 @@ public class UserController {
             return "signup";
         }
 
-        if (userService.emailExists(signupDto.getEmail())) {
-            bindingResult.rejectValue("email", "email.exists", "Diese E-Mail-Adresse ist bereits registriert");
-            return "signup";
-        }
-
         try {
             userService.createUser(signupDto.getName(), signupDto.getEmail(), signupDto.getPassword());
             return "redirect:/login?registered=true";
-        } catch (Exception e) {
+        } catch (EmailAlreadyExistsException e) {
+            bindingResult.rejectValue("email", "email.exists", "Diese E-Mail-Adresse ist bereits registriert");
+        } catch (RegistrationException e) {
             bindingResult.reject("registration.failed",
                     "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut");
-            return "signup";
         }
+
+        return "signup";
     }
 }
