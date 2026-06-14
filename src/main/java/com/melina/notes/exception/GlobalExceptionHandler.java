@@ -40,6 +40,12 @@ public class GlobalExceptionHandler {
         return responseEntityWithErrorResponse(HttpStatus.NOT_FOUND, ex);
     }
 
+    @ExceptionHandler(UserNoteMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleUserNoteMismatch(UserNoteMismatchException ex) {
+        log.warn("Note access denied: {}", ex.getMessage());
+        return responseEntityWithErrorResponse(HttpStatus.FORBIDDEN, ex);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
