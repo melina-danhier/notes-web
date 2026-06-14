@@ -2,7 +2,6 @@ package com.melina.notes.controller;
 
 import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
-import com.melina.notes.dto.TagDto;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
@@ -167,7 +166,7 @@ public class PageController {
         model.addAttribute("displayname", user.getDisplayName());
 
         if (!trashPage) {
-            List<TagDto> tags = tagService.getAllTagsByUserId(user.getId());
+            List<String> tags = tagService.getAllTagsByUserId(user.getId());
             model.addAttribute("allTags", tags);
             model.addAttribute("tagFilter", tagFilter);
             model.addAttribute("search", search);

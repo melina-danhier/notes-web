@@ -117,13 +117,13 @@
                             </span>
                             </button>
                             <ul class="dropdown-menu w-100">
-                                <li><a class="dropdown-item fw-semibold tag-filter-item active-tag-filter" data-tag-id="" data-tag-value="" data-tag-name="Alle Tags" href="#">Alle Tags</a></li>
+                                <li><a class="dropdown-item fw-semibold tag-filter-item active-tag-filter" data-tag-value="" data-tag-name="Alle Tags" href="#">Alle Tags</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li th:each="tag : ${allTags}">
                                     <a class="dropdown-item tag-filter-item"
-                                       th:classappend="${tagFilter != null and tagFilter == tag.tag} ? 'active-tag-filter'"
-                                       th:attr="data-tag-id=${tag.id},data-tag-value=${tag.tag},data-tag-name='#' + ${tag.tag}"
-                                       th:text="'#' + ${tag.tag}" href="#"></a>
+                                       th:classappend="${tagFilter != null and tagFilter == tag} ? 'active-tag-filter'"
+                                       th:attr="data-tag-value=${tag},data-tag-name='#' + ${tag}"
+                                       th:text="'#' + ${tag}" href="#"></a>
                                 </li>
                             </ul>
                         </div>

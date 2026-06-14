@@ -1,8 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
-import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,6 @@ import java.util.Set;
 @Transactional
 public class TagService {
     private final TagRepository tagRepository;
-    private final TagMapper tagMapper;
 
     public List<Tag> getOrCreateTags(List<String> rawTags) {
         Set<String> uniqueTagNames = normalizeTagNames(rawTags);
@@ -39,10 +36,10 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public List<TagDto> getAllTagsByUserId(long userId) {
+    public List<String> getAllTagsByUserId(long userId) {
         return tagRepository.findAllByUserId(userId)
                 .stream()
-                .map(tagMapper::toDTO)
+                .map(Tag::getTag)
                 .toList();
     }
 

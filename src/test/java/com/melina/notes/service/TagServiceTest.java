@@ -1,8 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.TagDto;
 import com.melina.notes.entity.Tag;
-import com.melina.notes.mapper.TagMapper;
 import com.melina.notes.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +24,6 @@ class TagServiceTest {
 
     @Mock
     private TagRepository tagRepository;
-
-    @Mock
-    private TagMapper tagMapper;
 
     @InjectMocks
     private TagService tagService;
@@ -132,23 +127,16 @@ class TagServiceTest {
     }
 
     @Test
-    void getAllTagsByUserId_mapsAttachedTagsWithoutRunningCleanup() {
+    void getAllTagsByUserId_returnsAttachedTagNamesWithoutRunningCleanup() {
         Tag tag = createTag(3L, "tag1");
 
-        TagDto dto = new TagDto();
-        dto.setId(3L);
-        dto.setTag("tag1");
-
         when(tagRepository.findAllByUserId(1L)).thenReturn(List.of(tag));
-        when(tagMapper.toDTO(tag)).thenReturn(dto);
 
-        List<TagDto> result = tagService.getAllTagsByUserId(1L);
+        List<String> result = tagService.getAllTagsByUserId(1L);
 
-        assertEquals(1, result.size());
-        assertSame(dto, result.getFirst());
+        assertEquals(List.of("tag1"), result);
 
         verify(tagRepository).findAllByUserId(1L);
-        verify(tagMapper).toDTO(tag);
         verify(tagRepository, never()).deleteAllWithNoNotes();
     }
 
