@@ -2,6 +2,7 @@ package com.melina.notes.controller;
 
 import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.SignupDto;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
@@ -44,6 +45,10 @@ public class PageController {
 
     @GetMapping("/signup")
     public String signup(Model model, @RequestParam(required = false) String error) {
+        if (!model.containsAttribute("signupDto")) {
+            model.addAttribute("signupDto", new SignupDto());
+        }
+
         String errorMessage;
         if (error != null) {
             errorMessage = switch(error) {

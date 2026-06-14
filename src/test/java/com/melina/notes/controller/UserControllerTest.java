@@ -2,60 +2,102 @@ package com.melina.notes.controller;
 
 import com.melina.notes.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
+@WithMockUser
 class UserControllerTest {
 
-    @Mock
+    @MockBean
     private UserService userService;
 
-    @InjectMocks
-    private UserController userController;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
-    void signupSubmit_withValidInput_createsUserAndRedirectsToLogin() {
-        String result = userController.signupSubmit(
-                "Melina", "user@mail.com", "password", "password");
+    void signupSubmit_withValidInput_createsUserAndRedirectsToLogin() throws Exception {
+        mockMvc.perform(post("/signup")
+                        .with(csrf())
+                        .param("name", "Melina")
+                        .param("email", "user@mail.com")
+                        .param("password", "password")
+                        .param("confirmPassword", "password"))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/login?registered=true")
+                );
 
-        assertEquals("redirect:/login?registered=true", result);
         verify(userService).createUser("Melina", "user@mail.com", "password");
     }
 
     @Test
-    void signupSubmit_withShortPassword_rejectsInputWithoutServiceCall() {
-        String result = userController.signupSubmit(
-                "Melina", "user@mail.com", "123", "123");
+    void signupSubmit_withInvalidFields_returnsFormWithFieldErrors() throws Exception {
+        mockMvc.perform(post("/signup")
+                        .with(csrf())
+                        .param("name", "")
+                        .param("email", "keine-email")
+                        .param("password", "123")
+                        .param("confirmPassword", "anders"))
+                .andExpectAll(
+                        status().isOk(),
+                        view().name("signup"),
+                        model().attributeHasFieldErrors(
+                                "signupDto", "name", "email", "password", "confirmPassword")
+                );
 
-        assertEquals("redirect:/signup?error=password_too_short", result);
-        verifyNoInteractions(userService);
-    }
-
-    @Test
-    void signupSubmit_withExistingEmail_doesNotCreateUser() {
-        when(userService.emailExists("user@mail.com")).thenReturn(true);
-
-        String result = userController.signupSubmit(
-                "Melina", "user@mail.com", "password", "password");
-
-        assertEquals("redirect:/signup?error=email_exists", result);
         verify(userService, never()).createUser(anyString(), anyString(), anyString());
     }
 
     @Test
-    void signupSubmit_whenCreationFails_redirectsWithError() {
-        doThrow(new IllegalStateException()).when(userService)
-                .createUser("Melina", "user@mail.com", "password");
+    void signupSubmit_withPasswordOverBcryptLimit_returnsPasswordError() throws Exception {
+        String password = "x".repeat(73);
 
-        String result = userController.signupSubmit(
-                "Melina", "user@mail.com", "password", "password");
+        mockMvc.perform(post("/signup")
+                        .with(csrf())
+                        .param("name", "Melina")
+                        .param("email", "user@mail.com")
+                        .param("password", password)
+                        .param("confirmPassword", password))
+                .andExpectAll(
+                        status().isOk(),
+                        view().name("signup"),
+                        model().attributeHasFieldErrors("signupDto", "password")
+                );
 
-        assertEquals("redirect:/signup?error=registration_failed", result);
+        verify(userService, never()).createUser(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void signupSubmit_withExistingEmail_addsEmailError() throws Exception {
+        when(userService.emailExists("user@mail.com")).thenReturn(true);
+
+        mockMvc.perform(post("/signup")
+                        .with(csrf())
+                        .param("name", "Melina")
+                        .param("email", "user@mail.com")
+                        .param("password", "password")
+                        .param("confirmPassword", "password"))
+                .andExpectAll(
+                        status().isOk(),
+                        view().name("signup"),
+                        model().attributeHasFieldErrors("signupDto", "email")
+                );
+
+        verify(userService, never()).createUser(anyString(), anyString(), anyString());
     }
 }

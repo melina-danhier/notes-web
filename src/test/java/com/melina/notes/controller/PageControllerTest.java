@@ -2,6 +2,7 @@ package com.melina.notes.controller;
 
 import com.melina.notes.dto.CreateNoteDto;
 import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.SignupDto;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.security.CustomUserDetails;
 import com.melina.notes.service.NoteService;
@@ -45,6 +46,18 @@ class PageControllerTest {
                 () -> assertTrue(model.containsAttribute("error")),
                 () -> assertTrue(model.containsAttribute("logout")),
                 () -> assertTrue(model.containsAttribute("success"))
+        );
+    }
+
+    @Test
+    void signup_addsEmptySignupDto() {
+        ConcurrentModel model = new ConcurrentModel();
+
+        String view = pageController.signup(model, null);
+
+        assertAll(
+                () -> assertEquals("signup", view),
+                () -> assertInstanceOf(SignupDto.class, model.getAttribute("signupDto"))
         );
     }
 
