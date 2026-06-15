@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -40,7 +39,7 @@ class NoteControllerTest {
     @Test
     void createNote_withValidDto_returnsCreatedNoteAndCreatedStatus() throws Exception {
         NoteFormDto note = createNoteForm("Titel");
-        NoteDto createdNote = createNoteDto(10L, "Titel");
+        NoteDto createdNote = createNoteDto(11L, "Titel");
         CustomUserDetails userDetails = createCustomUserDetails();
 
         when(noteService.createNoteForUser(eq(userDetails.getId()), any(NoteFormDto.class)))
@@ -314,6 +313,25 @@ class NoteControllerTest {
                 .andExpect(status().isOk());
 
         verify(noteService).togglePinNoteForUser(userDetails.getId(), 10L);
+    }
+
+    @Test
+    void toggleTask_returnsUpdatedNote() throws Exception {
+        CustomUserDetails userDetails = createCustomUserDetails();
+        NoteDto note = createNoteDto(10L, "Titel");
+        note.setContent("[x] Aufgabe");
+        when(noteService.toggleTaskForUser(userDetails.getId(), 10L, 0)).thenReturn(note);
+
+        mockMvc.perform(patch("/api/notes/10/tasks/0/toggle")
+                        .with(csrf())
+                        .with(user(userDetails)))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.id").value(10L),
+                        jsonPath("$.content").value("[x] Aufgabe")
+                );
+
+        verify(noteService).toggleTaskForUser(userDetails.getId(), 10L, 0);
     }
 
     private CustomUserDetails createCustomUserDetails() {

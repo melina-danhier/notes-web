@@ -26,15 +26,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
-import static org.mockito.ArgumentMatchers.eq;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -236,6 +233,40 @@ class NoteServiceTest {
 
         verify(noteRepository).delete(note);
         verify(tagService).deleteAllWithNoNotes();
+    }
+
+    @Test
+    void toggleTaskForUser_updatesOnlySelectedTask() {
+        User owner = createUser(1L);
+        Note note = createNote(10L, owner);
+        note.setContent("[ ] Erste\nText\n[x] Zweite");
+        NoteDto mappedDto = createNoteDto(10L);
+
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.save(note)).thenReturn(note);
+        when(noteMapper.toNoteDto(note)).thenReturn(mappedDto);
+
+        NoteDto result = noteService.toggleTaskForUser(1L, 10L, 1);
+
+        assertSame(mappedDto, result);
+        assertEquals("[ ] Erste\nText\n[ ] Zweite", note.getContent());
+        assertNotNull(note.getUpdated());
+        verify(noteRepository).save(note);
+        verify(noteMapper).toNoteDto(note);
+        verifyNoInteractions(tagService);
+    }
+
+    @Test
+    void toggleTaskForUser_rejectsUnknownTaskIndex() {
+        User owner = createUser(1L);
+        Note note = createNote(10L, owner);
+        note.setContent("[ ] Aufgabe");
+        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+
+        assertThrows(InvalidNoteStateException.class,
+                () -> noteService.toggleTaskForUser(1L, 10L, 2));
+
+        verify(noteRepository, never()).save(any(Note.class));
     }
 
     @Test

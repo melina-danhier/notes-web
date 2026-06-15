@@ -89,6 +89,42 @@ public class NoteService {
         return noteMapper.toNoteDto(note);
     }
 
+    public NoteDto toggleTaskForUser(Long userId, Long noteId, int taskIndex) {
+        Note note = getNote(userId, noteId);
+        ensureNotDeleted(note, "bearbeitet");
+
+        String content = note.getContent() == null ? "" : note.getContent();
+        String[] lines = content.split("\n", -1);
+        int currentTaskIndex = 0;
+        boolean toggled = false;
+
+        for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            if (!lines[lineIndex].matches("\\s*\\[[ xX]]\\s+.+?(?:;\\s*)?")) {
+                continue;
+            }
+            if (currentTaskIndex++ != taskIndex) {
+                continue;
+            }
+
+            lines[lineIndex] = lines[lineIndex].replaceFirst(
+                    "\\[([ xX])]","[x]".equalsIgnoreCase(lines[lineIndex].trim().substring(0, 3))
+                            ? "[ ]"
+                            : "[x]"
+            );
+            toggled = true;
+            break;
+        }
+
+        if (!toggled) {
+            throw new InvalidNoteStateException(noteId, "Aufgabe wurde nicht gefunden");
+        }
+
+        note.setContent(String.join("\n", lines));
+        note.setUpdated(Instant.now());
+        note = noteRepository.save(note);
+        return noteMapper.toNoteDto(note);
+    }
+
     public void deleteNoteForUser(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
         if (!note.isDeleted()) {

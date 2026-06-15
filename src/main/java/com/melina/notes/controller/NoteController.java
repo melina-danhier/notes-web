@@ -86,4 +86,12 @@ public class NoteController {
         NoteDto note = noteService.togglePinNoteForUser(userDetails.getId(), noteId);
         return ResponseEntity.ok(note);
     }
+
+    @PatchMapping("/{noteId}/tasks/{taskIndex}/toggle")
+    public ResponseEntity<NoteDto> toggleTask(@PathVariable Long noteId,
+                                              @PathVariable int taskIndex,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        NoteDto note = noteService.toggleTaskForUser(userDetails.getId(), noteId, taskIndex);
+        return ResponseEntity.ok(note);
+    }
 }
