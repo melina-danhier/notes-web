@@ -152,14 +152,17 @@
 
     </div>
 
-    <div class="center-gap m-3" th:if="${notes.content.isEmpty()}">
+    <div class="center-gap m-3" id="notesEmptyState"
+         th:style="${notes.content.isEmpty()} ? '' : 'display: none;'">
         <h5 class="fst-italic">Keine Notizen vorhanden</h5>
     </div>
 
     <!-- Gepinnte Notizen Sektion -->
-    <div th:if="${not pinnedNotes.isEmpty()}">
+    <div id="pinnedNotesSection"
+         th:style="${pinnedNotes.isEmpty()} ? 'display: none;' : ''">
         <h5 class="ms-3 mt-3 mb-2 text-muted fw-semibold" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📌 Angeheftet</h5>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 pinned-notes-section">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 pinned-notes-section"
+             id="pinnedNotesList">
             <div class="col" th:each="note : ${pinnedNotes}" th:id="'note-' + ${note.id}">
                 <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card pinned-card"
                      style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-left: 4px solid #f59e0b;"
@@ -230,7 +233,7 @@
     </div>
 
     <!-- Nicht-gepinnte Notizen Sektion -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3" id="notesList" th:if="${not unpinnedNotes.isEmpty()}">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3" id="notesList">
         <div class="col" th:each="note : ${unpinnedNotes}" th:id="'note-' + ${note.id}">
             <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card"
                  style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"

@@ -1,6 +1,6 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateNoteDto;
+import com.melina.notes.dto.NoteFormDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.dto.NotePageData;
 import com.melina.notes.dto.NotePageRequest;
@@ -56,6 +56,20 @@ class PageControllerTest {
     }
 
     @Test
+    void newNote_addsEmptyNoteAndNullIdToModel() {
+        ConcurrentModel model = new ConcurrentModel();
+
+        String view = pageController.newNote(model);
+
+        assertAll(
+                () -> assertEquals("note-view", view),
+                () -> assertInstanceOf(NoteFormDto.class, model.getAttribute("noteDto")),
+                () -> assertEquals(null, model.getAttribute("noteId")),
+                () -> assertEquals("", model.getAttribute("tagsInputValue"))
+        );
+    }
+
+    @Test
     void notesPage_delegatesAndAddsPageDataToModel() {
         CustomUserDetails user = userDetails();
         NotePageRequest request = new NotePageRequest();
@@ -92,7 +106,7 @@ class PageControllerTest {
     @Test
     void editNote_addsNoteAndJoinedTagsToModel() {
         CustomUserDetails user = userDetails();
-        CreateNoteDto note = CreateNoteDto.builder()
+        NoteFormDto note = NoteFormDto.builder()
                 .title("Titel")
                 .content("Inhalt")
                 .tags(List.of("work", "home"))
@@ -105,6 +119,7 @@ class PageControllerTest {
         assertAll(
                 () -> assertEquals("note-view", view),
                 () -> assertSame(note, model.getAttribute("noteDto")),
+                () -> assertEquals(10L, model.getAttribute("noteId")),
                 () -> assertEquals("work, home", model.getAttribute("tagsInputValue"))
         );
     }

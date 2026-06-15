@@ -1,6 +1,6 @@
 package com.melina.notes.controller;
 
-import com.melina.notes.dto.CreateNoteDto;
+import com.melina.notes.dto.NoteFormDto;
 import com.melina.notes.dto.NotePageData;
 import com.melina.notes.dto.NotePageRequest;
 import com.melina.notes.dto.SignupDto;
@@ -71,15 +71,16 @@ public class PageController {
 
     @GetMapping("/notes/new")
     public String newNote(Model model) {
-        model.addAttribute("noteDto", new CreateNoteDto());
+        model.addAttribute("noteDto", new NoteFormDto());
         model.addAttribute("tagsInputValue", "");
         return "note-view";
     }
 
     @GetMapping("/notes/{id}")
     public String editNote(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails user) {
-        CreateNoteDto note = noteService.getNoteByIdForView(user.getId(), id);
+        NoteFormDto note = noteService.getNoteByIdForView(user.getId(), id);
         model.addAttribute("noteDto", note);
+        model.addAttribute("noteId", id);
         model.addAttribute("tagsInputValue", joinTags(note.getTags()));
         return "note-view";
     }

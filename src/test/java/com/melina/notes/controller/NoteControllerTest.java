@@ -1,7 +1,7 @@
 package com.melina.notes.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.melina.notes.dto.CreateNoteDto;
+import com.melina.notes.dto.NoteFormDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.exception.InvalidNoteStateException;
 import com.melina.notes.exception.NoteNotFoundException;
@@ -39,11 +39,11 @@ class NoteControllerTest {
 
     @Test
     void createNote_withValidDto_returnsCreatedNoteAndCreatedStatus() throws Exception {
-        CreateNoteDto note = createCreateNoteDto("Titel");
+        NoteFormDto note = createNoteForm("Titel");
         NoteDto createdNote = createNoteDto(10L, "Titel");
         CustomUserDetails userDetails = createCustomUserDetails();
 
-        when(noteService.createNoteForUser(eq(userDetails.getId()), any(CreateNoteDto.class)))
+        when(noteService.createNoteForUser(eq(userDetails.getId()), any(NoteFormDto.class)))
                 .thenReturn(createdNote);
 
         mockMvc.perform(post("/api/notes")
@@ -58,12 +58,12 @@ class NoteControllerTest {
                         jsonPath("$.content").value(createdNote.getContent())
                 );
 
-        verify(noteService, only()).createNoteForUser(eq(userDetails.getId()), any(CreateNoteDto.class));
+        verify(noteService, only()).createNoteForUser(eq(userDetails.getId()), any(NoteFormDto.class));
     }
 
     @Test
     void createNote_withInvalidDto_returnsBadRequest() throws Exception {
-        CreateNoteDto note = createCreateNoteDto(null);
+        NoteFormDto note = createNoteForm(null);
         CustomUserDetails userDetails = createCustomUserDetails();
 
         mockMvc.perform(post("/api/notes")
@@ -73,12 +73,12 @@ class NoteControllerTest {
                         .content(objectMapper.writeValueAsString(note)))
                 .andExpect(status().isBadRequest());
 
-        verify(noteService, never()).createNoteForUser(anyLong(), any(CreateNoteDto.class));
+        verify(noteService, never()).createNoteForUser(anyLong(), any(NoteFormDto.class));
     }
 
     @Test
     void createNote_withMoreThanTenTags_returnsBadRequest() throws Exception {
-        CreateNoteDto note = createCreateNoteDto("Titel");
+        NoteFormDto note = createNoteForm("Titel");
         note.setTags(java.util.stream.IntStream.rangeClosed(1, 11)
                 .mapToObj(number -> "tag" + number)
                 .toList());
@@ -95,7 +95,7 @@ class NoteControllerTest {
                                 .value(org.hamcrest.Matchers.containsString("höchstens 10 Tags"))
                 );
 
-        verify(noteService, never()).createNoteForUser(anyLong(), any(CreateNoteDto.class));
+        verify(noteService, never()).createNoteForUser(anyLong(), any(NoteFormDto.class));
     }
 
     @Test
@@ -132,11 +132,11 @@ class NoteControllerTest {
 
     @Test
     void updateNote_withValidDto_returnsOkAndUpdatedNote() throws Exception {
-        CreateNoteDto updateRequestDto = createCreateNoteDto("Neuer Titel");
+        NoteFormDto updateRequestDto = createNoteForm("Neuer Titel");
         NoteDto updatedNote = createNoteDto(10L, "Neuer Titel");
         CustomUserDetails userDetails = createCustomUserDetails();
 
-        when(noteService.updateNoteForUser(anyLong(),anyLong(),any(CreateNoteDto.class)))
+        when(noteService.updateNoteForUser(anyLong(),anyLong(),any(NoteFormDto.class)))
                 .thenReturn(updatedNote);
 
         mockMvc.perform(patch("/api/notes/10")
@@ -150,12 +150,12 @@ class NoteControllerTest {
                         jsonPath("$.title").value(updatedNote.getTitle())
                 );
 
-        verify(noteService).updateNoteForUser(anyLong(),anyLong(),any(CreateNoteDto.class));
+        verify(noteService).updateNoteForUser(anyLong(),anyLong(),any(NoteFormDto.class));
     }
 
     @Test
     void updateNote_withInvalidDto_returnsBadRequest() throws Exception {
-        CreateNoteDto updateRequestDto = createCreateNoteDto("Zu langer Titellllllllllllllllllllllllllllllllllllll");
+        NoteFormDto updateRequestDto = createNoteForm("Zu langer Titellllllllllllllllllllllllllllllllllllll");
         CustomUserDetails userDetails = createCustomUserDetails();
 
         mockMvc.perform(patch("/api/notes/10")
@@ -165,7 +165,7 @@ class NoteControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequestDto)))
                 .andExpect(status().isBadRequest());
 
-        verify(noteService, never()).updateNoteForUser(anyLong(),anyLong(),any(CreateNoteDto.class));
+        verify(noteService, never()).updateNoteForUser(anyLong(),anyLong(),any(NoteFormDto.class));
     }
 
     @Test
@@ -325,8 +325,8 @@ class NoteControllerTest {
         );
     }
 
-    private CreateNoteDto createCreateNoteDto(String title) {
-        return CreateNoteDto.builder()
+    private NoteFormDto createNoteForm(String title) {
+        return NoteFormDto.builder()
                 .title(title)
                 .content("Inhalt")
                 .tags(java.util.List.of("work"))

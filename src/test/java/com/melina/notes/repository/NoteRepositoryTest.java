@@ -92,6 +92,41 @@ class NoteRepositoryTest {
         assertEquals(List.of(matching.getId()), result.stream().map(Note::getId).toList());
     }
 
+    @Test
+    void specification_withoutUserId_throwsException() {
+        NoteFilter filter = NoteFilter.builder()
+                .deleted(false)
+                .build();
+
+        NullPointerException exception = assertThrows(
+                NullPointerException.class,
+                () -> NoteSpecification.build(filter)
+        );
+
+        assertEquals("userId darf nicht null sein", exception.getMessage());
+    }
+
+    @Test
+    void specification_searchTreatsLikeWildcardsAsLiteralCharacters() {
+        User user = createAndSaveUser("user@mail.com");
+        Note matching = createAndSaveNote(user, "Fortschritt 100%", false);
+        createAndSaveNote(user, "Normale Notiz", false);
+
+        NoteFilter filter = NoteFilter.builder()
+                .userId(user.getId())
+                .searchTerm("%")
+                .deleted(false)
+                .archived(false)
+                .build();
+
+        List<Note> result = noteRepository.findAll(
+                NoteSpecification.build(filter),
+                PageRequest.of(0, 10)
+        ).getContent();
+
+        assertEquals(List.of(matching.getId()), result.stream().map(Note::getId).toList());
+    }
+
     private User createAndSaveUser(String email) {
         User user = User.builder()
                 .username("testuser")

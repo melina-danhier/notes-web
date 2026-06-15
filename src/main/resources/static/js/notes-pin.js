@@ -1,6 +1,7 @@
 'use strict';
 
 import { getCsrfHeader, getCsrfToken } from './notes-utils.js';
+import { moveNoteCardForPin } from './note-dom.js';
 
 export function togglePin(noteId, isFromModal = false) {
     const btn = document.querySelector(`#note-${noteId} .pin-btn`);
@@ -24,16 +25,11 @@ export function togglePin(noteId, isFromModal = false) {
         return response.json();
     })
     .then(data => {
-        // Normal view: reload immediately (no visual feedback)
-        if (!isFromModal) {
-            window.location.reload();
-            return;
-        }
-
-        // Modal view: only update modal button, not background button
         const newPinnedState = data.pinned;
+        moveNoteCardForPin(noteId, newPinnedState);
+
         const modalPinBtn = document.getElementById('modalPinBtn');
-        if (modalPinBtn) {
+        if (isFromModal && modalPinBtn) {
             updatePinButton(modalPinBtn, newPinnedState);
         }
     })

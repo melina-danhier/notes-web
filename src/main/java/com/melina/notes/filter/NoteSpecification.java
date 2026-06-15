@@ -6,18 +6,21 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
-public class NoteSpecification {
+import java.util.Locale;
+import java.util.Objects;
+
+public final class NoteSpecification {
+
+    private static final char LIKE_ESCAPE_CHAR = '\\';
+
+    private NoteSpecification() {
+    }
 
     public static Specification<Note> build(NoteFilter filter) {
+        Objects.requireNonNull(filter, "NoteFilter darf nicht null sein");
+        Objects.requireNonNull(filter.getUserId(), "userId darf nicht null sein");
+
         return (root, query, cb) -> {
-            if (query != null) {
-                query.distinct(true);
-            }
-
-            if (filter == null) {
-                return cb.isFalse(root.get("deleted"));
-            }
-
             return Specification
                     .where(isUser(filter.getUserId()))
                     .and(searchInTitleOrContent(filter.getSearchTerm()))
@@ -29,9 +32,7 @@ public class NoteSpecification {
     }
 
     private static Specification<Note> isUser(Long userId) {
-        return (root, query, cb) -> userId == null
-                ? null
-                : cb.equal(root.get("user").get("id"), userId);
+        return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
     }
 
     private static Specification<Note> searchInTitleOrContent(String search) {
@@ -40,11 +41,11 @@ public class NoteSpecification {
                 return null;
             }
 
-            String pattern = "%" + search.trim().toLowerCase() + "%";
+            String pattern = "%" + escapeLikePattern(search.trim().toLowerCase(Locale.ROOT)) + "%";
 
             return cb.or(
-                    cb.like(cb.lower(root.get("title")), pattern),
-                    cb.like(cb.lower(root.get("content")), pattern)
+                    cb.like(cb.lower(root.get("title")), pattern, LIKE_ESCAPE_CHAR),
+                    cb.like(cb.lower(root.get("content")), pattern, LIKE_ESCAPE_CHAR)
             );
         };
     }
@@ -56,6 +57,9 @@ public class NoteSpecification {
             }
 
             Join<Note, Tag> tags = root.join("tags", JoinType.LEFT);
+            if (query != null) {
+                query.distinct(true);
+            }
             return cb.equal(tags.get("tag"), tag.trim());
         };
     }
@@ -74,5 +78,12 @@ public class NoteSpecification {
         return (root, query, cb) -> archived == null
                 ? null
                 : cb.equal(root.get("archived"), archived);
+    }
+
+    private static String escapeLikePattern(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 }

@@ -1,6 +1,7 @@
 'use strict';
 
 import { getCsrfToken, getCsrfHeader } from './notes-utils.js';
+import { clearNoteList, removeNoteCard } from './note-dom.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initEmptyTrashButton();
@@ -25,11 +26,13 @@ window.restoreNote = async function(noteId) {
         headers: { [csrfHeader]: csrfToken }
     });
 
-    if (response.ok) {
-        location.reload();
-    } else {
+    if (!response.ok) {
         alert('Wiederherstellen fehlgeschlagen');
+        return;
     }
+
+    const restoredNote = await response.json();
+    removeNoteCard(restoredNote.id, 'trashList', 'trashEmptyState');
 };
 
 window.forceDeleteNote = async function(noteId) {
@@ -43,11 +46,12 @@ window.forceDeleteNote = async function(noteId) {
         headers: { [csrfHeader]: csrfToken }
     });
 
-    if (response.ok) {
-        location.reload();
-    } else {
+    if (!response.ok) {
         alert('Endgültiges Löschen fehlgeschlagen');
+        return;
     }
+
+    removeNoteCard(noteId, 'trashList', 'trashEmptyState');
 };
 
 async function emptyTrash() {
@@ -59,9 +63,10 @@ async function emptyTrash() {
         headers: { [csrfHeader]: csrfToken }
     });
 
-    if (response.ok) {
-        location.reload();
-    } else {
+    if (!response.ok) {
         alert('Papierkorb konnte nicht geleert werden');
+        return;
     }
+
+    clearNoteList('trashList', 'trashEmptyState');
 }

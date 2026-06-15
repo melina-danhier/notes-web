@@ -60,7 +60,17 @@ class NoteWorkflowsE2ETest {
         register("Melina", " MELINA@example.com ", "secret1");
         MockHttpSession session = login("melina@example.com", "secret1");
 
+        mockMvc.perform(get("/notes/new").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Neue Notiz")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"noteIdInput\"")));
+
         long noteId = createNote(session, "Einkauf", "Milch und Brot", "Privat", " privat ");
+
+        mockMvc.perform(get("/notes/{noteId}", noteId).session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"" + noteId + "\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Einkauf")));
 
         mockMvc.perform(get("/notes")
                         .session(session))

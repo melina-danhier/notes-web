@@ -1,6 +1,6 @@
 package com.melina.notes.service;
 
-import com.melina.notes.dto.CreateNoteDto;
+import com.melina.notes.dto.NoteFormDto;
 import com.melina.notes.dto.NoteDto;
 import com.melina.notes.entity.Note;
 import com.melina.notes.exception.InvalidNoteStateException;
@@ -35,15 +35,15 @@ public class NoteService {
     private final TagService tagService;
     private final UserService userService;
 
-    public NoteDto createNoteForUser(Long userId, CreateNoteDto noteDTO) {
-        String title = resolveTitle(noteDTO.getTitle());
+    public NoteDto createNoteForUser(Long userId, NoteFormDto noteForm) {
+        String title = resolveTitle(noteForm.getTitle());
 
         Note note = Note.builder()
                 .title(title)
-                .content(noteDTO.getContent())
+                .content(noteForm.getContent())
                 .created(Instant.now())
                 .updated(Instant.now())
-                .tags(tagService.getOrCreateTags(noteDTO.getTags()))
+                .tags(tagService.getOrCreateTags(noteForm.getTags()))
                 .user(userService.getUser(userId))
                 .deleted(false)
                 .archived(false)
@@ -51,42 +51,42 @@ public class NoteService {
                 .build();
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     @Transactional(readOnly = true)
     public Page<NoteDto> getAllNotes(NoteFilter filter, Pageable pageable) {
         return noteRepository
                 .findAll(NoteSpecification.build(filter), pageable)
-                .map(noteMapper::toNoteDTO);
+                .map(noteMapper::toNoteDto);
     }
 
     @Transactional(readOnly = true)
     public NoteDto getNoteById(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     @Transactional(readOnly = true)
-    public CreateNoteDto getNoteByIdForView(Long userId, Long noteId) {
+    public NoteFormDto getNoteByIdForView(Long userId, Long noteId) {
         Note note = getNote(userId, noteId);
-        return noteMapper.toEditNoteDto(note);
+        return noteMapper.toNoteFormDto(note);
     }
 
-    public NoteDto updateNoteForUser(Long userId, Long noteId, CreateNoteDto noteDTO) {
+    public NoteDto updateNoteForUser(Long userId, Long noteId, NoteFormDto noteForm) {
         Note note = getNote(userId, noteId);
         ensureNotDeleted(note, "bearbeitet");
 
-        noteMapper.updateNote(note, noteDTO);
+        noteMapper.updateNote(note, noteForm);
         note.setTitle(resolveTitle(note.getTitle()));
-        note.setTags(tagService.getOrCreateTags(noteDTO.getTags()));
+        note.setTags(tagService.getOrCreateTags(noteForm.getTags()));
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
 
         tagService.deleteAllWithNoNotes();
 
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     public void deleteNoteForUser(Long userId, Long noteId) {
@@ -113,7 +113,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     public NoteDto restoreNoteForUser(Long userId, Long noteId) {
@@ -127,7 +127,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     public void emptyTrashForUser(Long userId) {
@@ -152,7 +152,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     public NoteDto archiveNoteForUser(Long userId, Long noteId) {
@@ -168,7 +168,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     public NoteDto unarchiveNoteForUser(Long userId, Long noteId) {
@@ -182,7 +182,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
-        return noteMapper.toNoteDTO(note);
+        return noteMapper.toNoteDto(note);
     }
 
     private Note getNote(Long userId, Long noteId) {

@@ -1,6 +1,7 @@
 'use strict';
 
 import { getCsrfToken, getCsrfHeader } from './notes-utils.js';
+import { removeNoteCard } from './note-dom.js';
 
 window.unarchiveNote = async function(noteId) {
     const csrfToken = getCsrfToken();
@@ -11,11 +12,13 @@ window.unarchiveNote = async function(noteId) {
         headers: { [csrfHeader]: csrfToken }
     });
 
-    if (response.ok) {
-        location.reload();
-    } else {
+    if (!response.ok) {
         alert('Wiederherstellen fehlgeschlagen');
+        return;
     }
+
+    const unarchivedNote = await response.json();
+    removeNoteCard(unarchivedNote.id, 'archiveList', 'archiveEmptyState');
 };
 
 window.deleteArchivedNote = async function(noteId) {
@@ -29,9 +32,11 @@ window.deleteArchivedNote = async function(noteId) {
         headers: { [csrfHeader]: csrfToken }
     });
 
-    if (response.ok) {
-        location.reload();
-    } else {
+    if (!response.ok) {
         alert('Verschieben in den Papierkorb fehlgeschlagen');
+        return;
     }
+
+    const deletedNote = await response.json();
+    removeNoteCard(deletedNote.id, 'archiveList', 'archiveEmptyState');
 };

@@ -42,7 +42,8 @@
         </div>
     </div>
 
-    <div class="center-gap m-3" th:if="${notes.content.isEmpty()}">
+    <div class="center-gap m-3" id="trashEmptyState"
+         th:style="${notes.content.isEmpty()} ? '' : 'display: none;'">
         <h5 class="fst-italic">Papierkorb ist leer</h5>
     </div>
 
