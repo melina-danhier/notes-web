@@ -1,15 +1,18 @@
 "use strict";
 
 // Zentralisiertes Markdown-Rendering: exportiert eine kompakte, sichere Vorschau-Funktion
-export function renderMarkdownPreview(markdown) {
+export function renderMarkdownPreview(markdown, options = {}) {
     const normalized = (markdown || '').replace(/\r\n/g, '\n');
     if (!normalized.trim()) {
         return '<div class="markdown-empty-state text-muted">Hier erscheint die Vorschau deiner Notiz.</div>';
     }
-    return renderMarkdownBlocks(normalized);
+    return renderMarkdownBlocks(normalized, {
+        interactiveTasks: options.interactiveTasks === true,
+        taskIndex: 0
+    });
 }
 
-function renderMarkdownBlocks(markdown) {
+function renderMarkdownBlocks(markdown, context) {
     const lines = markdown.split('\n');
     const blocks = [];
     let index = 0;
@@ -29,6 +32,39 @@ function renderMarkdownBlocks(markdown) {
             if (index < lines.length) index++;
             const languageClass = language ? ` class="language-${escapeHtml(language)}"` : '';
             blocks.push(`<pre><code${languageClass}>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+            continue;
+        }
+
+        const toggleHeading = parseToggleHeading(trimmed);
+        if (toggleHeading !== null) {
+            index++;
+            const toggleLines = [];
+            while (index < lines.length && parseToggleHeading(lines[index].trim()) === null) {
+                toggleLines.push(lines[index]);
+                index++;
+            }
+            const content = renderMarkdownBlocks(toggleLines.join('\n'), context);
+            blocks.push(
+                `<details class="markdown-toggle" open>` +
+                `<summary>${renderMarkdownInline(toggleHeading)}</summary>` +
+                `<div class="markdown-toggle-content">${content}</div>` +
+                `</details>`
+            );
+            continue;
+        }
+
+        const task = parseTask(trimmed);
+        if (task !== null) {
+            const taskIndex = context.taskIndex++;
+            const disabled = context.interactiveTasks ? '' : ' disabled';
+            const checked = task.checked ? ' checked' : '';
+            blocks.push(
+                `<label class="markdown-task${task.checked ? ' is-complete' : ''}">` +
+                `<input type="checkbox" data-task-index="${taskIndex}"${checked}${disabled}>` +
+                `<span>${renderMarkdownInline(task.label)}</span>` +
+                `</label>`
+            );
+            index++;
             continue;
         }
 
@@ -66,7 +102,26 @@ function renderMarkdownBlocks(markdown) {
 
 function isMarkdownBlockBoundary(line) {
     const trimmed = line.trim();
-    return trimmed.startsWith('```') || /^#{1,6}\s+/.test(trimmed) || /^>\s?/.test(trimmed) || /^\s*(?:[-*+]\s+|\d+\.\s+)/.test(line);
+    return trimmed.startsWith('```')
+        || parseToggleHeading(trimmed) !== null
+        || parseTask(trimmed) !== null
+        || /^#{1,6}\s+/.test(trimmed)
+        || /^>\s?/.test(trimmed)
+        || /^\s*(?:[-*+]\s+|\d+\.\s+)/.test(line);
+}
+
+function parseToggleHeading(line) {
+    const match = line.match(/^>\s+(.+?)(?:\s*;)?\s*$/);
+    return match ? match[1] : null;
+}
+
+function parseTask(line) {
+    const match = line.match(/^\[([ xX])]\s+(.+?)(?:\s*;)?\s*$/);
+    if (!match) return null;
+    return {
+        checked: match[1].toLowerCase() === 'x',
+        label: match[2]
+    };
 }
 
 function renderMarkdownInline(text) {
@@ -92,7 +147,7 @@ function renderMarkdownInline(text) {
     });
 
     output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    output = output.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    output = output.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<strong>$2</strong>');
     output = output.replace(/__([^_]+)__/g, '<strong>$1</strong>');
     output = output.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
 

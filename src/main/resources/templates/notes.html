@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="/css/notes.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/+esm"></script>
     <script type="module">
         import { initNotePreviewModal, viewNote, closeNoteModal, closeNoteModalAndReload, editFromModal, modalTogglePin } from '/js/note-preview.js';
         import { renderMarkdownPreviews } from '/js/markdown-preview.js';
@@ -160,7 +159,7 @@
     <!-- Gepinnte Notizen Sektion -->
     <div id="pinnedNotesSection"
          th:style="${pinnedNotes.isEmpty()} ? 'display: none;' : ''">
-        <h5 class="ms-3 mt-3 mb-2 text-muted fw-semibold" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">📌 Angeheftet</h5>
+        <h5 class="ms-3 mt-3 mb-2 text-muted fw-semibold" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">📌 Angeheftet</h5>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 pinned-notes-section"
              id="pinnedNotesList">
             <div class="col" th:each="note : ${pinnedNotes}" th:id="'note-' + ${note.id}">

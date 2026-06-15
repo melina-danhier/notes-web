@@ -1,14 +1,17 @@
+// noinspection JSIgnoredPromiseFromCall
+
 'use strict';
 
 /**
  * Markdown-Rendering und Note-Preview Modal Logic
  */
 
-import { highlightText, highlightMarkdownContent } from './notes-utils.js';
+import { getCsrfToken, getCsrfHeader, highlightText, highlightMarkdownContent } from './notes-utils.js';
 import { getCurrentSearchTerm } from './notes.js';
 import { renderMarkdownPreview, escapeHtml } from './markdown.js';
 
 let currentEditNoteId = null;
+let currentNote = null;
 
 export function initNotePreviewModal() {
     document.addEventListener('keydown', (e) => {
@@ -21,6 +24,8 @@ export function initNotePreviewModal() {
     if (backdrop) {
         backdrop.addEventListener('click', closeNoteModal);
     }
+
+    document.getElementById('modalContent')?.addEventListener('change', handleTaskToggle);
 }
 
 export async function viewNote(noteId) {
@@ -50,6 +55,7 @@ export function displayNoteModal(note) {
     if (!modal) return;
 
     const searchTerm = getCurrentSearchTerm();
+    currentNote = note;
     
     const titleElement = document.getElementById('modalTitle');
     if (titleElement) {
@@ -72,7 +78,8 @@ export function displayNoteModal(note) {
 
     const contentContainer = document.getElementById('modalContent');
     if (contentContainer) {
-        let html = renderMarkdownPreview(note.content || '');
+        const interactiveTasks = !document.getElementById('modalRestoreBtn');
+        let html = renderMarkdownPreview(note.content || '', { interactiveTasks });
         if (searchTerm) {
             html = highlightMarkdownContent(html, searchTerm);
         }
@@ -182,11 +189,46 @@ export function displayNoteModal(note) {
     modal.style.display = 'flex';
 }
 
+async function handleTaskToggle(changeEvent) {
+    const checkbox = changeEvent.target.closest('input[type="checkbox"][data-task-index]');
+    if (!checkbox || !currentNote) return;
+
+    const csrfToken = getCsrfToken();
+    const csrfHeader = getCsrfHeader();
+    if (!csrfToken || !csrfHeader) {
+        checkbox.checked = !checkbox.checked;
+        alert('Sicherheitstoken fehlt. Bitte Seite neu laden.');
+        return;
+    }
+
+    checkbox.disabled = true;
+    try {
+        const response = await fetch(
+            `/api/notes/${currentNote.id}/tasks/${checkbox.dataset.taskIndex}/toggle`,
+            {
+                method: 'PATCH',
+                headers: { [csrfHeader]: csrfToken }
+            }
+        );
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        displayNoteModal(await response.json());
+    } catch (error) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.disabled = false;
+        alert('Aufgabe konnte nicht gespeichert werden.');
+        console.error('Fehler beim Speichern der Aufgabe:', error);
+    }
+}
+
 export function closeNoteModal() {
     const modal = document.getElementById('noteViewModal');
     if (modal) {
         modal.style.display = 'none';
         currentEditNoteId = null;
+        currentNote = null;
     }
 }
 
