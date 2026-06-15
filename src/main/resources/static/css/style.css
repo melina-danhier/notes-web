@@ -21,7 +21,7 @@ body {
 }
 
 body.note-editor-page {
-    padding: 0;
+    padding: 1.25rem;
     min-height: 100vh;
     height: 100vh;
 }
@@ -94,11 +94,19 @@ body.align-items-center .con {
     body {
         padding: 1.5rem;
     }
+
+    body.note-editor-page {
+        padding: 1rem;
+    }
 }
 
 @media (max-width: 576px) {
     body {
         padding: 1rem;
+    }
+
+    body.note-editor-page {
+        padding: 0.75rem;
     }
 
     body.mobile-fullscreen .con {

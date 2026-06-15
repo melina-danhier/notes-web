@@ -16,9 +16,7 @@ function initEditNotesApp() {
 
     document.getElementById('titleInput')?.focus();
 
-    initTooltips();
     initSaveButton();
-    initAutoResize();
     initMarkdownPreview();
     initMarkdownToolbar();
     initToolbarExtrasToggle();
@@ -97,27 +95,11 @@ function getFormData() {
 
 function isValidForm(data) {
     // Titel ist optional. Nur Länge validieren, falls gesetzt.
-    if (data.title && data.title.length > 200) {
-        showError('Titel zu lang (max 200 Zeichen)!');
+    if (data.title && data.title.length > 30) {
+        showError('Titel zu lang (max 30 Zeichen)!');
         return false;
     }
     return true;
-}
-
-function initAutoResize() {
-    const textarea = document.getElementById('contentInput');
-    if (!textarea) return;
-
-    const resize = function() {
-        this.style.height = 'auto';
-        this.style.height = `${this.scrollHeight}px`;
-    };
-
-    textarea.style.overflow = 'hidden';
-    textarea.style.resize = 'none';
-    textarea.addEventListener('input', resize);
-    window.addEventListener('resize', () => resize.call(textarea));
-    resize.call(textarea);
 }
 
 function initMarkdownPreview() {
@@ -140,11 +122,11 @@ function initMarkdownToolbar() {
 
     if (!toolbar || !textarea) return;
 
-    toolbar.addEventListener('click', function(event) {
-        const button = event.target.closest('button[data-md-action]');
+    toolbar.addEventListener('click', function(clickEvent) {
+        const button = clickEvent.target.closest('button[data-md-action]');
         if (!button) return;
 
-        event.preventDefault();
+        clickEvent.preventDefault();
         handleMarkdownAction(button.dataset.mdAction, textarea);
     });
 }
@@ -161,22 +143,13 @@ function handleMarkdownAction(action, textarea) {
             prefixMarkdownLines(textarea, '### ');
             break;
         case 'bold':
-            insertMarkdownWrap(textarea, '**', '**', 'fett');
+            insertMarkdownWrap(textarea, '*', '*', 'fett');
             break;
         case 'italic':
-            insertMarkdownWrap(textarea, '*', '*', 'kursiv');
-            break;
-        case 'inline-code':
-            insertMarkdownWrap(textarea, '`', '`', 'code');
-            break;
-        case 'code-block':
-            insertMarkdownBlock(textarea, '```\n', '\n```', 'Code hier');
+            insertMarkdownWrap(textarea, '_', '_', 'kursiv');
             break;
         case 'link':
             insertMarkdownLink(textarea);
-            break;
-        case 'quote':
-            prefixMarkdownLines(textarea, '> ');
             break;
         case 'bullet-list':
             prefixMarkdownLines(textarea, '- ');
@@ -184,25 +157,18 @@ function handleMarkdownAction(action, textarea) {
         case 'ordered-list':
             prefixMarkdownLines(textarea, '1. ', { ordered: true });
             break;
+        case 'task':
+            insertMarkdownWrap(textarea, '[ ] ', '', 'Aufgabe');
+            break;
+        case 'toggle':
+            insertMarkdownWrap(textarea, '> ', '\n', 'Überschrift');
+            break;
         default:
             console.warn(`Unbekannte Markdown-Aktion: ${action}`);
     }
 }
 
 function insertMarkdownWrap(textarea, before, after, placeholder) {
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const selection = textarea.value.slice(start, end);
-    const content = selection || placeholder;
-    const replacement = `${before}${content}${after}`;
-
-    textarea.value = textarea.value.slice(0, start) + replacement + textarea.value.slice(end);
-    textarea.focus();
-    textarea.setSelectionRange(start + before.length, start + before.length + content.length);
-    triggerPreviewRefresh(textarea);
-}
-
-function insertMarkdownBlock(textarea, before, after, placeholder) {
     const start = textarea.selectionStart ?? 0;
     const end = textarea.selectionEnd ?? 0;
     const selection = textarea.value.slice(start, end);
@@ -323,12 +289,11 @@ function initFormValidation() {
 
     // Keine Pflichtvalidierung für den Titel mehr; Länge wird beim Speichern geprüft.
     titleInput.addEventListener('blur', function() {
-        if (this.value && this.value.trim().length > 200) {
-            showError('Titel zu lang (max 200 Zeichen)!');
+        if (this.value && this.value.trim().length > 30) {
+            showError('Titel zu lang (max 30 Zeichen)!');
         }
     });
 }
-
 // CSRF-Token werden über das shared notes-utils Modul bezogen
 
 function showLoading(button, text) {
@@ -448,22 +413,22 @@ function initSplitResize() {
     const storedRatio = parseFloat(localStorage.getItem('noteEditorSplitRatio') || '');
     setSplitRatio(splitRoot, Number.isFinite(storedRatio) ? storedRatio : 0.55);
 
-    splitDivider.addEventListener('pointerdown', function(event) {
+    splitDivider.addEventListener('pointerdown', function(pointerEvent) {
         if (previewContainer.style.display === 'none') return;
 
         isDragging = true;
-        splitDivider.setPointerCapture(event.pointerId);
+        splitDivider.setPointerCapture(pointerEvent.pointerId);
         document.body.classList.add('split-resizing');
-        event.preventDefault();
+        pointerEvent.preventDefault();
     });
 
-    document.addEventListener('pointermove', function(event) {
+    document.addEventListener('pointermove', function(pointerEvent) {
         if (!isDragging) return;
 
         const rect = splitRoot.getBoundingClientRect();
         const dividerWidth = parseFloat(getComputedStyle(splitRoot).getPropertyValue('--split-divider-width')) || 12;
         const availableWidth = Math.max(rect.width - dividerWidth, 1);
-        const previewWidth = event.clientX - rect.left;
+        const previewWidth = pointerEvent.clientX - rect.left;
         const ratio = clamp(previewWidth / availableWidth, minRatio, maxRatio);
 
         setSplitRatio(splitRoot, ratio);
@@ -611,13 +576,4 @@ function initTagInput() {
     // Initial rendering
     currentTags = [...initialTags];
     renderTags();
-}
-
-// ======================== TOOLTIPS ========================
-
-function initTooltips() {
-    // Bootstrap Tooltips aktivieren
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(element) {
-        new bootstrap.Tooltip(element);
-    });
 }
