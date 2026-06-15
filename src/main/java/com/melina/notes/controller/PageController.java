@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
+@SuppressWarnings("SameReturnValue")
 @Controller
 @RequiredArgsConstructor
 public class PageController {

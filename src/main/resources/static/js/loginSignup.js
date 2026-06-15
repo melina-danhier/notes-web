@@ -1,7 +1,8 @@
 'use strict';
 
-function togglePassword() {
-    const icon = event.target;
+function togglePassword(icon) {
+    if (!icon) return;
+
     const input = icon.previousElementSibling;
 
     if (input.type === "password") {

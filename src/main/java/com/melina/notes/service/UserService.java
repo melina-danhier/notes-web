@@ -43,8 +43,6 @@ public class UserService {
             userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
             throw new EmailAlreadyExistsException(normalizedEmail);
-        } catch (DataAccessException ex) {
-            throw new RegistrationException(ex);
         } catch (RuntimeException ex) {
             throw new RegistrationException(ex);
         }

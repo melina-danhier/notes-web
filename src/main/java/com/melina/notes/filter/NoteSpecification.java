@@ -20,15 +20,13 @@ public final class NoteSpecification {
         Objects.requireNonNull(filter, "NoteFilter darf nicht null sein");
         Objects.requireNonNull(filter.getUserId(), "userId darf nicht null sein");
 
-        return (root, query, cb) -> {
-            return Specification
-                    .where(isUser(filter.getUserId()))
-                    .and(searchInTitleOrContent(filter.getSearchTerm()))
-                    .and(hasTag(filter.getTagFilter()))
-                    .and(isDeleted(filter.getDeleted()))
-                    .and(isArchived(filter.getArchived()))
-                    .toPredicate(root, query, cb);
-        };
+        return (root, query, cb) -> Specification
+                .where(isUser(filter.getUserId()))
+                .and(searchInTitleOrContent(filter.getSearchTerm()))
+                .and(hasTag(filter.getTagFilter()))
+                .and(isDeleted(filter.getDeleted()))
+                .and(isArchived(filter.getArchived()))
+                .toPredicate(root, query, cb);
     }
 
     private static Specification<Note> isUser(Long userId) {

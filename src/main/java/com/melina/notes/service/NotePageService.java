@@ -56,7 +56,7 @@ public class NotePageService {
 
     private NotePageData loadPage(Long userId, NotePageRequest request, NoteFilter filter, boolean loadTags) {
         int pageNo = Math.max(request.getPageNo(), 0);
-        int pageSize = Math.min(Math.max(request.getPageSize(), 1), MAX_PAGE_SIZE);
+        int pageSize = Math.clamp(request.getPageSize(), 1, MAX_PAGE_SIZE);
         String sortField = resolveSortField(request.getSortField());
         Sort.Direction sortDirection = resolveSortDirection(request.getSortDir());
 

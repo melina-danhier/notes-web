@@ -43,7 +43,7 @@ class UserRepositoryTest {
 
     @Test
     void existsByEmail_usedEmail_returnTrue() {
-        User user = createAndSaveUser("user@mail.com");
+        User user = createAndSaveUser("user1@mail.com");
         entityManager.clear();
 
         boolean result = userRepository.existsByEmail(user.getEmail());

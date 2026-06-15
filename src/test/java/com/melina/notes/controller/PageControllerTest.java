@@ -18,11 +18,7 @@ import org.springframework.ui.ConcurrentModel;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +60,7 @@ class PageControllerTest {
         assertAll(
                 () -> assertEquals("note-view", view),
                 () -> assertInstanceOf(NoteFormDto.class, model.getAttribute("noteDto")),
-                () -> assertEquals(null, model.getAttribute("noteId")),
+                () -> assertNull(model.getAttribute("noteId")),
                 () -> assertEquals("", model.getAttribute("tagsInputValue"))
         );
     }

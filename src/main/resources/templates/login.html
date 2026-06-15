@@ -51,7 +51,7 @@
             <input type="password" id="password" name="password"
                    placeholder="Passwort" required
                    class="form-control border-0 shadow-none">
-            <i class="fa-solid fa-eye" onclick="togglePassword()"></i>
+            <i class="fa-solid fa-eye" onclick="togglePassword(this)"></i>
         </div>
         <a th:href="@{/resetPassword}" class="text-end link-primary small">Passwort vergessen?</a>
         <button type="submit" class="btn btn-primary mt-2">Einloggen</button>
