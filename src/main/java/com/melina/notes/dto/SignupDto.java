@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @PasswordsMatch
 public class SignupDto {
-
     @NotBlank(message = "Bitte geben Sie Ihren Namen ein")
     @Size(max = 100, message = "Der Name darf höchstens 100 Zeichen lang sein")
     private String name;

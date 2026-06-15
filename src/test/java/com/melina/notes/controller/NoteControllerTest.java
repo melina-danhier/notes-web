@@ -247,12 +247,13 @@ class NoteControllerTest {
     @Test
     void createNote_withMalformedJson_returnsBadRequest() throws Exception {
         CustomUserDetails userDetails = createCustomUserDetails();
+        String malformedJson = "{";
 
         mockMvc.perform(post("/api/notes")
                         .with(csrf())
                         .with(user(userDetails))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{"))
+                        .content(malformedJson))
                 .andExpectAll(
                         status().isBadRequest(),
                         jsonPath("$.message").value("Ungültiger Request-Body")

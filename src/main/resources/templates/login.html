@@ -18,23 +18,23 @@
     <h2 class="mt-1">Willkommen zurück</h2>
 
     <!-- Fehlerbehandlung -->
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="fa-solid fa-circle-exclamation"></i>
-        <span th:text="${error}"></span>
+        <span th:text="#{login.error}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <!-- Abmeldungs-Erfolg -->
-    <div th:if="${logout}" class="alert alert-info alert-dismissible fade show" role="alert">
+    <div th:if="${param.logout}" class="alert alert-info alert-dismissible fade show" role="alert">
         <i class="fa-solid fa-circle-check"></i>
-        <span th:text="${logout}"></span>
+        <span th:text="#{login.logout}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <!-- Registrierungs-Erfolg -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <div th:if="${param.registered}" class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="fa-solid fa-circle-check"></i>
-        <span th:text="${success}"></span>
+        <span th:text="#{login.registered}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 

@@ -19,10 +19,9 @@
 
     <form id="signupForm" th:action="@{/signup}" th:object="${signupDto}"
           method="post" class="d-flex flex-column gap-3 my-2">
-        <div th:if="${error != null or #fields.hasErrors('*')}"
+        <div th:if="${#fields.hasErrors('*')}"
              class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fa-solid fa-circle-exclamation"></i>
-            <span th:if="${error}" th:text="${error}"></span>
             <ul th:if="${#fields.hasErrors('*')}" class="mb-0">
                 <li th:each="validationError : ${#fields.errors('*')}" th:text="${validationError}"></li>
             </ul>

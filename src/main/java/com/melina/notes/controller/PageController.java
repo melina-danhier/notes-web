@@ -1,67 +1,38 @@
 package com.melina.notes.controller;
 
 import com.melina.notes.dto.CreateNoteDto;
-import com.melina.notes.dto.NoteDto;
+import com.melina.notes.dto.NotePageData;
+import com.melina.notes.dto.NotePageRequest;
 import com.melina.notes.dto.SignupDto;
-import com.melina.notes.filter.NoteFilter;
-import com.melina.notes.service.NoteService;
 import com.melina.notes.security.CustomUserDetails;
-import com.melina.notes.service.TagService;
+import com.melina.notes.service.NotePageService;
+import com.melina.notes.service.NoteService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class PageController {
+
     private final NoteService noteService;
-    private final TagService tagService;
+    private final NotePageService notePageService;
 
     @GetMapping("/login")
-    public String login(Model model,
-                        @RequestParam(required = false) String error,
-                        @RequestParam(required = false) String logout,
-                        @RequestParam(required = false) String registered) {
-        if (error != null) {
-            model.addAttribute("error", "Ungültige E-Mail oder Passwort");
-        }
-        if (logout != null) {
-            model.addAttribute("logout", "Sie wurden erfolgreich abgemeldet");
-        }
-        if (registered != null) {
-            model.addAttribute("success", "Registrierung erfolgreich! Bitte melden Sie sich an.");
-        }
+    public String login() {
         return "login";
     }
 
     @GetMapping("/signup")
-    public String signup(Model model, @RequestParam(required = false) String error) {
+    public String signup(Model model) {
         if (!model.containsAttribute("signupDto")) {
             model.addAttribute("signupDto", new SignupDto());
-        }
-
-        String errorMessage;
-        if (error != null) {
-            errorMessage = switch(error) {
-                case "empty_name" -> "Bitte geben Sie Ihren Namen ein";
-                case "empty_email" -> "Bitte geben Sie Ihre E-Mail-Adresse ein";
-                case "empty_password" -> "Bitte geben Sie ein Passwort ein";
-                case "password_too_short" -> "Das Passwort muss mindestens 6 Zeichen lang sein";
-                case "password_mismatch" -> "Passwörter stimmen nicht überein";
-                case "email_exists" -> "Diese E-Mail-Adresse ist bereits registriert";
-                case "registration_failed" -> "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut";
-                default -> "Ein Fehler ist aufgetreten";
-            };
-            model.addAttribute("error", errorMessage);
         }
         return "signup";
     }
@@ -74,51 +45,27 @@ public class PageController {
     @GetMapping("/notes")
     public String notesPage(Model model,
                             @AuthenticationPrincipal CustomUserDetails user,
-                            @RequestParam(required = false, defaultValue = "0") int pageNo,
-                            @RequestParam(required = false, defaultValue = "6") int pageSize,
-                            @RequestParam(required = false, defaultValue = "created") String sortField,
-                            @RequestParam(required = false, defaultValue = "desc") String sortDir,
-                            @RequestParam(required = false) String tagFilter,
-                            @RequestParam(required = false) String search) {
-        NoteFilter filter = NoteFilter.builder()
-                .userId(user.getId())
-                .tagFilter(tagFilter)
-                .searchTerm(search)
-                .deleted(false)
-                .archived(false)
-                .build();
-        addToModel(model, sortDir, sortField, filter, user, pageNo, pageSize, tagFilter, search, false);
+                            @ModelAttribute NotePageRequest request) {
+        NotePageData pageData = notePageService.getActiveNotes(user.getId(), request);
+        addPageDataToModel(model, pageData, user);
         return "notes";
     }
 
     @GetMapping("/notes/archive")
     public String archivePage(Model model,
                               @AuthenticationPrincipal CustomUserDetails user,
-                              @RequestParam(required = false, defaultValue = "0") int pageNo,
-                              @RequestParam(required = false, defaultValue = "6") int pageSize,
-                              @RequestParam(required = false, defaultValue = "created") String sortField,
-                              @RequestParam(required = false, defaultValue = "desc") String sortDir) {
-        NoteFilter filter = NoteFilter.builder()
-                .userId(user.getId())
-                .deleted(false)
-                .archived(true)
-                .build();
-        addToModel(model, sortDir, sortField, filter, user, pageNo, pageSize, null, null, true);
+                              @ModelAttribute NotePageRequest request) {
+        NotePageData pageData = notePageService.getArchivedNotes(user.getId(), request);
+        addPageDataToModel(model, pageData, user);
         return "archive";
     }
 
     @GetMapping("/notes/trash")
     public String trashPage(Model model,
                             @AuthenticationPrincipal CustomUserDetails user,
-                            @RequestParam(required = false, defaultValue = "0") int pageNo,
-                            @RequestParam(required = false, defaultValue = "6") int pageSize,
-                            @RequestParam(required = false, defaultValue = "created") String sortField,
-                            @RequestParam(required = false, defaultValue = "desc") String sortDir) {
-        NoteFilter filter = NoteFilter.builder()
-                .userId(user.getId())
-                .deleted(true)
-                .build();
-        addToModel(model, sortDir, sortField, filter, user, pageNo, pageSize, null, null, true);
+                            @ModelAttribute NotePageRequest request) {
+        NotePageData pageData = notePageService.getDeletedNotes(user.getId(), request);
+        addPageDataToModel(model, pageData, user);
         return "trash";
     }
 
@@ -141,40 +88,21 @@ public class PageController {
         if (tags == null || tags.isEmpty()) {
             return "";
         }
-
         return String.join(", ", tags);
     }
 
-    private void addToModel(Model model, String sortDir, String sortField, NoteFilter filter, CustomUserDetails user,
-                            int pageNo, int pageSize, String tagFilter, String search, boolean trashPage) {
-        // First sort by pinned descending (unpinned false comes after pinned true), then by the selected field
-        Sort sort = Sort.by(Sort.Direction.DESC, "pinned")
-                .and(Sort.by(Sort.Direction.fromString(sortDir), sortField));
-        Page<NoteDto> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
-
-        // Split notes into pinned and unpinned
-        List<NoteDto> pinnedNotes = notes.getContent().stream()
-                .filter(NoteDto::isPinned)
-                .toList();
-        List<NoteDto> unpinnedNotes = notes.getContent().stream()
-                .filter(note -> !note.isPinned())
-                .toList();
-
-        model.addAttribute("notes", notes);
-        model.addAttribute("pinnedNotes", pinnedNotes);
-        model.addAttribute("unpinnedNotes", unpinnedNotes);
-        model.addAttribute("currentPage", pageNo);
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("totalPages", notes.getTotalPages());
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortDir", sortDir);
+    private void addPageDataToModel(Model model, NotePageData pageData, CustomUserDetails user) {
+        model.addAttribute("notes", pageData.getNotes());
+        model.addAttribute("pinnedNotes", pageData.getPinnedNotes());
+        model.addAttribute("unpinnedNotes", pageData.getUnpinnedNotes());
+        model.addAttribute("currentPage", pageData.getCurrentPage());
+        model.addAttribute("pageSize", pageData.getPageSize());
+        model.addAttribute("totalPages", pageData.getNotes().getTotalPages());
+        model.addAttribute("sortField", pageData.getSortField());
+        model.addAttribute("sortDir", pageData.getSortDir());
         model.addAttribute("displayname", user.getDisplayName());
-
-        if (!trashPage) {
-            List<String> tags = tagService.getAllTagsByUserId(user.getId());
-            model.addAttribute("allTags", tags);
-            model.addAttribute("tagFilter", tagFilter);
-            model.addAttribute("search", search);
-        }
+        model.addAttribute("allTags", pageData.getAllTags());
+        model.addAttribute("tagFilter", pageData.getTagFilter());
+        model.addAttribute("search", pageData.getSearch());
     }
 }
