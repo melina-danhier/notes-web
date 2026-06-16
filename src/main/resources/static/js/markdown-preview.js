@@ -2,19 +2,14 @@
 
 import { renderMarkdownPreview } from './markdown.js';
 
-/**
- * Renderiert Markdown-Previews auf Note-Karten
- */
 export function renderMarkdownPreviews() {
-    document.querySelectorAll('.card-preview-markdown').forEach(el => {
-        const markdown = el.getAttribute('data-markdown');
-        if (markdown) {
-            try {
-                el.innerHTML = renderMarkdownPreview(markdown);
-            } catch (e) {
-                console.error('Error parsing markdown:', e);
-                el.textContent = markdown;
-            }
+    document.querySelectorAll('.card-preview-markdown, [data-markdown]').forEach(function(previewElement) {
+        const markdown = previewElement.dataset.markdown || '';
+        try {
+            previewElement.innerHTML = renderMarkdownPreview(markdown);
+        } catch (error) {
+            console.error('Error parsing markdown:', error);
+            previewElement.textContent = markdown;
         }
     });
 }

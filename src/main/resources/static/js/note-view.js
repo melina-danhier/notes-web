@@ -522,8 +522,8 @@ function initTagInput() {
             return;
         }
 
-        if (trimmed.length > 50) {
-            showError('Tag zu lang (maximal 50 Zeichen).');
+        if (trimmed.length > 20) {
+            showError('Tag zu lang (maximal 20 Zeichen).');
             return;
         }
 

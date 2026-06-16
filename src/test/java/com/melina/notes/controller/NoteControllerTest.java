@@ -62,7 +62,8 @@ class NoteControllerTest {
 
     @Test
     void createNote_withInvalidDto_returnsBadRequest() throws Exception {
-        NoteFormDto note = createNoteForm(null);
+        NoteFormDto note = createNoteForm("Titel");
+        note.setContent(null);
         CustomUserDetails userDetails = createCustomUserDetails();
 
         mockMvc.perform(post("/api/notes")
@@ -127,6 +128,23 @@ class NoteControllerTest {
                         .with(csrf())
                         .with(user(userDetails)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void unexpectedError_returnsGenericMessageWithoutInternalDetails() throws Exception {
+        CustomUserDetails userDetails = createCustomUserDetails();
+
+        when(noteService.getNoteById(anyLong(), anyLong()))
+                .thenThrow(new RuntimeException("SQL connection failed on internal-host"));
+
+        mockMvc.perform(get("/api/notes/10")
+                        .with(csrf())
+                        .with(user(userDetails)))
+                .andExpectAll(
+                        status().isInternalServerError(),
+                        jsonPath("$.message").value("Interner Serverfehler"),
+                        jsonPath("$.details").value(org.hamcrest.Matchers.nullValue())
+                );
     }
 
     @Test

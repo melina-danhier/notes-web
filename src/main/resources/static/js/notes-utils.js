@@ -50,9 +50,50 @@ export function highlightText(text, searchTerm) {
 
 export function highlightMarkdownContent(html, searchTerm) {
     if (!searchTerm || !html) return html;
-    
-    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return html.replace(regex, '<mark>$1</mark>');
+
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    highlightTextNodes(template.content, searchTerm);
+    return template.innerHTML;
+}
+
+function highlightTextNodes(root, searchTerm) {
+    const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+
+    while (walker.nextNode()) {
+        textNodes.push(walker.currentNode);
+    }
+
+    textNodes.forEach(textNode => {
+        regex.lastIndex = 0;
+        if (!regex.test(textNode.nodeValue)) {
+            return;
+        }
+
+        regex.lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+
+        textNode.nodeValue.replace(regex, (match, _group, offset) => {
+            fragment.append(document.createTextNode(textNode.nodeValue.slice(lastIndex, offset)));
+
+            const mark = document.createElement('mark');
+            mark.textContent = match;
+            fragment.append(mark);
+
+            lastIndex = offset + match.length;
+            return match;
+        });
+
+        fragment.append(document.createTextNode(textNode.nodeValue.slice(lastIndex)));
+        textNode.replaceWith(fragment);
+    });
+}
+
+function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export function escapeHtml(text) {

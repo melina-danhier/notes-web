@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -125,7 +124,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<ErrorResponse> handleRegistration(RegistrationException ex) {
         log.error("Registration failed", ex);
-        return responseEntityWithErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+        return internalServerErrorResponse();
     }
 
     @ExceptionHandler(Exception.class)
@@ -133,12 +132,14 @@ public class GlobalExceptionHandler {
         String message = ex.getMessage() != null ? ex.getMessage() : "Unbekannter Fehler";
         log.error("Unerwarteter Fehler: {}", message, ex);
 
+        return internalServerErrorResponse();
+    }
+
+    private ResponseEntity<ErrorResponse> internalServerErrorResponse() {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("Interner Serverfehler")
-                .details(Collections.singletonList(message))
                 .build();
-
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

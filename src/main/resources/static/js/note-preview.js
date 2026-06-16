@@ -7,7 +7,6 @@
  */
 
 import { getCsrfToken, getCsrfHeader, highlightText, highlightMarkdownContent } from './notes-utils.js';
-import { getCurrentSearchTerm } from './notes.js';
 import { renderMarkdownPreview, escapeHtml } from './markdown.js';
 
 let currentEditNoteId = null;
@@ -25,7 +24,10 @@ export function initNotePreviewModal() {
         backdrop.addEventListener('click', closeNoteModal);
     }
 
-    document.getElementById('modalContent')?.addEventListener('change', handleTaskToggle);
+    const contentContainer = document.getElementById('modalContent');
+    if (contentContainer) {
+        contentContainer.addEventListener('change', handleTaskToggle);
+    }
 }
 
 export async function viewNote(noteId) {
@@ -123,7 +125,7 @@ export function displayNoteModal(note) {
             if (window.archiveNote) {
                 window.archiveNote(note.id);
             } else {
-                alert('Fehler: Archivieren-Funktion nicht verfÃ¼gbar');
+                alert('Fehler: Archivieren-Funktion nicht verfügbar');
             }
         };
     }
@@ -174,14 +176,14 @@ export function displayNoteModal(note) {
             if (window.unarchiveNote) {
                 window.unarchiveNote(note.id);
             } else {
-                alert('Fehler: Wiederherstellen-Funktion nicht verfÃ¼gbar');
+                alert('Fehler: Wiederherstellen-Funktion nicht verfügbar');
             }
         };
         archiveDeleteBtn.onclick = () => {
             if (window.deleteArchivedNote) {
                 window.deleteArchivedNote(note.id);
             } else {
-                alert('Fehler: LÃ¶schen-Funktion nicht verfÃ¼gbar');
+                alert('Fehler: Löschen-Funktion nicht verfügbar');
             }
         };
     }
@@ -221,6 +223,10 @@ async function handleTaskToggle(changeEvent) {
         alert('Aufgabe konnte nicht gespeichert werden.');
         console.error('Fehler beim Speichern der Aufgabe:', error);
     }
+}
+
+function getCurrentSearchTerm() {
+    return new URL(window.location.href).searchParams.get('search');
 }
 
 export function closeNoteModal() {
