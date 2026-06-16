@@ -21,4 +21,4 @@ spring:
 logging:
   level:
     root: INFO
-    com.deinpackage: DEBUG
+    com.melina.notes: DEBUG

@@ -6,7 +6,6 @@ import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

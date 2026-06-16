@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings({"ALL", "unused"})
 @Service
 @RequiredArgsConstructor
 public class NotePageService {

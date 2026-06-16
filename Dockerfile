@@ -15,6 +15,6 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar app.jar
 
-EXPOSE 10000
+EXPOSE 8080
 
 ENTRYPOINT ["java","-Xms128m","-Xmx300m","-XX:+UseSerialGC","-XX:+ExitOnOutOfMemoryError","-jar","app.jar"]

@@ -1,5 +1,17 @@
 spring:
+  application:
+    name: notes-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
   jpa:
+    open-in-view: false
     properties:
       hibernate:
         default_batch_fetch_size: 50
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
