@@ -7,11 +7,12 @@ import lombok.*;
 @Table(name = "users")
 @Builder
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class User {
     @Id
-    @SequenceGenerator(name = "users_seq", sequenceName = "users_SEQ", allocationSize = 1)
+    @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
     private Long id;
 
@@ -21,5 +22,8 @@ public class User {
     private String email;
 
     private String password;
+
+    @Column(nullable = false)
+    @Builder.Default
     private String role = "ROLE_USER";
 }

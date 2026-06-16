@@ -3,10 +3,9 @@ package com.melina.notes.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -14,25 +13,26 @@ import java.util.List;
 
 @Entity
 @Table(name = "notes")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Note {
     @Id
-    @SequenceGenerator(name = "notes_seq", sequenceName = "notes_SEQ", allocationSize = 1)
+    @SequenceGenerator(name = "notes_seq", sequenceName = "notes_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notes_seq")
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant created;
 
-    @LastModifiedDate
     private Instant updated;
 
     @ManyToMany

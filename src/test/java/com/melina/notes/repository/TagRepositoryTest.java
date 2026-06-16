@@ -11,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,7 +87,6 @@ class TagRepositoryTest {
 
         Tag unusedTag = tagRepository.saveAndFlush(Tag.builder()
                 .tag("unused")
-                .notes(new HashSet<>())
                 .build());
 
         entityManager.flush();
@@ -136,11 +134,9 @@ class TagRepositoryTest {
     private Tag createAndSaveTag(Note note, String name) {
         Tag tag = tagRepository.saveAndFlush(Tag.builder()
                 .tag(name)
-                .notes(new HashSet<>())
                 .build());
 
         note.getTags().add(tag);
-        tag.getNotes().add(note);
 
         noteRepository.saveAndFlush(note);
 

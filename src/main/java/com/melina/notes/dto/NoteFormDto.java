@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NoteFormDto {
-    @NotNull(message = "Der Titel darf nicht fehlen")
     @Size(max = 30, message = "Der Titel darf höchstens 30 Zeichen lang sein")
     private String title;
 
