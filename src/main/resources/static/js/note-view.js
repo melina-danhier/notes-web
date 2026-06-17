@@ -163,9 +163,26 @@ function handleMarkdownAction(action, textarea) {
         case 'toggle':
             insertMarkdownWrap(textarea, '> ', '\n', 'Überschrift');
             break;
+        case 'toggle-end':
+            insertMarkdownToggleEnd(textarea);
+            break;
         default:
             console.warn(`Unbekannte Markdown-Aktion: ${action}`);
     }
+}
+
+function insertMarkdownToggleEnd(textarea) {
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const value = textarea.value;
+    const needsLeadingBreak = start > 0 && value[start - 1] !== '\n';
+    const needsTrailingBreak = end < value.length && value[end] !== '\n';
+    const replacement = `${needsLeadingBreak ? '\n' : ''}>;${needsTrailingBreak ? '\n' : ''}`;
+
+    textarea.value = value.slice(0, start) + replacement + textarea.value.slice(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    triggerPreviewRefresh(textarea);
 }
 
 function insertMarkdownWrap(textarea, before, after, placeholder) {

@@ -124,13 +124,23 @@
     background: transparent;
     border-bottom: 1px solid rgba(0,0,0,.06);
 }
+
+.card-header > .d-flex:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .card-header .title {
     font-size: 1rem;
     font-weight: 600;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 60%;
+}
+
+.note-card-toolbar {
+    flex: 0 0 auto;
 }
 
 .note-card-toolbar .btn {

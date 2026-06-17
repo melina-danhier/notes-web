@@ -39,8 +39,13 @@ function renderMarkdownBlocks(markdown, context) {
         if (toggleHeading !== null) {
             index++;
             const toggleLines = [];
-            while (index < lines.length && parseToggleHeading(lines[index].trim()) === null) {
+            while (index < lines.length
+                && parseToggleHeading(lines[index].trim()) === null
+                && !isToggleEnd(lines[index].trim())) {
                 toggleLines.push(lines[index]);
+                index++;
+            }
+            if (index < lines.length && isToggleEnd(lines[index].trim())) {
                 index++;
             }
             const content = renderMarkdownBlocks(toggleLines.join('\n'), context);
@@ -50,6 +55,11 @@ function renderMarkdownBlocks(markdown, context) {
                 `<div class="markdown-toggle-content">${content}</div>` +
                 `</details>`
             );
+            continue;
+        }
+
+        if (isToggleEnd(trimmed)) {
+            index++;
             continue;
         }
 
@@ -104,6 +114,7 @@ function isMarkdownBlockBoundary(line) {
     const trimmed = line.trim();
     return trimmed.startsWith('```')
         || parseToggleHeading(trimmed) !== null
+        || isToggleEnd(trimmed)
         || parseTask(trimmed) !== null
         || /^#{1,6}\s+/.test(trimmed)
         || /^>\s?/.test(trimmed)
@@ -113,6 +124,10 @@ function isMarkdownBlockBoundary(line) {
 function parseToggleHeading(line) {
     const match = line.match(/^>\s+(.+?)(?:\s*;)?\s*$/);
     return match ? match[1] : null;
+}
+
+function isToggleEnd(line) {
+    return /^>\s*;\s*$/.test(line);
 }
 
 function parseTask(line) {
