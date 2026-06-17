@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
-    private static final int MIN_LENGTH = 6;
+    private static final int MIN_LENGTH = 10;
     private static final int MAX_LENGTH = 72;
 
     @Override

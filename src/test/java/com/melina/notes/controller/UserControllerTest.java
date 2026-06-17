@@ -36,14 +36,14 @@ class UserControllerTest {
                         .with(csrf())
                         .param("name", "Melina")
                         .param("email", "user@mail.com")
-                        .param("password", "password")
-                        .param("confirmPassword", "password"))
+                        .param("password", "validPassword")
+                        .param("confirmPassword", "validPassword"))
                 .andExpectAll(
                         status().is3xxRedirection(),
                         redirectedUrl("/login?registered=true")
                 );
 
-        verify(userService).createUser("Melina", "user@mail.com", "password");
+        verify(userService).createUser("Melina", "user@mail.com", "validPassword");
     }
 
     @Test
@@ -92,14 +92,14 @@ class UserControllerTest {
     @Test
     void signupSubmit_withExistingEmail_addsEmailError() throws Exception {
         doThrow(new EmailAlreadyExistsException("user@mail.com")).when(userService)
-                .createUser("Melina", "user@mail.com", "password");
+                .createUser("Melina", "user@mail.com", "validPassword");
 
         mockMvc.perform(post("/signup")
                         .with(csrf())
                         .param("name", "Melina")
                         .param("email", "user@mail.com")
-                        .param("password", "password")
-                        .param("confirmPassword", "password"))
+                        .param("password", "validPassword")
+                        .param("confirmPassword", "validPassword"))
                 .andExpectAll(
                         status().isOk(),
                         view().name("signup"),
@@ -110,14 +110,14 @@ class UserControllerTest {
     @Test
     void signupSubmit_whenCreationFails_addsGlobalError() throws Exception {
         doThrow(new RegistrationException(new IllegalStateException())).when(userService)
-                .createUser("Melina", "user@mail.com", "password");
+                .createUser("Melina", "user@mail.com", "validPassword");
 
         mockMvc.perform(post("/signup")
                         .with(csrf())
                         .param("name", "Melina")
                         .param("email", "user@mail.com")
-                        .param("password", "password")
-                        .param("confirmPassword", "password"))
+                        .param("password", "validPassword")
+                        .param("confirmPassword", "validPassword"))
                 .andExpectAll(
                         status().isOk(),
                         view().name("signup"),

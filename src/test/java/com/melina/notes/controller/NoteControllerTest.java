@@ -357,6 +357,7 @@ class NoteControllerTest {
                 10L,
                 "user@mail.com",
                 "password",
+                "Melina",
                 "ROLE_USER"
         );
     }

@@ -129,7 +129,7 @@ class NoteRepositoryTest {
 
     private User createAndSaveUser(String email) {
         User user = User.builder()
-                .username("testuser")
+                .displayName("testuser")
                 .email(email)
                 .password("encryptedPassword")
                 .role("ROLE_USER")

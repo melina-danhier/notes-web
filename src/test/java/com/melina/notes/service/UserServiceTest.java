@@ -74,7 +74,7 @@ class UserServiceTest {
         User savedUser = userCaptor.getValue();
 
         assertAll(
-                () -> assertEquals("Melina", savedUser.getUsername()),
+                () -> assertEquals("Melina", savedUser.getDisplayName()),
                 () -> assertEquals("melina@mail.com", savedUser.getEmail()),
                 () -> assertEquals("encodedPassword", savedUser.getPassword()),
                 () -> assertEquals("ROLE_USER", savedUser.getRole())
@@ -97,7 +97,7 @@ class UserServiceTest {
         User savedUser = userCaptor.getValue();
 
         assertAll(
-                () -> assertEquals("Melina", savedUser.getUsername()),
+                () -> assertEquals("Melina", savedUser.getDisplayName()),
                 () -> assertEquals("melina@mail.com", savedUser.getEmail()),
                 () -> assertEquals("encodedPassword", savedUser.getPassword()),
                 () -> assertEquals("ROLE_USER", savedUser.getRole())
@@ -152,10 +152,10 @@ class UserServiceTest {
         verify(userRepository).findById(3L);
     }
 
-    private User createUser(Long id, String username, String email, String password) {
+    private User createUser(Long id, String displayName, String email, String password) {
         User user = new User();
         user.setId(id);
-        user.setUsername(username);
+        user.setDisplayName(displayName);
         user.setEmail(email);
         user.setPassword(password);
         user.setRole("ROLE_USER");

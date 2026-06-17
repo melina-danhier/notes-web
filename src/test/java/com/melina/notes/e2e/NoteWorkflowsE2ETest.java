@@ -57,8 +57,8 @@ class NoteWorkflowsE2ETest {
 
     @Test
     void userCanRegisterLoginCreateUpdateAndFilterNote() throws Exception {
-        register("Melina", " MELINA@example.com ", "secret1");
-        MockHttpSession session = login("melina@example.com", "secret1");
+        register("Melina", " MELINA@example.com ", "secretPass1");
+        MockHttpSession session = login("melina@example.com", "secretPass1");
 
         mockMvc.perform(get("/notes/new").session(session))
                 .andExpect(status().isOk())
@@ -106,8 +106,8 @@ class NoteWorkflowsE2ETest {
 
     @Test
     void userCanMoveNotesToTrashRestoreOneAndEmptyTheRest() throws Exception {
-        register("Melina", "melina@example.com", "secret1");
-        MockHttpSession session = login("melina@example.com", "secret1");
+        register("Melina", "melina@example.com", "secretPass1");
+        MockHttpSession session = login("melina@example.com", "secretPass1");
         long restoredNoteId = createNote(session, "Behalten", "Wichtiger Inhalt", "wichtig");
         long deletedNoteId = createNote(session, "Entfernen", "Alter Inhalt", "alt");
 
@@ -148,21 +148,21 @@ class NoteWorkflowsE2ETest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("http://localhost/login"));
 
-        register("Melina", "melina@example.com", "secret1");
-        MockHttpSession ownerSession = login("melina@example.com", "secret1");
+        register("Melina", "melina@example.com", "secretPass1");
+        MockHttpSession ownerSession = login("melina@example.com", "secretPass1");
         long noteId = createNote(ownerSession, "Privat", "Nur fuer mich", "privat");
 
         mockMvc.perform(patch("/api/notes/{noteId}/delete", noteId)
                         .session(ownerSession))
                 .andExpect(status().isForbidden());
 
-        register("Andere Person", "other@example.com", "secret2");
-        MockHttpSession otherSession = login("other@example.com", "secret2");
+        register("Andere Person", "other@example.com", "secretPass2");
+        MockHttpSession otherSession = login("other@example.com", "secretPass2");
 
         mockMvc.perform(get("/api/notes/{noteId}", noteId)
                         .session(otherSession))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.status").value("FORBIDDEN"));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("NOT_FOUND"));
 
         assertThat(noteRepository.findById(noteId)).isPresent();
     }

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPassword {
-    String message() default "Das Passwort muss zwischen 6 und 72 Zeichen lang sein";
+    String message() default "Das Passwort muss zwischen 10 und 72 Zeichen lang sein";
 
     Class<?>[] groups() default {};
 

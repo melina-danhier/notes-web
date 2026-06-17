@@ -106,7 +106,7 @@ class TagRepositoryTest {
 
     private User createAndSaveUser(String email) {
         User user = User.builder()
-                .username("Username")
+                .displayName("Username")
                 .email(email)
                 .password("encryptedPass")
                 .role("ROLE_USER")

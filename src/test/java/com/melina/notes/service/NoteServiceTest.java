@@ -9,7 +9,6 @@ import com.melina.notes.exception.InvalidNoteStateException;
 import com.melina.notes.exception.NoteDeletedException;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.NoteNotInTrashException;
-import com.melina.notes.exception.UserNoteMismatchException;
 
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.mapper.NoteMapper;
@@ -134,38 +133,35 @@ class NoteServiceTest {
         Note note = createNote(10L, owner);
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteMapper.toNoteDto(note)).thenReturn(mappedDto);
 
         NoteDto result = noteService.getNoteById(1L, 10L);
 
         assertSame(mappedDto, result);
-        verify(noteRepository).findById(10L);
+        verify(noteRepository).findByIdAndUserId(10L, 1L);
         verify(noteMapper).toNoteDto(note);
     }
 
     @Test
     void getNoteById_throwsWhenNoteDoesNotExist() {
-        when(noteRepository.findById(99L)).thenReturn(Optional.empty());
+        when(noteRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
 
         assertThrows(NoteNotFoundException.class,
                 () -> noteService.getNoteById(1L, 99L));
 
-        verify(noteRepository).findById(99L);
+        verify(noteRepository).findByIdAndUserId(99L, 1L);
         verifyNoInteractions(noteMapper);
     }
 
     @Test
-    void getNoteById_throwsWhenUserIsNotOwner() {
-        User owner = createUser(2L);
-        Note note = createNote(99L, owner);
+    void getNoteById_throwsNotFoundWhenUserIsNotOwner() {
+        when(noteRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
 
-        when(noteRepository.findById(99L)).thenReturn(Optional.of(note));
-
-        assertThrows(UserNoteMismatchException.class,
+        assertThrows(NoteNotFoundException.class,
                 () -> noteService.getNoteById(1L, 99L));
 
-        verify(noteRepository).findById(99L);
+        verify(noteRepository).findByIdAndUserId(99L, 1L);
         verifyNoInteractions(noteMapper);
     }
 
@@ -181,7 +177,7 @@ class NoteServiceTest {
         Tag newTag = createTag(2L, "work");
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         doAnswer(invocation -> {
             Note target = invocation.getArgument(0);
@@ -225,7 +221,7 @@ class NoteServiceTest {
                 createTag(2L, "home")
         )));
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         noteService.deleteNoteForUser(1L, 10L);
 
@@ -242,7 +238,7 @@ class NoteServiceTest {
         note.setContent("[ ] Erste\nText\n[x] Zweite");
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(note)).thenReturn(note);
         when(noteMapper.toNoteDto(note)).thenReturn(mappedDto);
 
@@ -261,7 +257,7 @@ class NoteServiceTest {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
         note.setContent("[ ] Aufgabe");
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(InvalidNoteStateException.class,
                 () -> noteService.toggleTaskForUser(1L, 10L, 2));
@@ -272,7 +268,7 @@ class NoteServiceTest {
     @Test
     void deleteNoteForUser_noteOutsideTrash_throwsException() {
         Note note = createNote(10L, createUser(1L));
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(NoteNotInTrashException.class,
                 () -> noteService.deleteNoteForUser(1L, 10L));
@@ -292,7 +288,7 @@ class NoteServiceTest {
 
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDto(any(Note.class))).thenReturn(mappedDto);
 
@@ -321,7 +317,7 @@ class NoteServiceTest {
 
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDto(any(Note.class))).thenReturn(mappedDto);
 
@@ -340,7 +336,7 @@ class NoteServiceTest {
     @Test
     void restoreNoteForUser_activeNote_throwsException() {
         Note note = createNote(10L, createUser(1L));
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(InvalidNoteStateException.class,
                 () -> noteService.restoreNoteForUser(1L, 10L));
@@ -352,7 +348,7 @@ class NoteServiceTest {
     void updateNoteForUser_deletedNote_throwsException() {
         Note note = createNote(10L, createUser(1L));
         note.setDeleted(true);
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(NoteDeletedException.class,
                 () -> noteService.updateNoteForUser(
@@ -397,7 +393,7 @@ class NoteServiceTest {
 
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDto(any(Note.class))).thenReturn(mappedDto);
 
@@ -417,7 +413,7 @@ class NoteServiceTest {
     void togglePinNoteForUser_archivedNote_throwsException() {
         Note note = createNote(10L, createUser(1L));
         note.setArchived(true);
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(InvalidNoteStateException.class,
                 () -> noteService.togglePinNoteForUser(1L, 10L));
@@ -435,7 +431,7 @@ class NoteServiceTest {
 
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDto(any(Note.class))).thenReturn(mappedDto);
 
@@ -463,7 +459,7 @@ class NoteServiceTest {
 
         NoteDto mappedDto = createNoteDto(10L);
 
-        when(noteRepository.findById(10L)).thenReturn(Optional.of(note));
+        when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(noteMapper.toNoteDto(any(Note.class))).thenReturn(mappedDto);
 

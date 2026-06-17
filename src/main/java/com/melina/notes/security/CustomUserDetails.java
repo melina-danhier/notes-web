@@ -8,39 +8,47 @@ import com.melina.notes.entity.User;
 import java.util.Collection;
 import java.util.List;
 
-public record CustomUserDetails(User user) implements UserDetails {
+public record CustomUserDetails (
+        long id,
+        String email,
+        String password,
+        String displayName,
+        String role
+) implements UserDetails {
 
-    public CustomUserDetails(long id, String mail, String password, String role) {
-        this(User.builder()
-                .id(id)
-                .username(mail)
-                .email(mail)
-                .password(password)
-                .role(role)
-                .build());
+    public CustomUserDetails(User user) {
+        this(user.getId(), user.getEmail(), user.getPassword(), user.getDisplayName(), user.getRole());
+    }
+
+    public CustomUserDetails(long id, String email, String password, String displayName, String role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.displayName = displayName;
+        this.role = role;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole()));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     public Long getId() {
-        return user.getId();
+        return id;
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     public String getDisplayName() {
-        return user.getUsername();
+        return displayName;
     }
 
 }

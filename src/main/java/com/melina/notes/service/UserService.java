@@ -33,7 +33,7 @@ public class UserService {
 
         try {
             User user = User.builder()
-                    .username(normalizeName(name))
+                    .displayName(normalizeName(name))
                     .email(normalizedEmail)
                     .password(passwordEncoder.encode(password))
                     .role("ROLE_USER")

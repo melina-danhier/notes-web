@@ -222,14 +222,8 @@ public class NoteService {
     }
 
     private Note getNote(Long userId, Long noteId) {
-        Note note = noteRepository.findById(noteId)
+        return noteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> new NoteNotFoundException(noteId));
-
-        if (!note.getUser().getId().equals(userId)) {
-            throw new UserNoteMismatchException(userId, noteId);
-        }
-
-        return note;
     }
 
     private void ensureNotDeleted(Note note, String action) {

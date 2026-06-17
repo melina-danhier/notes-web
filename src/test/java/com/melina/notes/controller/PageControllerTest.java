@@ -137,6 +137,6 @@ class PageControllerTest {
     }
 
     private CustomUserDetails userDetails() {
-        return new CustomUserDetails(5L, "user@mail.com", "password", "ROLE_USER");
+        return new CustomUserDetails(5L, "user@mail.com", "password", "Melina", "ROLE_USER");
     }
 }
