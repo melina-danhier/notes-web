@@ -20,14 +20,6 @@ public record CustomUserDetails (
         this(user.getId(), user.getEmail(), user.getPassword(), user.getDisplayName(), user.getRole());
     }
 
-    public CustomUserDetails(long id, String email, String password, String displayName, String role) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.displayName = displayName;
-        this.role = role;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));

@@ -12,24 +12,6 @@ import { renderMarkdownPreview, escapeHtml } from './markdown.js';
 let currentEditNoteId = null;
 let currentNote = null;
 
-export function initNotePreviewModal() {
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeNoteModal();
-        }
-    });
-
-    const backdrop = document.querySelector('.note-view-modal-backdrop');
-    if (backdrop) {
-        backdrop.addEventListener('click', closeNoteModal);
-    }
-
-    const contentContainer = document.getElementById('modalContent');
-    if (contentContainer) {
-        contentContainer.addEventListener('change', handleTaskToggle);
-    }
-}
-
 export async function viewNote(noteId) {
     try {
         const response = await fetch(`/api/notes/${noteId}`, {
@@ -111,7 +93,7 @@ export function displayNoteModal(note) {
         timestamp.innerHTML = timestampHtml;
     }
 
-    // Check if we're on notes page (edit button exists)
+    // Check if we're on note page (edit button exists)
     const editBtn = document.getElementById('modalEditBtn');
     if (editBtn) {
         editBtn.onclick = () => {
@@ -130,7 +112,7 @@ export function displayNoteModal(note) {
         };
     }
 
-     // Check if we're on notes page and add pin button functionality
+     // Check if we're on note page and add pin button functionality
      const pinBtn = document.getElementById('modalPinBtn');
      if (pinBtn) {
          pinBtn.style.display = 'block';
@@ -241,21 +223,6 @@ export function closeNoteModal() {
 export function closeNoteModalAndReload() {
     closeNoteModal();
     window.location.reload();
-}
-
-export function modalTogglePin() {
-    const modal = document.getElementById('noteViewModal');
-    if (modal && currentEditNoteId) {
-        if (window.togglePin) {
-            window.togglePin(currentEditNoteId, true);
-        }
-    }
-}
-
-export function editFromModal() {
-    if (currentEditNoteId) {
-        window.location.href = `/notes/${currentEditNoteId}`;
-    }
 }
 
 // Markdown-Funktionen werden nun aus dem zentralen Modul importiert (./markdown.js)

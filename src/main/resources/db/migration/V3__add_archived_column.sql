@@ -1,4 +1,4 @@
--- Add archived column to notes table
+-- Add archived column to 'notes' table
 ALTER TABLE notes ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Create index for filtering archived notes

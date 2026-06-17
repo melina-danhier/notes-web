@@ -7,7 +7,6 @@ import com.melina.notes.exception.InvalidNoteStateException;
 import com.melina.notes.exception.NoteDeletedException;
 import com.melina.notes.exception.NoteNotFoundException;
 import com.melina.notes.exception.NoteNotInTrashException;
-import com.melina.notes.exception.UserNoteMismatchException;
 import com.melina.notes.filter.NoteFilter;
 import com.melina.notes.filter.NoteSpecification;
 import com.melina.notes.mapper.NoteMapper;

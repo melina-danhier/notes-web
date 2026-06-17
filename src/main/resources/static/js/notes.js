@@ -109,6 +109,3 @@ function initSearchHighlighting() {
     });
 }
 
-export function getCurrentSearchTerm() {
-    return currentSearchTerm;
-}

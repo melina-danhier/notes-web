@@ -17,3 +17,9 @@ spring:
     compose:
       enabled: false
 
+logging:
+  level:
+    com.melina.notes.exception.GlobalExceptionHandler: off
+    org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration: off
+    org.hibernate.SQL: warn
+    org.hibernate.orm.jdbc.bind: warn

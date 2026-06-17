@@ -3,7 +3,7 @@ CREATE SEQUENCE IF NOT EXISTS users_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS notes_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS tags_seq START WITH 1 INCREMENT BY 1;
 
--- Create users table
+-- Create users' table
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY DEFAULT nextval('users_seq'),
     username VARCHAR(255),
@@ -12,13 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(255) DEFAULT 'ROLE_USER'
 );
 
--- Create tags table
+-- Create tag table
 CREATE TABLE IF NOT EXISTS tags (
     id BIGINT PRIMARY KEY DEFAULT nextval('tags_seq'),
     tag VARCHAR(255)
 );
 
--- Create notes table
+-- Create 'notes' table
 CREATE TABLE IF NOT EXISTS notes (
     id BIGINT PRIMARY KEY DEFAULT nextval('notes_seq'),
     title VARCHAR(255),

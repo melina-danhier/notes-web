@@ -583,7 +583,7 @@ function initTagInput() {
         }
     });
 
-    // Komma erlaubt das schnelle Hinzufügen mehrerer Tags, auch beim Einfügen von Listen.
+    // Ein Komma erlaubt das schnelle Hinzufügen mehrerer Tags, auch beim Einfügen von Listen.
     tagInputField.addEventListener('keyup', function() {
         if (this.value.includes(',')) {
             addTagsFromInput(this.value);

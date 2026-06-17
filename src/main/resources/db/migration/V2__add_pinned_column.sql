@@ -1,4 +1,4 @@
--- Add pinned column to notes table
+-- Add pinned column to 'notes' table
 ALTER TABLE notes ADD COLUMN pinned BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Create index for better query performance when sorting by pinned
