@@ -39,9 +39,6 @@ function updateCardPinAppearance(cardColumn, pinned) {
     const pinButton = cardColumn.querySelector('.pin-btn');
 
     card?.classList.toggle('pinned-card', pinned);
-    if (card) {
-        card.style.borderLeft = pinned ? '4px solid #f59e0b' : '';
-    }
 
     let pinIcon = titleRow?.querySelector('.pin-icon');
     if (pinned && titleRow && !pinIcon) {

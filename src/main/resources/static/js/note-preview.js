@@ -1,16 +1,23 @@
-// noinspection JSIgnoredPromiseFromCall
-
 'use strict';
-
-/**
- * Markdown-Rendering und Note-Preview Modal Logic
- */
 
 import { getCsrfToken, getCsrfHeader, highlightText, highlightMarkdownContent } from './notes-utils.js';
 import { renderMarkdownPreview, escapeHtml } from './markdown.js';
 
-let currentEditNoteId = null;
 let currentNote = null;
+
+export function initNotePreviewModal() {
+    const modal = document.getElementById('noteViewModal');
+    if (!modal) return;
+
+    modal.querySelector('.note-view-modal-backdrop')?.addEventListener('click', closeNoteModal);
+    modal.querySelector('#modalContent')?.addEventListener('change', handleTaskToggle);
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal.style.display !== 'none') {
+            closeNoteModal();
+        }
+    });
+}
 
 export async function viewNote(noteId) {
     try {
@@ -26,7 +33,6 @@ export async function viewNote(noteId) {
         }
 
         const note = await response.json();
-        currentEditNoteId = noteId;
         displayNoteModal(note);
     } catch (error) {
         console.error('Fehler beim Laden der Notiz:', error);
@@ -93,12 +99,9 @@ export function displayNoteModal(note) {
         timestamp.innerHTML = timestampHtml;
     }
 
-    // Check if we're on note page (edit button exists)
     const editBtn = document.getElementById('modalEditBtn');
     if (editBtn) {
-        editBtn.onclick = () => {
-            window.location.href = `/notes/${note.id}`;
-        };
+        editBtn.onclick = editFromModal;
     }
 
     const archiveBtn = document.getElementById('modalArchiveBtn');
@@ -112,26 +115,20 @@ export function displayNoteModal(note) {
         };
     }
 
-     // Check if we're on note page and add pin button functionality
-     const pinBtn = document.getElementById('modalPinBtn');
-     if (pinBtn) {
-         pinBtn.style.display = 'block';
-         pinBtn.dataset.noteId = note.id;
-         pinBtn.dataset.pinned = note.pinned;
-         const updatePinButtonText = (isPinned) => {
-             pinBtn.innerHTML = isPinned ? '📍 Entfernen' : '📌 Anheften';
-             pinBtn.className = `btn btn-${isPinned ? 'warning' : 'secondary'} btn-sm`;
-             pinBtn.dataset.pinned = isPinned;
-         };
-         updatePinButtonText(note.pinned);
-         pinBtn.onclick = () => {
-             if (window.togglePin) {
-                 window.togglePin(note.id, true);
-             }
-         };
-     }
+    const pinBtn = document.getElementById('modalPinBtn');
+    if (pinBtn) {
+        pinBtn.style.display = 'block';
+        pinBtn.dataset.noteId = note.id;
+        pinBtn.dataset.pinned = note.pinned;
+        const updatePinButtonText = (isPinned) => {
+            pinBtn.innerHTML = isPinned ? '📍 Entfernen' : '📌 Anheften';
+            pinBtn.className = `btn btn-${isPinned ? 'warning' : 'secondary'} btn-sm`;
+            pinBtn.dataset.pinned = isPinned;
+        };
+        updatePinButtonText(note.pinned);
+        pinBtn.onclick = modalTogglePin;
+    }
 
-    // Check if we're on trash page (restore/delete buttons exist)
     const restoreBtn = document.getElementById('modalRestoreBtn');
     const deleteBtn = document.getElementById('modalDeleteBtn');
     if (restoreBtn && deleteBtn) {
@@ -171,6 +168,18 @@ export function displayNoteModal(note) {
     }
 
     modal.style.display = 'flex';
+}
+
+export function editFromModal() {
+    if (currentNote?.id) {
+        window.location.href = `/notes/${currentNote.id}`;
+    }
+}
+
+export function modalTogglePin() {
+    if (currentNote?.id && window.togglePin) {
+        window.togglePin(currentNote.id, true);
+    }
 }
 
 async function handleTaskToggle(changeEvent) {
@@ -215,7 +224,6 @@ export function closeNoteModal() {
     const modal = document.getElementById('noteViewModal');
     if (modal) {
         modal.style.display = 'none';
-        currentEditNoteId = null;
         currentNote = null;
     }
 }
@@ -224,7 +232,3 @@ export function closeNoteModalAndReload() {
     closeNoteModal();
     window.location.reload();
 }
-
-// Markdown-Funktionen werden nun aus dem zentralen Modul importiert (./markdown.js)
-
-

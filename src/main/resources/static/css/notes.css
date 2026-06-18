@@ -14,6 +14,10 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
+.click-card {
+    cursor: pointer;
+}
+
 .note-editor-page .card,
 .note-editor-page .card:hover {
     transform: none;
@@ -166,8 +170,6 @@
     width: 100%;
 }
 
-/* ======================== EDITOR STYLES ======================== */
-
 .note-editor-page {
     display: flex;
     flex-direction: column;
@@ -187,11 +189,6 @@
     width: 100%;
     gap: 0.7rem;
     border-radius: 1rem;
-}
-
-.note-editor-header h3 {
-    font-size: 1.4rem;
-    margin: 0;
 }
 
 .note-editor-form {
@@ -239,12 +236,6 @@
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.input-with-hint .form-control,
-.input-with-hint .tag-input-field {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
 .markdown-panel .card-body {
     display: flex;
     flex-direction: column;
@@ -254,8 +245,6 @@
 .split-preview .markdown-panel {
     height: 100%;
 }
-
-/* ======================== TAG INPUT STYLES ======================== */
 
 .tag-input-container {
     background: #f9fafb;
@@ -325,8 +314,6 @@
 .tag-input-field::placeholder {
     color: #d1d5db;
 }
-
-/* ======================== EDITOR CONTROLS & TOGGLES ======================== */
 
 .editor-controls {
     display: flex;
@@ -409,8 +396,6 @@
     line-height: 1.4;
 }
 
-/* ======================== MARKDOWN TOOLBAR ======================== */
-
 .markdown-toolbar {
     border-radius: 0.5rem;
     overflow: hidden;
@@ -461,8 +446,6 @@
 .markdown-toolbar .btn:hover {
     transform: translateY(-1px);
 }
-
-/* ======================== MARKDOWN PANELS ======================== */
 
 .markdown-panel {
     border-radius: 0.5rem;
@@ -539,7 +522,6 @@
     background: linear-gradient(180deg, rgba(102, 126, 234, 0.16), rgba(118, 75, 162, 0.16));
 }
 
-/* Preview offen: Split View mit variablem Verhältnis */
 .markdown-split-view.preview-open .split-editor {
     flex-basis: calc((100% - var(--split-divider-width)) * (1 - var(--split-ratio)));
 }
@@ -555,8 +537,6 @@
 .markdown-split-view.preview-open #previewContainer {
     display: block;
 }
-
-/* Preview zu: Editor volle Breite */
 
 .markdown-editor-textarea {
     width: 100%;
@@ -585,6 +565,10 @@
     min-height: 0;
     overflow-y: auto;
     padding-right: 0.2rem;
+}
+
+.markdown-preview,
+.note-modal-content {
     color: #1f2937;
     line-height: 1.6;
     font-size: 0.95rem;
@@ -604,25 +588,39 @@
 .markdown-preview h3,
 .markdown-preview h4,
 .markdown-preview h5,
-.markdown-preview h6 {
+.markdown-preview h6,
+.note-modal-content h1,
+.note-modal-content h2,
+.note-modal-content h3,
+.note-modal-content h4,
+.note-modal-content h5,
+.note-modal-content h6 {
     margin-top: 0.8rem;
     margin-bottom: 0.5rem;
     font-weight: 700;
     color: #0f172a;
 }
 
-.markdown-preview h1 { font-size: 1.6rem; }
-.markdown-preview h2 { font-size: 1.4rem; }
-.markdown-preview h3 { font-size: 1.2rem; }
-.markdown-preview h4 { font-size: 1.1rem; }
-.markdown-preview h5 { font-size: 1rem; }
-.markdown-preview h6 { font-size: 0.95rem; }
+.markdown-preview h1,
+.note-modal-content h1 { font-size: 1.6rem; }
+.markdown-preview h2,
+.note-modal-content h2 { font-size: 1.4rem; }
+.markdown-preview h3,
+.note-modal-content h3 { font-size: 1.2rem; }
+.markdown-preview h4,
+.note-modal-content h4 { font-size: 1.1rem; }
+.markdown-preview h5,
+.note-modal-content h5 { font-size: 1rem; }
+.markdown-preview h6,
+.note-modal-content h6 { font-size: 0.95rem; }
 
-.markdown-preview p {
+.markdown-preview p,
+.note-modal-content p {
     margin-bottom: 0.7rem;
 }
 
-.markdown-preview blockquote {
+.markdown-preview blockquote,
+.note-modal-content blockquote {
     border-left: 3px solid #667eea;
     background: rgba(102, 126, 234, 0.05);
     padding: 0.7rem 0.9rem;
@@ -633,16 +631,20 @@
 }
 
 .markdown-preview ul,
-.markdown-preview ol {
+.markdown-preview ol,
+.note-modal-content ul,
+.note-modal-content ol {
     padding-left: 1.2rem;
     margin-bottom: 0.8rem;
 }
 
-.markdown-preview li + li {
+.markdown-preview li + li,
+.note-modal-content li + li {
     margin-top: 0.2rem;
 }
 
-.markdown-preview pre {
+.markdown-preview pre,
+.note-modal-content pre {
     background: #0f172a;
     color: #e2e8f0;
     border-radius: 0.4rem;
@@ -653,7 +655,8 @@
     font-size: 0.85rem;
 }
 
-.markdown-preview code {
+.markdown-preview code,
+.note-modal-content code {
     background: rgba(15, 23, 42, 0.08);
     border-radius: 0.3rem;
     padding: 0.1rem 0.3rem;
@@ -661,19 +664,22 @@
     color: #0f172a;
 }
 
-.markdown-preview pre code {
+.markdown-preview pre code,
+.note-modal-content pre code {
     background: transparent;
     color: inherit;
     padding: 0;
 }
 
-.markdown-preview a {
+.markdown-preview a,
+.note-modal-content a {
     color: #4f46e5;
     word-break: break-word;
     text-decoration: underline;
 }
 
-.markdown-preview a:hover {
+.markdown-preview a:hover,
+.note-modal-content a:hover {
     color: #667eea;
 }
 
@@ -737,15 +743,11 @@
     pointer-events: none;
 }
 
-/* ======================== ACTION BUTTONS ======================== */
-
 .note-editor-form .btn-success,
 .note-editor-form .btn-outline-secondary {
     padding: 0.4rem 1rem;
     font-size: 0.9rem;
 }
-
-/* ======================== RESPONSIVE ======================== */
 
 @media (max-width: 992px) {
     .note-meta-row {
@@ -837,10 +839,6 @@
 
 @media (max-width: 576px) {
 
-    .note-editor-header h3 {
-        font-size: 1.1rem;
-    }
-
     .editor-controls {
         flex-direction: column;
         gap: 0.35rem;
@@ -904,8 +902,6 @@
     }
 }
 
-/* ======================== NOTE VIEW MODAL ======================== */
-
 .note-view-modal {
     position: fixed;
     top: 0;
@@ -916,16 +912,6 @@
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
 }
 
 .note-view-modal-backdrop {
@@ -1025,90 +1011,6 @@
     white-space: nowrap;
 }
 
-.note-modal-content {
-    color: #1f2937;
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
-
-.note-modal-content h1,
-.note-modal-content h2,
-.note-modal-content h3,
-.note-modal-content h4,
-.note-modal-content h5,
-.note-modal-content h6 {
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.note-modal-content h1 { font-size: 1.6rem; }
-.note-modal-content h2 { font-size: 1.4rem; }
-.note-modal-content h3 { font-size: 1.2rem; }
-.note-modal-content h4 { font-size: 1.1rem; }
-.note-modal-content h5 { font-size: 1rem; }
-.note-modal-content h6 { font-size: 0.95rem; }
-
-.note-modal-content p {
-    margin-bottom: 0.7rem;
-}
-
-.note-modal-content blockquote {
-    border-left: 3px solid #667eea;
-    background: rgba(102, 126, 234, 0.05);
-    padding: 0.7rem 0.9rem;
-    border-radius: 0.4rem;
-    margin: 0.8rem 0;
-    font-style: italic;
-    color: #4b5563;
-}
-
-.note-modal-content ul,
-.note-modal-content ol {
-    padding-left: 1.2rem;
-    margin-bottom: 0.8rem;
-}
-
-.note-modal-content li + li {
-    margin-top: 0.2rem;
-}
-
-.note-modal-content pre {
-    background: #0f172a;
-    color: #e2e8f0;
-    border-radius: 0.4rem;
-    padding: 0.8rem;
-    overflow: auto;
-    margin: 0.8rem 0;
-    border: 1px solid #1e293b;
-    font-size: 0.85rem;
-}
-
-.note-modal-content code {
-    background: rgba(15, 23, 42, 0.08);
-    border-radius: 0.3rem;
-    padding: 0.1rem 0.3rem;
-    font-size: 0.9em;
-    color: #0f172a;
-}
-
-.note-modal-content pre code {
-    background: transparent;
-    color: inherit;
-    padding: 0;
-}
-
-.note-modal-content a {
-    color: #4f46e5;
-    word-break: break-word;
-    text-decoration: underline;
-}
-
-.note-modal-content a:hover {
-    color: #667eea;
-}
-
 .note-modal-timestamp {
     color: #6b7280;
     font-size: 0.85rem;
@@ -1169,16 +1071,10 @@
     }
 }
 
-/* ======================== PIN BUTTON STYLES ======================== */
-
 .pin-icon {
     opacity: 0.75;
     margin-right: 0.25rem;
 }
-
-/* ======================== END PIN BUTTON STYLES ======================== */
-
-/* ======================== PINNED NOTES SECTION ======================== */
 
 .pinned-notes-section {
     margin-bottom: 1.5rem;
@@ -1190,6 +1086,7 @@
 
 .pinned-card:hover {
     border-left-color: #f97316 !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.15);
 }
 
 .pinned-divider {
@@ -1212,4 +1109,3 @@
     transform: translateX(-50%);
 }
 
-/* ======================== END PINNED NOTES SECTION ======================== */
