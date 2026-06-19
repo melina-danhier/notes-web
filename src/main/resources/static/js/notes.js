@@ -6,6 +6,7 @@ import './notes-archive.js';
 import { initSorting } from './note-sort.js';
 import { highlightText } from './notes-utils.js';
 import './notes-pin.js';
+import { initNoteSelection } from './note-selection.js';
 
 let currentSearchTerm = null;
 
@@ -16,6 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
     initBinButton();
     initArchiveButton();
     initSearchHighlighting();
+    initNoteSelection({
+        actions: {
+            archive: {
+                method: 'PATCH',
+                url: noteId => `/api/notes/${noteId}/archive`,
+                confirmMessage: count => `${count} Notiz(en) archivieren?`,
+                errorMessage: 'Archivieren der ausgewählten Notizen fehlgeschlagen'
+            },
+            delete: {
+                method: 'PATCH',
+                url: noteId => `/api/notes/${noteId}/delete`,
+                confirmMessage: count => `${count} Notiz(en) in den Papierkorb verschieben?`,
+                errorMessage: 'Löschen der ausgewählten Notizen fehlgeschlagen'
+            }
+        }
+    });
 });
 
 function initBinButton() {
@@ -108,4 +125,3 @@ function initSearchHighlighting() {
         titleElement.innerHTML = highlightText(originalText, currentSearchTerm);
     });
 }
-

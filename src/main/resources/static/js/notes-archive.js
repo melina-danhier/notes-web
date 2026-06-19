@@ -1,8 +1,6 @@
 'use strict';
 
 import { getCsrfToken, getCsrfHeader, showLoading, hideLoading } from './notes-utils.js';
-import { showSuccessToast } from './notes-ui.js';
-import { removeNoteFromMainPage } from './note-dom.js';
 
 window.archiveNote = async function(noteId) {
     const csrfToken = getCsrfToken();
@@ -25,9 +23,7 @@ window.archiveNote = async function(noteId) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        const archivedNote = await response.json();
-        removeNoteFromMainPage(archivedNote.id);
-        showSuccessToast('Notiz archiviert!');
+        window.location.reload();
     } catch (error) {
         console.error('Archivierungsfehler:', error);
         hideLoading(noteId);

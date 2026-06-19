@@ -1,7 +1,6 @@
 'use strict';
+
 import { getCsrfToken, getCsrfHeader, showLoading, hideLoading } from './notes-utils.js';
-import { showSuccessToast } from './notes-ui.js';
-import { removeNoteFromMainPage } from './note-dom.js';
 
 window.deleteNote = async function(noteId) {
     const csrfToken = getCsrfToken();
@@ -24,9 +23,7 @@ window.deleteNote = async function(noteId) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        const deletedNote = await response.json();
-        removeNoteFromMainPage(deletedNote.id);
-        showSuccessToast('Notiz gelöscht!');
+        window.location.reload();
     } catch (error) {
         console.error('Löschfehler:', error);
         hideLoading(noteId);

@@ -1,13 +1,11 @@
 'use strict';
 
 import { getCsrfHeader, getCsrfToken } from './notes-utils.js';
-import { moveNoteCardForPin } from './note-dom.js';
 
-export function togglePin(noteId, isFromModal = false) {
+export function togglePin(noteId) {
     const btn = document.querySelector(`#note-${noteId} .pin-btn`);
     if (!btn) return;
 
-    // Disable button during request
     btn.disabled = true;
 
     fetch(`/api/notes/${noteId}/pin`, {
@@ -22,16 +20,7 @@ export function togglePin(noteId, isFromModal = false) {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-    })
-    .then(data => {
-        const newPinnedState = data.pinned;
-        moveNoteCardForPin(noteId, newPinnedState);
-
-        const modalPinBtn = document.getElementById('modalPinBtn');
-        if (isFromModal && modalPinBtn) {
-            updatePinButton(modalPinBtn, newPinnedState);
-        }
+        window.location.reload();
     })
     .catch(error => {
         console.error('Fehler beim Anheften der Notiz:', error);
@@ -40,19 +29,4 @@ export function togglePin(noteId, isFromModal = false) {
     });
 }
 
-function updatePinButton(btn, isPinned) {
-    btn.innerHTML = isPinned ? '📍 Entfernen' : '📌 Anheften';
-    btn.title = isPinned ? 'Trennen' : 'Anheften';
-    btn.dataset.pinned = isPinned;
-    btn.disabled = false;
-
-    // Update button color
-    btn.className = isPinned
-        ? 'btn btn-warning px-3 py-1 pin-btn'
-        : 'btn btn-secondary px-3 py-1 pin-btn';
-}
-
-// Export for global use
 window.togglePin = togglePin;
-
-

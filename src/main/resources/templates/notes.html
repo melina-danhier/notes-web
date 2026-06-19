@@ -146,6 +146,17 @@
             </div>
         </div>
 
+        <div class="bulk-action-bar d-none mt-3" id="bulkActionBar">
+            <div class="bulk-selection-count">
+                <strong id="selectedNoteCount">0</strong> ausgew&auml;hlt
+            </div>
+            <div class="bulk-action-buttons">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearSelectionBtn">Aufheben</button>
+                <button type="button" class="btn btn-warning text-dark btn-sm" data-bulk-action="archive">&#128451;&#65039; Archivieren</button>
+                <button type="button" class="btn btn-danger btn-sm" data-bulk-action="delete">&#128465;&#65039; L&ouml;schen</button>
+            </div>
+        </div>
+
     <div class="center-gap m-3" id="notesEmptyState"
          th:style="${notes.content.isEmpty()} ? '' : 'display: none;'">
         <h5 class="fst-italic">Keine Notizen vorhanden</h5>
@@ -160,6 +171,10 @@
                 <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card pinned-card"
                      th:onclick="'viewNote(' + ${note.id} + '); event.stopPropagation();'"
                      th:data-note-id="${note.id}">
+                    <label class="note-select-toggle" title="Notiz ausw&auml;hlen" onclick="event.stopPropagation();">
+                        <input type="checkbox" class="note-select-checkbox" th:value="${note.id}" aria-label="Notiz ausw&auml;hlen">
+                        <span></span>
+                    </label>
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
                             <span class="pin-icon" title="Angeheftet">📌</span>
@@ -226,6 +241,10 @@
             <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card"
                  th:onclick="'viewNote(' + ${note.id} + '); event.stopPropagation();'"
                  th:data-note-id="${note.id}">
+                <label class="note-select-toggle" title="Notiz ausw&auml;hlen" onclick="event.stopPropagation();">
+                    <input type="checkbox" class="note-select-checkbox" th:value="${note.id}" aria-label="Notiz ausw&auml;hlen">
+                    <span></span>
+                </label>
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
                         <h5 class="title m-0" th:text="${note.title}">Notiz</h5>
@@ -316,7 +335,7 @@
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary btn-sm" id="modalPinBtn" onclick="modalTogglePin(); event.stopPropagation();" style="display:none;">📌 Pin</button>
                     <button type="button" class="btn btn-primary btn-sm" id="modalEditBtn" onclick="editFromModal()">✏️ Bearbeiten</button>
-                    <button type="button" class="btn btn-warning text-dark btn-sm" id="modalArchiveBtn">Archivieren</button>
+                    <button type="button" class="btn btn-warning text-dark btn-sm" id="modalArchiveBtn">&#128451;&#65039; Archivieren</button>
                 </div>
             </div>
         </div>

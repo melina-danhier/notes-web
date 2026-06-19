@@ -2,9 +2,26 @@
 
 import { getCsrfToken, getCsrfHeader } from './notes-utils.js';
 import { clearNoteList, removeNoteCard } from './note-dom.js';
+import { initNoteSelection } from './note-selection.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initEmptyTrashButton();
+    initNoteSelection({
+        actions: {
+            restore: {
+                method: 'PATCH',
+                url: noteId => `/api/notes/${noteId}/restore`,
+                confirmMessage: count => `${count} Notiz(en) wiederherstellen?`,
+                errorMessage: 'Wiederherstellen der ausgewählten Notizen fehlgeschlagen'
+            },
+            delete: {
+                method: 'DELETE',
+                url: noteId => `/api/notes/${noteId}`,
+                confirmMessage: count => `${count} Notiz(en) endgültig löschen?`,
+                errorMessage: 'Endgültiges Löschen der ausgewählten Notizen fehlgeschlagen'
+            }
+        }
+    });
 });
 
 function initEmptyTrashButton() {
