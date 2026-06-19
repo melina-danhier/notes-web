@@ -106,14 +106,6 @@
             <version>5.3.8</version>
         </dependency>
 
-        <!-- Docker Compose Support -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-docker-compose</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

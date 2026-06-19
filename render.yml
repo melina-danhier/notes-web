@@ -11,6 +11,8 @@ projects:
             repo: https://github.com/melina-danhier/notes-web
             plan: free
             envVars:
+              - key: SPRING_PROFILES_ACTIVE
+                value: prod
               - key: DB_PASSWORD
                 sync: false
               - key: DB_USERNAME
