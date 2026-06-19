@@ -50,6 +50,7 @@ public class NoteService {
                 .build();
 
         note = noteRepository.save(note);
+        log.info("Note created - userId={}, noteId={}", userId, note.getId());
         return noteMapper.toNoteDto(note);
     }
 
@@ -134,6 +135,7 @@ public class NoteService {
         noteRepository.delete(note);
 
         tagService.deleteAllWithNoNotes();
+        log.info("Note permanently deleted - userId={}, noteId={}", userId, noteId);
     }
 
     public NoteDto softDeleteNoteForUser(Long userId, Long noteId) {
@@ -174,6 +176,7 @@ public class NoteService {
 
         noteRepository.deleteAll(deletedNotes);
         tagService.deleteAllWithNoNotes();
+        log.info("Trash emptied - userId={}, deletedCount={}", userId, deletedNotes.size());
     }
 
     public NoteDto togglePinNoteForUser(Long userId, Long noteId) {
@@ -203,6 +206,7 @@ public class NoteService {
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);
+        log.info("Note archived - userId={}, noteId={}", userId, noteId);
         return noteMapper.toNoteDto(note);
     }
 

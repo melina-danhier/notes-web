@@ -6,11 +6,13 @@ import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.exception.UserNotFoundException;
 import com.melina.notes.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -40,6 +42,7 @@ public class UserService {
                     .build();
 
             userRepository.save(user);
+            log.info("User registered - userId={}", user.getId());
         } catch (DataIntegrityViolationException ex) {
             throw new EmailAlreadyExistsException(normalizedEmail);
         } catch (RuntimeException ex) {

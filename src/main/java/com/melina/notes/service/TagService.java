@@ -51,7 +51,9 @@ public class TagService {
 
     public void deleteAllWithNoNotes() {
         int del = tagRepository.deleteAllWithNoNotes();
-        log.info("Deleted tags with no notes - deletedCount={}", del);
+        if (del > 0) {
+            log.info("Unused tags deleted - deletedCount={}", del);
+        }
     }
 
     private Tag createTag(String tagName) {
