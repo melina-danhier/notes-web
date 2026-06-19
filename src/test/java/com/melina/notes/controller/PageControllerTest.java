@@ -130,7 +130,7 @@ class PageControllerTest {
                 .unpinnedNotes(unpinnedNotes)
                 .allTags(List.of())
                 .currentPage(0)
-                .pageSize(6)
+                .pageSize(9)
                 .sortField("created")
                 .sortDir("desc")
                 .build();
