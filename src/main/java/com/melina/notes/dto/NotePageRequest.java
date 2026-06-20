@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class NotePageRequest {
     private int pageNo = 0;
-    private int pageSize = 9;
+    private int pageSize = 12;
     private String sortField = "created";
     private String sortDir = "desc";
     private String tagFilter;

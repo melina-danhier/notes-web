@@ -115,13 +115,25 @@ export function displayNoteModal(note) {
         };
     }
 
+    const noteDeleteBtn = document.getElementById('modalNoteDeleteBtn');
+    if (noteDeleteBtn) {
+        noteDeleteBtn.onclick = () => {
+            if (window.deleteNote) {
+                window.deleteNote(note.id);
+            } else {
+                alert('Fehler: Löschen-Funktion nicht verfügbar');
+            }
+        };
+    }
+
     const pinBtn = document.getElementById('modalPinBtn');
     if (pinBtn) {
         pinBtn.style.display = 'block';
         pinBtn.dataset.noteId = note.id;
         pinBtn.dataset.pinned = note.pinned;
         const updatePinButtonText = (isPinned) => {
-            pinBtn.innerHTML = isPinned ? '📍 Entfernen' : '📌 Anheften';
+            pinBtn.textContent = isPinned ? '📍' : '📌';
+            pinBtn.title = isPinned ? 'Anheftung entfernen' : 'Anheften';
             pinBtn.className = `btn btn-${isPinned ? 'warning' : 'secondary'} btn-sm`;
             pinBtn.dataset.pinned = isPinned;
         };
