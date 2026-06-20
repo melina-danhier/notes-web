@@ -16,7 +16,6 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.ERROR
 )
 public interface NoteMapper {
-    @Mapping(source = "user.id", target = "userId")
     @Mapping(target = "contentPreview", ignore = true)
     NoteDto toNoteDto(Note note);
 

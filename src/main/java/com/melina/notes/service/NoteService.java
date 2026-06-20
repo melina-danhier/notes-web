@@ -35,14 +35,14 @@ public class NoteService {
     private final UserService userService;
 
     public NoteDto createNoteForUser(Long userId, NoteFormDto noteForm) {
-        String title = resolveTitle(noteForm.getTitle());
+        String title = resolveTitle(noteForm.title());
 
         Note note = Note.builder()
                 .title(title)
-                .content(noteForm.getContent())
+                .content(noteForm.content())
                 .created(Instant.now())
                 .updated(Instant.now())
-                .tags(tagService.getOrCreateTags(noteForm.getTags()))
+                .tags(tagService.getOrCreateTags(noteForm.tags()))
                 .user(userService.getUser(userId))
                 .deleted(false)
                 .archived(false)
@@ -79,7 +79,7 @@ public class NoteService {
 
         noteMapper.updateNote(note, noteForm);
         note.setTitle(resolveTitle(note.getTitle()));
-        note.setTags(tagService.getOrCreateTags(noteForm.getTags()));
+        note.setTags(tagService.getOrCreateTags(noteForm.tags()));
         note.setUpdated(Instant.now());
 
         note = noteRepository.save(note);

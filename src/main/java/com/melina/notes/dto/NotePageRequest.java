@@ -1,8 +1,10 @@
 package com.melina.notes.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class NotePageRequest {
     private int pageNo = 0;
     private int pageSize = 9;

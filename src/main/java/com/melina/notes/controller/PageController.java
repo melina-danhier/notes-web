@@ -72,7 +72,7 @@ public class PageController {
 
     @GetMapping("/notes/new")
     public String newNote(Model model) {
-        model.addAttribute("noteDto", new NoteFormDto());
+        model.addAttribute("noteDto", NoteFormDto.builder().build());
         model.addAttribute("tagsInputValue", "");
         return "note-view";
     }
@@ -82,7 +82,7 @@ public class PageController {
         NoteFormDto note = noteService.getNoteByIdForView(user.getId(), id);
         model.addAttribute("noteDto", note);
         model.addAttribute("noteId", id);
-        model.addAttribute("tagsInputValue", joinTags(note.getTags()));
+        model.addAttribute("tagsInputValue", joinTags(note.tags()));
         return "note-view";
     }
 
@@ -94,17 +94,17 @@ public class PageController {
     }
 
     private void addPageDataToModel(Model model, NotePageData pageData, CustomUserDetails user) {
-        model.addAttribute("notes", pageData.getNotes());
-        model.addAttribute("pinnedNotes", pageData.getPinnedNotes());
-        model.addAttribute("unpinnedNotes", pageData.getUnpinnedNotes());
-        model.addAttribute("currentPage", pageData.getCurrentPage());
-        model.addAttribute("pageSize", pageData.getPageSize());
-        model.addAttribute("totalPages", pageData.getNotes().getTotalPages());
-        model.addAttribute("sortField", pageData.getSortField());
-        model.addAttribute("sortDir", pageData.getSortDir());
+        model.addAttribute("notes", pageData.notes());
+        model.addAttribute("pinnedNotes", pageData.pinnedNotes());
+        model.addAttribute("unpinnedNotes", pageData.unpinnedNotes());
+        model.addAttribute("currentPage", pageData.currentPage());
+        model.addAttribute("pageSize", pageData.pageSize());
+        model.addAttribute("totalPages", pageData.notes().getTotalPages());
+        model.addAttribute("sortField", pageData.sortField());
+        model.addAttribute("sortDir", pageData.sortDir());
         model.addAttribute("displayname", user.getDisplayName());
-        model.addAttribute("allTags", pageData.getAllTags());
-        model.addAttribute("tagFilter", pageData.getTagFilter());
-        model.addAttribute("search", pageData.getSearch());
+        model.addAttribute("allTags", pageData.allTags());
+        model.addAttribute("tagFilter", pageData.tagFilter());
+        model.addAttribute("search", pageData.search());
     }
 }

@@ -57,9 +57,9 @@ class NotePageServiceTest {
                 () -> assertEquals("meeting", filter.getSearchTerm()),
                 () -> assertEquals(false, filter.getDeleted()),
                 () -> assertEquals(false, filter.getArchived()),
-                () -> assertEquals(List.of(pinned), result.getPinnedNotes()),
-                () -> assertEquals(List.of(unpinned), result.getUnpinnedNotes()),
-                () -> assertEquals(List.of("work"), result.getAllTags())
+                () -> assertEquals(List.of(pinned), result.pinnedNotes()),
+                () -> assertEquals(List.of(unpinned), result.unpinnedNotes()),
+                () -> assertEquals(List.of("work"), result.allTags())
         );
     }
 
@@ -81,8 +81,8 @@ class NotePageServiceTest {
         assertAll(
                 () -> assertEquals(0, pageable.getPageNumber()),
                 () -> assertEquals(50, pageable.getPageSize()),
-                () -> assertEquals("created", result.getSortField()),
-                () -> assertEquals("desc", result.getSortDir())
+                () -> assertEquals("created", result.sortField()),
+                () -> assertEquals("desc", result.sortDir())
         );
         verify(tagService, never()).getAllTagsByUserId(any(Long.class));
     }

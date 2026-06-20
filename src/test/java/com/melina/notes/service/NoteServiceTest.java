@@ -182,8 +182,8 @@ class NoteServiceTest {
         doAnswer(invocation -> {
             Note target = invocation.getArgument(0);
             NoteFormDto dto = invocation.getArgument(1);
-            target.setTitle(dto.getTitle());
-            target.setContent(dto.getContent());
+            target.setTitle(dto.title());
+            target.setContent(dto.content());
             return null;
         }).when(noteMapper).updateNote(note, input);
 
@@ -476,11 +476,11 @@ class NoteServiceTest {
     }
 
     private NoteFormDto createInput(String title, String content, List<String> tags) {
-        NoteFormDto dto = new NoteFormDto();
-        dto.setTitle(title);
-        dto.setContent(content);
-        dto.setTags(tags);
-        return dto;
+        return NoteFormDto.builder()
+                .title(title)
+                .content(content)
+                .tags(tags)
+                .build();
     }
 
     private NoteDto createNoteDto(Long id) {

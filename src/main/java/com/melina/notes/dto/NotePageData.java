@@ -1,22 +1,21 @@
 package com.melina.notes.dto;
 
 import lombok.Builder;
-import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-@Data
 @Builder
-public class NotePageData {
-    private Page<NoteDto> notes;
-    private List<NoteDto> pinnedNotes;
-    private List<NoteDto> unpinnedNotes;
-    private List<String> allTags;
-    private int currentPage;
-    private int pageSize;
-    private String sortField;
-    private String sortDir;
-    private String tagFilter;
-    private String search;
+public record NotePageData(
+        Page<NoteDto> notes,
+        List<NoteDto> pinnedNotes,
+        List<NoteDto> unpinnedNotes,
+        List<String> allTags,
+        int currentPage,
+        int pageSize,
+        String sortField,
+        String sortDir,
+        String tagFilter,
+        String search
+) {
 }

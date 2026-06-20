@@ -21,6 +21,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,8 +66,10 @@ class NoteControllerTest {
 
     @Test
     void createNote_withInvalidDto_returnsBadRequest() throws Exception {
-        NoteFormDto note = createNoteForm("Titel");
-        note.setContent(null);
+        NoteFormDto note = NoteFormDto.builder()
+                .title("Titel")
+                .tags(List.of("tag"))
+                .build();
         CustomUserDetails userDetails = createCustomUserDetails();
 
         mockMvc.perform(post("/api/notes")
@@ -80,10 +84,13 @@ class NoteControllerTest {
 
     @Test
     void createNote_withMoreThanTenTags_returnsBadRequest() throws Exception {
-        NoteFormDto note = createNoteForm("Titel");
-        note.setTags(java.util.stream.IntStream.rangeClosed(1, 11)
-                .mapToObj(number -> "tag" + number)
-                .toList());
+        NoteFormDto note = NoteFormDto.builder()
+                .title("Titel")
+                .content("Inhalt")
+                .tags(java.util.stream.IntStream.rangeClosed(1, 11)
+                        .mapToObj(number -> "tag" + number)
+                        .toList())
+                .build();
         CustomUserDetails userDetails = createCustomUserDetails();
 
         mockMvc.perform(post("/api/notes")
