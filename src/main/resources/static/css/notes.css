@@ -646,6 +646,10 @@
     padding-right: 0.2rem;
 }
 
+.note-previews-hidden .note-content-preview {
+    display: none;
+}
+
 .markdown-preview,
 .note-modal-content {
     color: #1f2937;

@@ -103,7 +103,7 @@
 
             <div class="col-12 col-lg-6">
                 <div class="row g-2">
-                    <div class="col-6 col-lg-4">
+                    <div class="col-6 col-lg-3">
                         <div class="dropdown">
                             <button class="btn btn-outline-primary w-100 shadow-sm dropdown-toggle text-truncate"
                                     data-bs-toggle="dropdown" id="tagFilterBtn">
@@ -124,7 +124,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-6 col-lg-4">
+                    <div class="col-6 col-lg-3">
                         <div class="dropdown">
                             <button class="btn btn-outline-secondary w-100 shadow-sm dropdown-toggle text-truncate"
                                     data-bs-toggle="dropdown" id="sortBtn">
@@ -137,7 +137,17 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-4">
+                    <div class="col-6 col-lg-3">
+                        <button class="btn btn-outline-secondary w-100 shadow-sm"
+                                type="button"
+                                id="previewToggleBtn"
+                                aria-pressed="false"
+                                title="Mini-Vorschau der Notizen ausblenden">
+                            <span aria-hidden="true">&#128065;&#65039;</span>
+                            <span id="previewToggleLabel">Vorschau aus</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-lg-3">
                         <button class="btn btn-primary w-100 shadow-sm" id="newNoteBtn" title="Neue Notiz">
                             ➕ Neue Notiz
                         </button>
@@ -212,7 +222,7 @@
                             </span>
                         </div>
 
-                        <div class="h-100">
+                        <div class="h-100 note-content-preview">
                             <div class="card-preview-markdown"
                                  th:if="${note.contentPreview != null and note.contentPreview.length() > 0}"
                                  th:attr="data-markdown=${note.contentPreview}"></div>
@@ -281,7 +291,7 @@
                         </span>
                     </div>
 
-                    <div class="h-100">
+                    <div class="h-100 note-content-preview">
                         <div class="card-preview-markdown"
                              th:if="${note.contentPreview != null and note.contentPreview.length() > 0}"
                              th:attr="data-markdown=${note.contentPreview}"></div>
