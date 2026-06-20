@@ -6,12 +6,17 @@
     box-sizing: border-box;
 }
 
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
 html {
     height: 100%;
+    background-color: #667eea;
 }
 
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -88,6 +93,28 @@ mark {
 
 body.align-items-center .con {
     max-width: 420px;
+}
+
+[data-theme="dark"] body {
+    background: linear-gradient(135deg, #171a2b 0%, #21182b 100%);
+    color: #eef0f6;
+}
+
+[data-theme="dark"] {
+    background-color: #171a2b;
+}
+
+[data-theme="dark"] .con {
+    background-color: #1b1d27;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    border-color: #3a3e4d;
+    background-color: #20232e;
+    color: #eef0f6;
 }
 
 @media (max-width: 768px) {
