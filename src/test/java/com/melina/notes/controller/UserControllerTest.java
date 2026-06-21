@@ -1,7 +1,9 @@
 package com.melina.notes.controller;
 
+import com.melina.notes.entity.User;
 import com.melina.notes.exception.EmailAlreadyExistsException;
 import com.melina.notes.exception.RegistrationException;
+import com.melina.notes.security.CustomUserDetails;
 import com.melina.notes.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -125,5 +131,53 @@ class UserControllerTest {
                         view().name("signup"),
                         model().attributeHasErrors("signupDto")
                 );
+    }
+
+    @Test
+    void settings_rendersAccountFormsForAuthenticatedUser() throws Exception {
+        User account = account();
+        when(userService.getUser(5L)).thenReturn(account);
+
+        mockMvc.perform(get("/settings").with(user(principal())))
+                .andExpectAll(
+                        status().isOk(),
+                        view().name("settings"),
+                        model().attribute("email", "user@mail.com"),
+                        content().string(org.hamcrest.Matchers.containsString("/settings/delete"))
+                );
+    }
+
+    @Test
+    void updatePassword_withDifferentConfirmation_returnsFieldError() throws Exception {
+        when(userService.getUser(5L)).thenReturn(account());
+
+        mockMvc.perform(post("/settings/password")
+                        .with(user(principal()))
+                        .with(csrf())
+                        .param("currentPassword", "oldPassword")
+                        .param("newPassword", "newPassword1")
+                        .param("confirmPassword", "different1"))
+                .andExpectAll(
+                        status().isOk(),
+                        view().name("settings"),
+                        model().attributeHasFieldErrors("passwordForm", "confirmPassword")
+                );
+
+        verify(userService, never()).updatePassword(
+                org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString());
+    }
+
+    private User account() {
+        User account = new User();
+        account.setId(5L);
+        account.setDisplayName("Melina");
+        account.setEmail("user@mail.com");
+        return account;
+    }
+
+    private CustomUserDetails principal() {
+        return new CustomUserDetails(5L, "user@mail.com", "encoded", "Melina", "ROLE_USER");
     }
 }

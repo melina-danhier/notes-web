@@ -1,9 +1,12 @@
 package com.melina.notes.service;
 
+import com.melina.notes.entity.Note;
 import com.melina.notes.entity.User;
 import com.melina.notes.exception.EmailAlreadyExistsException;
 import com.melina.notes.exception.RegistrationException;
 import com.melina.notes.exception.UserNotFoundException;
+import com.melina.notes.repository.NoteRepository;
+import com.melina.notes.repository.TagRepository;
 import com.melina.notes.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +28,12 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private NoteRepository noteRepository;
+
+    @Mock
+    private TagRepository tagRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -150,6 +160,43 @@ class UserServiceTest {
                 () -> userService.getUser(3L));
 
         verify(userRepository).findById(3L);
+    }
+
+    @Test
+    void updatePassword_withCorrectCurrentPassword_encodesAndStoresNewPassword() {
+        User user = createUser(4L, "Melina", "test@mail.com", "oldEncoded");
+        when(userRepository.findById(4L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPassword", "oldEncoded")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword1")).thenReturn("newEncoded");
+
+        assertTrue(userService.updatePassword(4L, "oldPassword", "newPassword1"));
+        assertEquals("newEncoded", user.getPassword());
+    }
+
+    @Test
+    void updatePassword_withWrongCurrentPassword_keepsPassword() {
+        User user = createUser(4L, "Melina", "test@mail.com", "oldEncoded");
+        when(userRepository.findById(4L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "oldEncoded")).thenReturn(false);
+
+        assertFalse(userService.updatePassword(4L, "wrong", "newPassword1"));
+        assertEquals("oldEncoded", user.getPassword());
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    void deleteAccount_withCorrectPassword_removesNotesUserAndUnusedTags() {
+        User user = createUser(8L, "Melina", "test@mail.com", "encoded");
+        Note note = Note.builder().tags(new java.util.LinkedList<>()).build();
+        when(userRepository.findById(8L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("password", "encoded")).thenReturn(true);
+        when(noteRepository.findAllByUserId(8L)).thenReturn(List.of(note));
+
+        assertTrue(userService.deleteAccount(8L, "password"));
+
+        verify(noteRepository).deleteAll(List.of(note));
+        verify(userRepository).delete(user);
+        verify(tagRepository).deleteAllWithNoNotes();
     }
 
     private User createUser(Long id, String displayName, String email, String password) {

@@ -1,0 +1,44 @@
+.settings-page {
+    max-width: 780px;
+    gap: 1.25rem;
+}
+
+.settings-card {
+    border: 1px solid #e2e5ea;
+    border-radius: 1rem;
+    padding: 1.35rem;
+}
+
+.settings-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.settings-card form {
+    margin-top: 0;
+    gap: 1rem;
+}
+
+.danger-zone {
+    border-color: rgba(220, 53, 69, 0.45);
+    background: rgba(220, 53, 69, 0.025);
+}
+
+[data-theme="dark"] .settings-card {
+    border-color: #383c49;
+    background: #1f222d;
+}
+
+[data-theme="dark"] .danger-zone {
+    border-color: rgba(255, 107, 121, 0.5);
+    background: rgba(220, 53, 69, 0.07);
+}
+
+@media (max-width: 576px) {
+    .settings-card {
+        padding: 1rem;
+    }
+}

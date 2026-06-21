@@ -39,6 +39,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <div th:if="${param.accountDeleted}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Dein Konto wurde vollst&auml;ndig gel&ouml;scht.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schlie&szlig;en"></button>
+    </div>
+
     <div th:if="${param.demoUnavailable}" class="alert alert-warning alert-dismissible fade show" role="alert">
         Die Demo ist gerade ausgelastet. Bitte versuche es später erneut.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -63,24 +69,18 @@
         <button type="submit" class="btn btn-primary mt-2">Einloggen</button>
     </form>
 
-    <div class="d-flex align-items-center gap-2 my-3" aria-hidden="true">
-        <hr class="flex-grow-1 my-0">
-        <span class="text-secondary small">oder</span>
-        <hr class="flex-grow-1 my-0">
-    </div>
+    <p>Noch kein Konto?
+        <a th:href="@{/signup}" class="link-primary">Jetzt registrieren</a>
+    </p>
 
     <form th:action="@{/demo-login}" method="post">
-        <button type="submit" class="btn btn-outline-primary w-100">
+        <button type="submit" class="btn btn-outline-primary">
             Demo ausprobieren
         </button>
         <p class="small text-secondary mt-2 mb-0">
             Ohne Registrierung. Deine Demo-Daten werden beim Logout oder automatisch nach etwa zwei Stunden gelöscht.
         </p>
     </form>
-
-    <p>Noch kein Konto?
-        <a th:href="@{/signup}" class="link-primary">Jetzt registrieren</a>
-    </p>
 </div>
 
 </body>
