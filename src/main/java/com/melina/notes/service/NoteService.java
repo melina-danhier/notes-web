@@ -22,12 +22,18 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class NoteService {
+
+    private static final Pattern TASK_PATTERN = Pattern.compile(
+            "^\\s*(?:[-*+]\\s+)?\\[([ xX])]\\s+.+$"
+    );
 
     private final NoteRepository noteRepository;
     private final NoteMapper noteMapper;
@@ -99,18 +105,19 @@ public class NoteService {
         boolean toggled = false;
 
         for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-            if (!lines[lineIndex].matches("\\s*\\[[ xX]]\\s+.+?(?:;\\s*)?")) {
+            Matcher taskMatcher = TASK_PATTERN.matcher(lines[lineIndex]);
+            if (!taskMatcher.matches()) {
                 continue;
             }
             if (currentTaskIndex++ != taskIndex) {
                 continue;
             }
 
-            lines[lineIndex] = lines[lineIndex].replaceFirst(
-                    "\\[([ xX])]","[x]".equalsIgnoreCase(lines[lineIndex].trim().substring(0, 3))
-                            ? "[ ]"
-                            : "[x]"
-            );
+            int statusIndex = taskMatcher.start(1);
+            char nextStatus = taskMatcher.group(1).equalsIgnoreCase("x") ? ' ' : 'x';
+            lines[lineIndex] = lines[lineIndex].substring(0, statusIndex)
+                    + nextStatus
+                    + lines[lineIndex].substring(statusIndex + 1);
             toggled = true;
             break;
         }

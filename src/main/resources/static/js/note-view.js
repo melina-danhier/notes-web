@@ -143,7 +143,7 @@ function handleMarkdownAction(action, textarea) {
             prefixMarkdownLines(textarea, '### ');
             break;
         case 'bold':
-            insertMarkdownWrap(textarea, '*', '*', 'fett');
+            insertMarkdownWrap(textarea, '**', '**', 'fett');
             break;
         case 'italic':
             insertMarkdownWrap(textarea, '_', '_', 'kursiv');
@@ -158,10 +158,10 @@ function handleMarkdownAction(action, textarea) {
             prefixMarkdownLines(textarea, '1. ', { ordered: true });
             break;
         case 'task':
-            insertMarkdownWrap(textarea, '[ ] ', '', 'Aufgabe');
+            insertMarkdownWrap(textarea, '- [ ] ', '', 'Aufgabe');
             break;
         case 'toggle':
-            insertMarkdownWrap(textarea, '> ', '\n', 'Überschrift');
+            insertMarkdownToggleStart(textarea);
             break;
         case 'toggle-end':
             insertMarkdownToggleEnd(textarea);
@@ -171,15 +171,30 @@ function handleMarkdownAction(action, textarea) {
     }
 }
 
+function insertMarkdownToggleStart(textarea) {
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const value = textarea.value;
+    const title = value.slice(start, end) || 'Titel';
+    const leadingBreak = start > 0 && value[start - 1] !== '\n' ? '\n' : '';
+    const replacement = `${leadingBreak}:::toggle ${title}\n`;
+    const titleStart = start + leadingBreak.length + ':::toggle '.length;
+
+    textarea.value = value.slice(0, start) + replacement + textarea.value.slice(end);
+    textarea.focus();
+    textarea.setSelectionRange(titleStart, titleStart + title.length);
+    triggerPreviewRefresh(textarea);
+}
+
 function insertMarkdownToggleEnd(textarea) {
     const start = textarea.selectionStart ?? 0;
     const end = textarea.selectionEnd ?? 0;
     const value = textarea.value;
-    const needsLeadingBreak = start > 0 && value[start - 1] !== '\n';
-    const needsTrailingBreak = end < value.length && value[end] !== '\n';
-    const replacement = `${needsLeadingBreak ? '\n' : ''}>;${needsTrailingBreak ? '\n' : ''}`;
+    const leadingBreak = start > 0 && value[start - 1] !== '\n' ? '\n' : '';
+    const trailingBreak = end < value.length && value[end] !== '\n' ? '\n' : '';
+    const replacement = `${leadingBreak}:::\n${trailingBreak}`;
 
-    textarea.value = value.slice(0, start) + replacement + textarea.value.slice(end);
+    textarea.value = value.slice(0, start) + replacement + value.slice(end);
     textarea.focus();
     textarea.setSelectionRange(start + replacement.length, start + replacement.length);
     triggerPreviewRefresh(textarea);

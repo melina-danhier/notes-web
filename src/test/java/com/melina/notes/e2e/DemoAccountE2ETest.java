@@ -1,5 +1,6 @@
 package com.melina.notes.e2e;
 
+import com.melina.notes.entity.Note;
 import com.melina.notes.entity.User;
 import com.melina.notes.repository.NoteRepository;
 import com.melina.notes.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -68,7 +70,15 @@ class DemoAccountE2ETest {
         CustomUserDetails principal = principalFrom(session);
 
         assertThat(userRepository.findById(principal.getId())).isPresent();
-        assertThat(noteRepository.findAllByUserId(principal.getId())).hasSize(5);
+        List<Note> demoNotes = noteRepository.findAllByUserId(principal.getId());
+        assertThat(demoNotes).hasSize(5);
+        assertThat(demoNotes)
+                .extracting(Note::getContent)
+                .anyMatch(content -> content.contains("- [ ] Eigene Notiz erstellen"))
+                .anyMatch(content -> content.contains(":::toggle Tipp zu Aufgaben")
+                        && content.contains("\n:::\n"))
+                .anyMatch(content -> content.contains("**Diese Zeile ist fett**"))
+                .noneMatch(content -> content.contains(">;"));
 
         mockMvc.perform(get("/notes").session(session))
                 .andExpect(status().isOk());

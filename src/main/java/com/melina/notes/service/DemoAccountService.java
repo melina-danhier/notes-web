@@ -68,13 +68,21 @@ public class DemoAccountService {
                 note(user, "Willkommen bei Notes 👋", """
                         # Deine persönliche Demo ist bereit
 
-                        Du kannst hier alles ausprobieren. Deine Änderungen sind nur für dich sichtbar
-                        und werden nach dem Logout oder automatisch nach einiger Zeit gelöscht.
+                        Du kannst hier alles ausprobieren. Deine Änderungen sind nur für dich sichtbar.
 
-                        - Notizen mit **Markdown** formatieren
-                        - Tags vergeben
-                        - wichtige Notizen anheften
-                        - Inhalte suchen, archivieren oder löschen
+                        :::toggle Was passiert mit diesen Daten?
+                        Beim Logout oder nach Ablauf der Demo werden das temporäre Konto und alle Notizen gelöscht.
+                        :::
+
+                        Dieser Text steht wieder außerhalb der Ausklappliste.
+
+                        ## Standard-Markdown
+
+                        **Fetter Text** wird mit zwei Sternchen geschrieben.
+
+                        *Kursiver Text* verwendet einzelne Sternchen und `Code` steht zwischen Backticks.
+
+                        [Links funktionieren ebenfalls](https://www.markdownguide.org/basic-syntax/).
                         """, now.minus(4, ChronoUnit.DAYS), List.of(start, markdown), true, false, false),
                 note(user, "Markdown kurz ausprobieren", """
                         ## Kleine Checkliste
@@ -83,12 +91,27 @@ public class DemoAccountService {
                         - [ ] Eigene Notiz erstellen
                         - [ ] Einen Tag hinzufügen
 
-                        Du kannst außerdem `Code`, **fetten Text** und Links verwenden.
+                        :::toggle Tipp zu Aufgaben
+                        Aufgaben verwenden das übliche GFM-Format `- [ ]` oder `- [x]`.
+                        In der geöffneten Notiz kannst du die Checkboxen direkt anklicken.
+                        :::
+
+                        **Diese Zeile ist fett** und *dieser Teil ist kursiv*.
                         """, now.minus(3, ChronoUnit.DAYS), List.of(markdown), false, false, false),
                 note(user, "Ideen für das Wochenende", """
+                        # Ideen sammeln
+
                         - Fahrradtour planen
                         - Neues Rezept ausprobieren
                         - Fotos sortieren
+
+                        :::toggle Details zur Fahrradtour
+                        1. Route auswählen
+                        2. Wetter prüfen
+                        3. Proviant einpacken
+                        :::
+
+                        Danach kann die Notiz ganz normal weitergehen.
                         """, now.minus(2, ChronoUnit.DAYS), List.of(privat, ideen), false, false, false),
                 note(user, "Archivierte Beispielnotiz",
                         "Diese Notiz liegt bereits im Archiv und demonstriert den Archiv-Workflow.",

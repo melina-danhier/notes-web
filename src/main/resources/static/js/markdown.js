@@ -35,6 +35,60 @@ function renderMarkdownBlocks(markdown, context) {
             continue;
         }
 
+        const toggleDirective = parseToggleDirective(trimmed);
+        if (toggleDirective !== null) {
+            index++;
+            const toggleLines = [];
+            while (index < lines.length && !isToggleDirectiveEnd(lines[index].trim())) {
+                toggleLines.push(lines[index]);
+                index++;
+            }
+            if (index < lines.length) index++;
+
+            const content = renderMarkdownBlocks(toggleLines.join('\n'), context);
+            blocks.push(
+                `<details class="markdown-toggle" open>` +
+                `<summary>${renderMarkdownInline(toggleDirective)}</summary>` +
+                `<div class="markdown-toggle-content">${content}</div>` +
+                `</details>`
+            );
+            continue;
+        }
+
+        if (isToggleDirectiveEnd(trimmed)) {
+            index++;
+            continue;
+        }
+
+        const details = parseDetailsStart(trimmed);
+        if (details !== null) {
+            index++;
+            let summary = 'Abschnitt';
+            const summaryMatch = index < lines.length
+                ? lines[index].trim().match(/^<summary>(.*?)<\/summary>$/i)
+                : null;
+            if (summaryMatch) {
+                summary = summaryMatch[1];
+                index++;
+            }
+
+            const detailsLines = [];
+            while (index < lines.length && !/^<\/details>$/i.test(lines[index].trim())) {
+                detailsLines.push(lines[index]);
+                index++;
+            }
+            if (index < lines.length) index++;
+
+            const content = renderMarkdownBlocks(detailsLines.join('\n'), context);
+            blocks.push(
+                `<details class="markdown-toggle"${details.open ? ' open' : ''}>` +
+                `<summary>${renderMarkdownInline(summary)}</summary>` +
+                `<div class="markdown-toggle-content">${content}</div>` +
+                `</details>`
+            );
+            continue;
+        }
+
         const toggleHeading = parseToggleHeading(trimmed);
         if (toggleHeading !== null) {
             index++;
@@ -81,6 +135,12 @@ function renderMarkdownBlocks(markdown, context) {
         const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
         if (headingMatch) { blocks.push(`<h${headingMatch[1].length}>${renderMarkdownInline(headingMatch[2])}</h${headingMatch[1].length}>`); index++; continue; }
 
+        if (/^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+            blocks.push('<hr>');
+            index++;
+            continue;
+        }
+
         if (/^>\s?/.test(trimmed)) {
             const quoteLines = [];
             while (index < lines.length && /^>\s?/.test(lines[index].trim())) { quoteLines.push(lines[index].replace(/^\s*>\s?/, '')); index++; }
@@ -113,16 +173,36 @@ function renderMarkdownBlocks(markdown, context) {
 function isMarkdownBlockBoundary(line) {
     const trimmed = line.trim();
     return trimmed.startsWith('```')
+        || parseToggleDirective(trimmed) !== null
+        || isToggleDirectiveEnd(trimmed)
+        || parseDetailsStart(trimmed) !== null
         || parseToggleHeading(trimmed) !== null
         || isToggleEnd(trimmed)
         || parseTask(trimmed) !== null
         || /^#{1,6}\s+/.test(trimmed)
+        || /^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)
         || /^>\s?/.test(trimmed)
         || /^\s*(?:[-*+]\s+|\d+\.\s+)/.test(line);
 }
 
+function parseToggleDirective(line) {
+    const match = line.match(/^:::toggle\s+(.+?)\s*$/i);
+    return match ? match[1] : null;
+}
+
+function isToggleDirectiveEnd(line) {
+    return /^:::\s*$/.test(line);
+}
+
+function parseDetailsStart(line) {
+    const match = line.match(/^<details(?:\s+(open))?\s*>$/i);
+    return match ? { open: Boolean(match[1]) } : null;
+}
+
 function parseToggleHeading(line) {
-    const match = line.match(/^>\s+(.+?)(?:\s*;)?\s*$/);
+    // Legacy-Unterstützung für bereits gespeicherte Bereiche. Neue Bereiche
+    // verwenden standardnahes <details>/<summary>-HTML.
+    const match = line.match(/^>\s+(.+?)\s*;\s*$/);
     return match ? match[1] : null;
 }
 
@@ -131,11 +211,11 @@ function isToggleEnd(line) {
 }
 
 function parseTask(line) {
-    const match = line.match(/^\[([ xX])]\s+(.+?)(?:\s*;)?\s*$/);
+    const match = line.match(/^([-*+]\s+)?\[([ xX])]\s+(.+?)\s*$/);
     if (!match) return null;
     return {
-        checked: match[1].toLowerCase() === 'x',
-        label: match[2]
+        checked: match[2].toLowerCase() === 'x',
+        label: match[1] ? match[3] : match[3].replace(/;\s*$/, '')
     };
 }
 
@@ -161,10 +241,11 @@ function renderMarkdownInline(text) {
         return token;
     });
 
-    output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    output = output.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<strong>$2</strong>');
-    output = output.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    output = output.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    output = output.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+    output = output.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
     output = output.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
+    output = output.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
 
     output = output.replace(/@@CODE_(\d+)@@/g, function(_, idx) { return codeSegments[Number(idx)] || ''; });
     output = output.replace(/@@LINK_(\d+)@@/g, function(_, idx) { return linkSegments[Number(idx)] || ''; });

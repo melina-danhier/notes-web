@@ -346,7 +346,7 @@ class NoteControllerTest {
     void toggleTask_returnsUpdatedNote() throws Exception {
         CustomUserDetails userDetails = createCustomUserDetails();
         NoteDto note = createNoteDto(10L, "Titel");
-        note.setContent("[x] Aufgabe");
+        note.setContent("- [x] Aufgabe");
         when(noteService.toggleTaskForUser(userDetails.getId(), 10L, 0)).thenReturn(note);
 
         mockMvc.perform(patch("/api/notes/10/tasks/0/toggle")
@@ -355,7 +355,7 @@ class NoteControllerTest {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(10L),
-                        jsonPath("$.content").value("[x] Aufgabe")
+                        jsonPath("$.content").value("- [x] Aufgabe")
                 );
 
         verify(noteService).toggleTaskForUser(userDetails.getId(), 10L, 0);

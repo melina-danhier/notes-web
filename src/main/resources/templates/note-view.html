@@ -55,7 +55,7 @@
                         <strong>So funktioniert der Editor</strong>
                         <p>Text markieren und ein Werkzeug anklicken. Ohne Auswahl wird ein Beispiel an der Cursorposition eingefügt.</p>
                         <p>Die Vorschau kann ein- und ausgeblendet werden. Auf dem Desktop lässt sich ihre Breite am Trenner verändern.</p>
-                        <p>Aufgaben werden später direkt in der Notizansicht abgehakt und dabei automatisch gespeichert. Bereiche sind dort standardmäßig geöffnet und einklappbar.</p>
+                        <p>Aufgaben verwenden das GFM-Format <code>- [ ] Aufgabe</code>. Eine Notion-artige Ausklappliste beginnt mit <code>:::toggle Titel</code> und endet mit <code>:::</code>. Text danach bleibt außerhalb.</p>
                         <small>Tags mit Enter oder Komma bestätigen.</small>
                     </div>
                 </details>
@@ -75,7 +75,7 @@
                                 ### H3
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" data-md-action="bold">
-                                *Fett*
+                                **Fett**
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" data-md-action="italic">
                                 _Kursiv_
@@ -99,13 +99,13 @@
                                     1. Liste
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-md-action="task">
-                                    [ ] Aufgabe
+                                    - [ ] Aufgabe
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-md-action="toggle">
-                                    &gt; Bereich
+                                    :::toggle Liste
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-md-action="toggle-end">
-                                    &gt;; Ende
+                                    ::: Ende
                                 </button>
                             </div>
                         </div>

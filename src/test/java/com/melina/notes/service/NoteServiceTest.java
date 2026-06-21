@@ -235,7 +235,7 @@ class NoteServiceTest {
     void toggleTaskForUser_updatesOnlySelectedTask() {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
-        note.setContent("[ ] Erste\nText\n[x] Zweite");
+        note.setContent("- [ ] Erste\nText\n- [x] Zweite");
         NoteDto mappedDto = createNoteDto(10L);
 
         when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
@@ -245,7 +245,7 @@ class NoteServiceTest {
         NoteDto result = noteService.toggleTaskForUser(1L, 10L, 1);
 
         assertSame(mappedDto, result);
-        assertEquals("[ ] Erste\nText\n[ ] Zweite", note.getContent());
+        assertEquals("- [ ] Erste\nText\n- [ ] Zweite", note.getContent());
         assertNotNull(note.getUpdated());
         verify(noteRepository).save(note);
         verify(noteMapper).toNoteDto(note);
@@ -256,7 +256,7 @@ class NoteServiceTest {
     void toggleTaskForUser_rejectsUnknownTaskIndex() {
         User owner = createUser(1L);
         Note note = createNote(10L, owner);
-        note.setContent("[ ] Aufgabe");
+        note.setContent("- [ ] Aufgabe");
         when(noteRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(note));
 
         assertThrows(InvalidNoteStateException.class,

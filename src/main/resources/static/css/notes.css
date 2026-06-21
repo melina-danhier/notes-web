@@ -767,14 +767,13 @@
 
 .markdown-toggle {
     margin: 0.55rem 0;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    background: rgba(249, 250, 251, 0.75);
-    overflow: hidden;
+    border: 0;
+    background: transparent;
 }
 
 .markdown-toggle > summary {
-    padding: 0.55rem 0.7rem;
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.3rem;
     font-weight: 600;
     color: #1f2937;
     cursor: pointer;
@@ -786,7 +785,7 @@
 }
 
 .markdown-toggle-content {
-    padding: 0 0.7rem 0.65rem;
+    padding: 0.15rem 0.4rem 0.4rem 1.7rem;
 }
 
 .markdown-toggle-content > :last-child {
