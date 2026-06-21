@@ -103,6 +103,7 @@ public class PageController {
         model.addAttribute("sortField", pageData.sortField());
         model.addAttribute("sortDir", pageData.sortDir());
         model.addAttribute("displayname", user.getDisplayName());
+        model.addAttribute("demoAccount", "ROLE_DEMO".equals(user.role()));
         model.addAttribute("allTags", pageData.allTags());
         model.addAttribute("tagFilter", pageData.tagFilter());
         model.addAttribute("search", pageData.search());

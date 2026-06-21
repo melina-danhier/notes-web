@@ -35,6 +35,10 @@
 
 <div class="con animate">
 
+        <div th:if="${demoAccount}" class="alert alert-info py-2" role="status">
+            Du verwendest eine persönliche Demo. Die Daten werden beim Logout oder automatisch nach etwa zwei Stunden gelöscht.
+        </div>
+
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 notes-page-header">
             <div class="flex-grow-1" style="min-width:0">
                 <h2 class="fs-5 fs-md-4 fs-lg-2 mb-0 text-truncate"
@@ -186,7 +190,7 @@
     <div id="pinnedNotesSection"
          th:style="${pinnedNotes.isEmpty()} ? 'display: none;' : ''">
         <h5 class="ms-3 mt-3 mb-2 text-muted fw-semibold" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">📌 Angeheftet</h5>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-lg-2 pinned-notes-section"
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-2 pinned-notes-section"
              id="pinnedNotesList">
             <div class="col" th:each="note : ${pinnedNotes}" th:id="'note-' + ${note.id}">
                 <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card pinned-card"
@@ -243,7 +247,7 @@
         <div class="pinned-divider"></div>
     </div>
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-lg-2" id="notesList">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-2" id="notesList">
         <div class="col" th:each="note : ${unpinnedNotes}" th:id="'note-' + ${note.id}">
             <div class="card h-100 border-1 shadow-sm rounded-4 overflow-hidden click-card"
                  th:onclick="'viewNote(' + ${note.id} + '); event.stopPropagation();'"

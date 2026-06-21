@@ -39,6 +39,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <div th:if="${param.demoUnavailable}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        Die Demo ist gerade ausgelastet. Bitte versuche es später erneut.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <form id="loginForm" th:action="@{/login}" method="post"
           class="d-flex flex-column gap-3 my-2">
         <div class="d-flex align-items-center border rounded-2 gap-2 px-2">
@@ -57,6 +62,22 @@
         <a th:href="@{/resetPassword}" class="text-end link-primary small">Passwort vergessen?</a>
         <button type="submit" class="btn btn-primary mt-2">Einloggen</button>
     </form>
+
+    <div class="d-flex align-items-center gap-2 my-3" aria-hidden="true">
+        <hr class="flex-grow-1 my-0">
+        <span class="text-secondary small">oder</span>
+        <hr class="flex-grow-1 my-0">
+    </div>
+
+    <form th:action="@{/demo-login}" method="post">
+        <button type="submit" class="btn btn-outline-primary w-100">
+            Demo ausprobieren
+        </button>
+        <p class="small text-secondary mt-2 mb-0">
+            Ohne Registrierung. Deine Demo-Daten werden beim Logout oder automatisch nach etwa zwei Stunden gelöscht.
+        </p>
+    </form>
+
     <p>Noch kein Konto?
         <a th:href="@{/signup}" class="link-primary">Jetzt registrieren</a>
     </p>

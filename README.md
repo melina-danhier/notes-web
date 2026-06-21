@@ -126,16 +126,17 @@ Eine Vorlage befindet sich in [`.env.example`](.env.example). Spring Boot lädt 
 
 ## Demo-Daten beim Deployment
 
-Optional kann die Anwendung beim Start einen Demo-Benutzer mit fünf Beispielnotizen anlegen. Der Seeder ist standardmäßig deaktiviert und legt keine Duplikate an: Existiert die konfigurierte E-Mail-Adresse bereits, wird er übersprungen.
+Auf der Loginseite kann ohne Registrierung eine persönliche Demo gestartet werden. Für jeden Aufruf wird ein eigener temporärer Benutzer mit fünf Beispielnotizen erzeugt und automatisch angemeldet. Andere Besucher sehen dessen Änderungen nicht.
 
-| Variable                 | Erforderlich       | Standardwert       |
-|--------------------------|--------------------|--------------------|
-| `DEMO_DATA_ENABLED`      | ja                 | `false`            |
-| `DEMO_USER_PASSWORD`     | bei Aktivierung    | kein Standardwert  |
-| `DEMO_USER_EMAIL`        | nein               | `demo@example.com` |
-| `DEMO_USER_DISPLAY_NAME` | nein               | `Demo User`        |
+Beim regulären Logout werden Benutzer und Notizen sofort gelöscht. Wird der Browser nur geschlossen, entfernt ein regelmäßiger Cleanup abgelaufene Demo-Konten. Der Cleanup läuft zusätzlich vor jeder neuen Demo-Erstellung, damit er auch nach einer Ruhephase des Render-Dienstes zuverlässig greift.
 
-Für Render muss `DEMO_DATA_ENABLED` auf `true` gesetzt und für `DEMO_USER_PASSWORD` ein eigenes Passwort hinterlegt werden. Nach dem erfolgreichen ersten Start kann `DEMO_DATA_ENABLED` wieder auf `false` gesetzt werden. Das Demo-Konto und seine Notizen bleiben in PostgreSQL erhalten.
+| Variable                | Erforderlich | Standardwert | Beschreibung                         |
+|-------------------------|--------------|--------------|--------------------------------------|
+| `DEMO_ACCOUNT_LIFETIME` | nein         | `PT2H`       | Lebensdauer eines Demo-Kontos        |
+| `DEMO_CLEANUP_INTERVAL` | nein         | `PT15M`      | Abstand zwischen Cleanup-Durchläufen |
+| `DEMO_MAX_ACCOUNTS`     | nein         | `50`         | Maximale gleichzeitige Demo-Konten   |
+
+Die Zeitwerte verwenden das ISO-8601-Dauerformat, beispielsweise `PT30M` für 30 Minuten oder `PT4H` für vier Stunden. Für Render sind keine zusätzlichen Variablen erforderlich, solange die Standardwerte passen.
 
 Ohne aktives Profil wird nur `application.yml` geladen. Da dort bewusst keine Datenbank-Zugangsdaten definiert sind, bricht die Anwendung beim Start ab. Dadurch kann ein vergessenes Produktionsprofil nicht unbemerkt auf lokale Standardwerte zurückfallen.
 

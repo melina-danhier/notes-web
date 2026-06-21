@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificationExecutor<Note> {
 
+    List<Note> findAllByUserId(Long userId);
+
     List<Note> findAllByUserIdAndDeleted(Long userId, boolean deleted);
 
     Optional<Note> findByIdAndUserId(Long id, Long userId);

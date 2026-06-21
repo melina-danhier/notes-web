@@ -91,12 +91,12 @@
                         <button class="btn btn-outline-success px-2 py-1"
                                 title="Wiederherstellen"
                                 th:onclick="'unarchiveNote(' + ${note.id} + '); event.stopPropagation();'">
-                            ♻️ <span class="mobile-label">Wiederherstellen</span>
+                            ♻️ <span class="mobile-label"></span>
                         </button>
                         <button class="btn btn-danger px-2 py-1"
                                 title="In den Papierkorb"
                                 th:onclick="'deleteArchivedNote(' + ${note.id} + '); event.stopPropagation();'">
-                            🗑️ <span class="mobile-label">Papierkorb</span>
+                            🗑️ <span class="mobile-label"></span>
                         </button>
                     </div>
                 </div>

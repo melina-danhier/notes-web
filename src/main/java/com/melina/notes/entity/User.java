@@ -3,6 +3,8 @@ package com.melina.notes.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "users")
 @Builder
@@ -28,4 +30,11 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private String role = "ROLE_USER";
+
+    @Column(name = "demo_account", nullable = false)
+    @Builder.Default
+    private boolean demoAccount = false;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 }

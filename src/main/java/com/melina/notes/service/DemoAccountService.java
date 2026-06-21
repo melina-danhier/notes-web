@@ -1,74 +1,62 @@
-package com.melina.notes.config;
+package com.melina.notes.service;
 
 import com.melina.notes.entity.Note;
 import com.melina.notes.entity.Tag;
 import com.melina.notes.entity.User;
+import com.melina.notes.exception.DemoCapacityExceededException;
 import com.melina.notes.repository.NoteRepository;
 import com.melina.notes.repository.TagRepository;
 import com.melina.notes.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
-@Component
-@ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
-public class DemoDataSeeder implements ApplicationRunner {
+@Service
+@RequiredArgsConstructor
+public class DemoAccountService {
 
     private final UserRepository userRepository;
     private final NoteRepository noteRepository;
     private final TagRepository tagRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String displayName;
-    private final String email;
-    private final String password;
 
-    public DemoDataSeeder(
-            UserRepository userRepository,
-            NoteRepository noteRepository,
-            TagRepository tagRepository,
-            PasswordEncoder passwordEncoder,
-            @Value("${app.demo-data.user.display-name}") String displayName,
-            @Value("${app.demo-data.user.email}") String email,
-            @Value("${app.demo-data.user.password:}") String password
-    ) {
-        this.userRepository = userRepository;
-        this.noteRepository = noteRepository;
-        this.tagRepository = tagRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.displayName = displayName;
-        this.email = email.trim().toLowerCase();
-        this.password = password;
-    }
+    @Value("${app.demo.account-lifetime:PT2H}")
+    private Duration accountLifetime;
 
-    @Override
-    @Transactional
-    public void run(ApplicationArguments args) {
-        if (password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Demo data is enabled, but DEMO_USER_PASSWORD is missing or blank"
-            );
+    @Value("${app.demo.max-accounts:50}")
+    private int maxAccounts;
+
+    @Transactional(noRollbackFor = DemoCapacityExceededException.class)
+    public DemoCredentials createDemoAccount() {
+        deleteExpiredDemoAccounts();
+
+        if (userRepository.countByDemoAccountTrue() >= maxAccounts) {
+            throw new DemoCapacityExceededException(maxAccounts);
         }
 
-        if (userRepository.existsByEmail(email)) {
-            log.info("Skipping demo data: user already exists - email={}", email);
-            return;
-        }
+        String token = UUID.randomUUID().toString();
+        String email = "demo-" + token + "@example.invalid";
+        String password = UUID.randomUUID().toString();
+        Instant now = Instant.now();
 
         User user = userRepository.save(User.builder()
-                .displayName(displayName.trim())
+                .displayName("Demo User")
                 .email(email)
                 .password(passwordEncoder.encode(password))
-                .role("ROLE_USER")
+                .role("ROLE_DEMO")
+                .demoAccount(true)
+                .expiresAt(now.plus(accountLifetime))
                 .build());
 
         Tag start = findOrCreateTag("start");
@@ -76,19 +64,17 @@ public class DemoDataSeeder implements ApplicationRunner {
         Tag privat = findOrCreateTag("privat");
         Tag ideen = findOrCreateTag("ideen");
 
-        Instant now = Instant.now();
         noteRepository.saveAll(List.of(
                 note(user, "Willkommen bei Notes 👋", """
-                        # Deine Demo ist bereit
+                        # Deine persönliche Demo ist bereit
 
-                        Diese Notiz zeigt dir die wichtigsten Funktionen:
+                        Du kannst hier alles ausprobieren. Deine Änderungen sind nur für dich sichtbar
+                        und werden nach dem Logout oder automatisch nach einiger Zeit gelöscht.
 
                         - Notizen mit **Markdown** formatieren
                         - Tags vergeben
                         - wichtige Notizen anheften
                         - Inhalte suchen, archivieren oder löschen
-
-                        Viel Spaß beim Ausprobieren!
                         """, now.minus(4, ChronoUnit.DAYS), List.of(start, markdown), true, false, false),
                 note(user, "Markdown kurz ausprobieren", """
                         ## Kleine Checkliste
@@ -112,7 +98,44 @@ public class DemoDataSeeder implements ApplicationRunner {
                         now, List.of(start), false, false, true)
         ));
 
-        log.info("Demo data created - userId={}, email={}, notes=5", user.getId(), email);
+        log.info("Temporary demo account created - userId={}, expiresAt={}", user.getId(), user.getExpiresAt());
+        return new DemoCredentials(user.getId(), email, password);
+    }
+
+    @Transactional
+    public boolean deleteDemoAccount(Long userId) {
+        return userRepository.findById(userId)
+                .filter(User::isDemoAccount)
+                .map(user -> {
+                    deleteAccount(user);
+                    tagRepository.deleteAllWithNoNotes();
+                    log.info("Temporary demo account deleted - userId={}", userId);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    @Scheduled(fixedDelayString = "${app.demo.cleanup-interval:PT15M}")
+    @Transactional
+    public void deleteExpiredDemoAccounts() {
+        List<User> expiredUsers = userRepository
+                .findAllByDemoAccountTrueAndExpiresAtBefore(Instant.now());
+
+        expiredUsers.forEach(this::deleteAccount);
+        if (!expiredUsers.isEmpty()) {
+            tagRepository.deleteAllWithNoNotes();
+            log.info("Expired demo accounts deleted - count={}", expiredUsers.size());
+        }
+    }
+
+    private void deleteAccount(User user) {
+        List<Note> notes = noteRepository.findAllByUserId(user.getId());
+        notes.forEach(note -> note.getTags().clear());
+        noteRepository.deleteAll(notes);
+        noteRepository.flush();
+
+        userRepository.delete(user);
+        userRepository.flush();
     }
 
     private Tag findOrCreateTag(String name) {
@@ -141,5 +164,8 @@ public class DemoDataSeeder implements ApplicationRunner {
                 .archived(archived)
                 .deleted(deleted)
                 .build();
+    }
+
+    public record DemoCredentials(Long userId, String email, String password) {
     }
 }
