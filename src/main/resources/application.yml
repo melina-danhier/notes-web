@@ -11,3 +11,11 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+app:
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:false}
+    user:
+      display-name: ${DEMO_USER_DISPLAY_NAME:Demo User}
+      email: ${DEMO_USER_EMAIL:demo@example.com}
+      password: ${DEMO_USER_PASSWORD:}

@@ -124,6 +124,19 @@ Das `prod`-Profil erwartet zwingend folgende Variablen; im `dev`-Profil sind sie
 
 Eine Vorlage befindet sich in [`.env.example`](.env.example). Spring Boot lädt diese Datei nicht automatisch. Die Werte müssen über die Shell, die Run-Konfiguration der IDE oder Docker Compose gesetzt werden. Echte Zugangsdaten gehören nicht ins Repository.
 
+## Demo-Daten beim Deployment
+
+Optional kann die Anwendung beim Start einen Demo-Benutzer mit fünf Beispielnotizen anlegen. Der Seeder ist standardmäßig deaktiviert und legt keine Duplikate an: Existiert die konfigurierte E-Mail-Adresse bereits, wird er übersprungen.
+
+| Variable                 | Erforderlich       | Standardwert       |
+|--------------------------|--------------------|--------------------|
+| `DEMO_DATA_ENABLED`      | ja                 | `false`            |
+| `DEMO_USER_PASSWORD`     | bei Aktivierung    | kein Standardwert  |
+| `DEMO_USER_EMAIL`        | nein               | `demo@example.com` |
+| `DEMO_USER_DISPLAY_NAME` | nein               | `Demo User`        |
+
+Für Render muss `DEMO_DATA_ENABLED` auf `true` gesetzt und für `DEMO_USER_PASSWORD` ein eigenes Passwort hinterlegt werden. Nach dem erfolgreichen ersten Start kann `DEMO_DATA_ENABLED` wieder auf `false` gesetzt werden. Das Demo-Konto und seine Notizen bleiben in PostgreSQL erhalten.
+
 Ohne aktives Profil wird nur `application.yml` geladen. Da dort bewusst keine Datenbank-Zugangsdaten definiert sind, bricht die Anwendung beim Start ab. Dadurch kann ein vergessenes Produktionsprofil nicht unbemerkt auf lokale Standardwerte zurückfallen.
 
 ## Projektstruktur

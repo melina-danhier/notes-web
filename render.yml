@@ -19,6 +19,10 @@ projects:
                 sync: false
               - key: DB_URL
                 sync: false
+              - key: DEMO_DATA_ENABLED
+                value: "false"
+              - key: DEMO_USER_PASSWORD
+                sync: false
             region: oregon
             dockerContext: .
             dockerfilePath: ./Dockerfile
