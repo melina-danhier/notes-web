@@ -37,6 +37,18 @@ Einfach ein eigenes Konto registrieren und direkt Notizen erstellen, Markdown ve
 
 Die Anwendung läuft auf Render und verwendet eine PostgreSQL-Datenbank von Neon.
 
+## Screenshots
+
+| Einstieg | Notizübersicht |
+|----------|----------------|
+| <img src="docs/screenshots/login-mit-demo-zugang.png" alt="Login mit Demo-Zugang" width="420"> | <img src="docs/screenshots/notizen-uebersicht-demo-vorschau.png" alt="Notizübersicht mit Demo-Notizen" width="420"> |
+
+| Markdown-Editor | Mehrfachauswahl |
+|-----------------|-----------------|
+| <img src="docs/screenshots/editor-markdown-live-preview.png" alt="Markdown-Editor mit Live-Vorschau" width="420"> | <img src="docs/screenshots/notizen-mehrfachauswahl.png" alt="Mehrfachauswahl für Archivieren und Löschen" width="420"> |
+
+Weitere Ansichten wie Dark Mode, Archiv, Papierkorb, Einstellungen und Registrierung liegen unter [`docs/screenshots`](docs/screenshots).
+
 
 ## Lokal mit Docker starten
 
