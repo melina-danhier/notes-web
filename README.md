@@ -16,16 +16,16 @@ Eine responsive Webanwendung zum Erstellen und Organisieren persönlicher Notize
 
 ## Tech-Stack
 
-| Bereich               | Technologie                                    |
-|-----------------------|------------------------------------------------|
-| Backend               | Java 21, Spring Boot 3.5                       |
-| Web                   | Spring MVC, Thymeleaf, JavaScript, Bootstrap 5 |
-| Sicherheit            | Spring Security, BCrypt                        |
-| Persistenz            | Spring Data JPA, PostgreSQL 16                 |
-| Migrationen           | Flyway                                         |
-| Mapping & Boilerplate | MapStruct, Lombok                              |
-| Tests                 | JUnit 5, Spring Boot Test, MockMvc, H2         |
-| Betrieb               | Docker, Docker Compose, Render                 |
+| Bereich               | Technologie                                                  |
+|-----------------------|--------------------------------------------------------------|
+| Backend               | Java 21, Spring Boot 3.5.15, Actuator                        |
+| Web                   | Spring MVC, Thymeleaf, JavaScript, Bootstrap 5.3.8           |
+| Sicherheit            | Spring Security, BCrypt                                      |
+| Persistenz            | Spring Data JPA, PostgreSQL 16                               |
+| Migrationen           | Flyway                                                       |
+| Mapping & Boilerplate | MapStruct, Lombok                                            |
+| Tests                 | JUnit 5, Spring Boot Test, Spring Security Test, MockMvc, H2  |
+| Betrieb               | Docker, Docker Compose, Render                               |
 
 ## Anwendung direkt ausprobieren
 
