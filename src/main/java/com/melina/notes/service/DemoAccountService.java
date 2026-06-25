@@ -91,11 +91,6 @@ public class DemoAccountService {
                         - [ ] Eigene Notiz erstellen
                         - [ ] Einen Tag hinzufügen
 
-                        :::toggle Tipp zu Aufgaben
-                        Aufgaben verwenden das übliche GFM-Format `- [ ]` oder `- [x]`.
-                        In der geöffneten Notiz kannst du die Checkboxen direkt anklicken.
-                        :::
-
                         **Diese Zeile ist fett** und *dieser Teil ist kursiv*.
                         """, now.minus(3, ChronoUnit.DAYS), List.of(markdown), false, false, false),
                 note(user, "Ideen für das Wochenende", """

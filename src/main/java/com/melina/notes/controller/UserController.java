@@ -62,6 +62,7 @@ public class UserController {
         model.addAttribute("passwordForm", new PasswordUpdateDto());
         model.addAttribute("deleteForm", new DeleteAccountDto());
         model.addAttribute("email", user.getEmail());
+        model.addAttribute("demoAccount", isDemoAccount(principal));
         return "settings";
     }
 
@@ -143,5 +144,10 @@ public class UserController {
             model.addAttribute("deleteForm", new DeleteAccountDto());
         }
         model.addAttribute("email", user.getEmail());
+        model.addAttribute("demoAccount", "ROLE_DEMO".equals(user.getRole()));
+    }
+
+    private boolean isDemoAccount(CustomUserDetails principal) {
+        return "ROLE_DEMO".equals(principal.role());
     }
 }

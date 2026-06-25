@@ -28,6 +28,9 @@
     <div th:if="${param.passwordUpdated}" class="alert alert-success mb-0" role="status">
         Dein Passwort wurde ge&auml;ndert.
     </div>
+    <div th:if="${demoAccount}" class="alert alert-info mb-0" role="status">
+        Passwort&auml;nderung und Kontol&ouml;schung sind im Demo-Konto deaktiviert.
+    </div>
 
     <section class="settings-card">
         <div class="settings-card-heading">
@@ -65,7 +68,8 @@
                 <label for="currentPassword" class="form-label">Aktuelles Passwort</label>
                 <input id="currentPassword" class="form-control"
                        th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'"
-                       type="password" th:field="*{currentPassword}" maxlength="72" autocomplete="current-password" required>
+                       type="password" th:field="*{currentPassword}" maxlength="72" autocomplete="current-password"
+                       th:disabled="${demoAccount}" required>
                 <div class="invalid-feedback" th:errors="*{currentPassword}"></div>
             </div>
             <div class="row g-3">
@@ -74,7 +78,7 @@
                     <input id="newPassword" class="form-control"
                            th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"
                            type="password" th:field="*{newPassword}" minlength="10" maxlength="72"
-                           autocomplete="new-password" required>
+                           autocomplete="new-password" th:disabled="${demoAccount}" required>
                     <div class="invalid-feedback" th:errors="*{newPassword}"></div>
                 </div>
                 <div class="col-12 col-md-6">
@@ -82,11 +86,15 @@
                     <input id="confirmPassword" class="form-control"
                            th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
                            type="password" th:field="*{confirmPassword}" minlength="10" maxlength="72"
-                           autocomplete="new-password" required>
+                           autocomplete="new-password" th:disabled="${demoAccount}" required>
                     <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
                 </div>
             </div>
-            <div><button class="btn btn-primary" type="submit">Passwort &auml;ndern</button></div>
+            <div>
+                <button class="btn btn-primary" type="submit" th:disabled="${demoAccount}">
+                    Passwort &auml;ndern
+                </button>
+            </div>
         </form>
     </section>
 
@@ -104,10 +112,15 @@
                 <label for="deletePassword" class="form-label">Passwort zur Best&auml;tigung</label>
                 <input id="deletePassword" class="form-control"
                        th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                       type="password" th:field="*{password}" maxlength="72" autocomplete="current-password" required>
+                       type="password" th:field="*{password}" maxlength="72" autocomplete="current-password"
+                       th:disabled="${demoAccount}" required>
                 <div class="invalid-feedback" th:errors="*{password}"></div>
             </div>
-            <div><button class="btn btn-danger" type="submit">Konto endg&uuml;ltig l&ouml;schen</button></div>
+            <div>
+                <button class="btn btn-danger" type="submit" th:disabled="${demoAccount}">
+                    Konto endg&uuml;ltig l&ouml;schen
+                </button>
+            </div>
         </form>
     </section>
 </main>

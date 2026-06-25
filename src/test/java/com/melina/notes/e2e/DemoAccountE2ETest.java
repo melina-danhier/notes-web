@@ -75,8 +75,7 @@ class DemoAccountE2ETest {
         assertThat(demoNotes)
                 .extracting(Note::getContent)
                 .anyMatch(content -> content.contains("- [ ] Eigene Notiz erstellen"))
-                .anyMatch(content -> content.contains(":::toggle Tipp zu Aufgaben")
-                        && content.contains("\n:::\n"))
+                .noneMatch(content -> content.contains(":::toggle Tipp zu Aufgaben"))
                 .anyMatch(content -> content.contains("**Diese Zeile ist fett**"))
                 .noneMatch(content -> content.contains(">;"));
 
