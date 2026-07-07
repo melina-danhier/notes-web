@@ -2,6 +2,16 @@
 
 Eine responsive Webanwendung zum Erstellen und Organisieren persönlicher Notizen. Notes verbindet eine serverseitig gerenderte Spring-Boot-Oberfläche mit Markdown-Unterstützung, Tags, Suche sowie Archiv und Papierkorb.
 
+## Überblick
+
+- **Live-Demo:** https://notes-web-6zb2.onrender.com
+- **Backend:** Java 21, Spring Boot, Spring Data JPA
+- **Security:** Session-basierte Authentifizierung mit Spring Security und BCrypt
+- **Datenbank:** PostgreSQL und Flyway
+- **Frontend:** Thymeleaf, Bootstrap und JavaScript
+- **Tests:** Unit-, Repository-, MVC- und End-to-End-Tests
+- **Deployment:** Docker und Render
+
 ## Funktionen
 
 - Registrierung und Anmeldung per E-Mail
