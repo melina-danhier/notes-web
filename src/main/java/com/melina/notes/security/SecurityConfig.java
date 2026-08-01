@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/demo-login",
                                 "/css/**",
                                 "/js/**",
+                                "/webjars/**",
                                 "/images/**",
                                 "/fonts/**"
                         ).permitAll()

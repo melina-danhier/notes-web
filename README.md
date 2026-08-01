@@ -34,7 +34,7 @@ Eine responsive Webanwendung zum Erstellen und Organisieren persönlicher Notize
 | Persistenz            | Spring Data JPA, PostgreSQL 16                               |
 | Migrationen           | Flyway                                                       |
 | Mapping & Boilerplate | MapStruct, Lombok                                            |
-| Tests                 | JUnit 5, Spring Boot Test, Spring Security Test, MockMvc, H2  |
+| Tests                 | JUnit 5, Spring Boot Test, Spring Security Test, MockMvc, H2, Testcontainers |
 | Betrieb               | Docker, Docker Compose, Render                               |
 
 ## Anwendung direkt ausprobieren
@@ -110,7 +110,7 @@ Die Entwicklungsdatenbank läuft auf Port `5433`. Das `dev`-Profil enthält pass
 
 ## Tests
 
-Die Tests verwenden H2 und benötigen keine laufende PostgreSQL-Instanz.
+Die schnelle Testbasis verwendet H2 und benötigt keine laufende PostgreSQL-Instanz. Wenn Docker verfügbar ist, startet ein zusätzlicher Test über Testcontainers PostgreSQL 16, führt alle Flyway-Migrationen aus und validiert das resultierende Schema mit Hibernate. Ohne Docker wird nur dieser Integrationstest automatisch übersprungen.
 
 PowerShell:
 
@@ -124,7 +124,7 @@ macOS/Linux:
 ./mvnw test
 ```
 
-Die Testsuite umfasst Unit-, Repository-, MVC- und End-to-End-Tests für die wichtigsten Notiz-Workflows.
+Die Testsuite umfasst Unit-, Repository-, MVC-, Migrations- und End-to-End-Tests für die wichtigsten Notiz-Workflows.
 
 ## Konfiguration
 

@@ -11,6 +11,7 @@ import com.melina.notes.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +73,7 @@ public class UserService {
 
     public boolean updatePassword(Long userId, String currentPassword, String newPassword) {
         User user = getUser(userId);
+        ensureMutableCredentials(user);
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             return false;
         }
@@ -83,6 +85,7 @@ public class UserService {
 
     public boolean deleteAccount(Long userId, String password) {
         User user = getUser(userId);
+        ensureMutableCredentials(user);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             return false;
         }
@@ -112,5 +115,11 @@ public class UserService {
         }
 
         return name.trim();
+    }
+
+    private void ensureMutableCredentials(User user) {
+        if (user.isDemoAccount()) {
+            throw new AccessDeniedException("Demo-Konten dürfen weder Passwort noch Konto ändern");
+        }
     }
 }

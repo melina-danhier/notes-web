@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -185,6 +186,20 @@ class UserServiceTest {
     }
 
     @Test
+    void updatePassword_forDemoAccount_isRejectedServerSide() {
+        User user = createUser(4L, "Demo", "demo@example.invalid", "encoded");
+        user.setDemoAccount(true);
+        when(userRepository.findById(4L)).thenReturn(Optional.of(user));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> userService.updatePassword(4L, "password", "newPassword1")
+        );
+
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
     void deleteAccount_withCorrectPassword_removesNotesUserAndUnusedTags() {
         User user = createUser(8L, "Melina", "test@mail.com", "encoded");
         Note note = Note.builder().tags(new java.util.LinkedList<>()).build();
@@ -197,6 +212,21 @@ class UserServiceTest {
         verify(noteRepository).deleteAll(List.of(note));
         verify(userRepository).delete(user);
         verify(tagRepository).deleteAllWithNoNotes();
+    }
+
+    @Test
+    void deleteAccount_forDemoAccount_isRejectedServerSide() {
+        User user = createUser(8L, "Demo", "demo@example.invalid", "encoded");
+        user.setDemoAccount(true);
+        when(userRepository.findById(8L)).thenReturn(Optional.of(user));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> userService.deleteAccount(8L, "password")
+        );
+
+        verifyNoInteractions(passwordEncoder, noteRepository, tagRepository);
+        verify(userRepository, never()).delete(any());
     }
 
     private User createUser(Long id, String displayName, String email, String password) {
