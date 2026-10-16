@@ -5,18 +5,14 @@ WORKDIR /app
 # Copy pom.xml to avoid reloading dependencies
 COPY pom.xml .
 
-# Maven Wrapper
-COPY --chmod=0755 mvnw .
-COPY .mvn .mvn
-
-# Cashing dependencies
-RUN ./mvnw dependency:go-offline -B -T 1C
+# Cache dependencies
+RUN mvn dependency:go-offline -B -T 1C
 
 # Copy actual code
 COPY src ./src
 
 # Maven clean package
-RUN ./mvnw clean package -DskipTests -T 1C
+RUN mvn clean package -DskipTests -T 1C
 
 
 

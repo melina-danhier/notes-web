@@ -1,166 +1,264 @@
 # Notes
 
-Eine responsive Webanwendung zum Erstellen und Organisieren persönlicher Notizen. Notes verbindet eine serverseitig gerenderte Spring-Boot-Oberfläche mit Markdown-Unterstützung, Tags, Suche sowie Archiv und Papierkorb.
+[![Java 21](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=for-the-badge&logo=thymeleaf&logoColor=white)](https://www.thymeleaf.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://notes-web-qwo2.onrender.com)
 
-## Überblick
+Eine responsive Webanwendung zum Erstellen, Verwalten und Strukturieren persönlicher Notizen. **Notes** kombiniert ein serverseitig gerendertes Spring-Boot-Backend mit Thymeleaf, Markdown-Unterstützung mit interaktiven Aufgabenlisten, Tag-Verwaltung, Volltextsuche sowie Archiv- und Papierkorb-Funktionen.
 
-- **Live-Demo:** https://notes-web-6zb2.onrender.com
-- **Backend:** Java 21, Spring Boot, Spring Data JPA
-- **Security:** Session-basierte Authentifizierung mit Spring Security und BCrypt
-- **Datenbank:** PostgreSQL und Flyway
-- **Frontend:** Thymeleaf, Bootstrap und JavaScript
-- **Tests:** Unit-, Repository-, MVC- und End-to-End-Tests
-- **Deployment:** Docker und Render
+---
+
+<p align="center">
+  <img src="docs/screenshots/notizen-uebersicht-demo-vorschau.png" alt="Notes Thymeleaf UI Übersicht" width="900">
+</p>
+
+> **Thymeleaf-basierte Benutzeroberfläche**: Serverseitig gerendertes Dashboard im Google-Keep-Stil mit dynamischer Markdown-Vorschau, Tag-Filtern, Suchleiste und interaktiven Notizkarten.
+
+---
+
+## Live-Demo
+
+Die Anwendung kann direkt im Browser getestet werden – ohne lokale Installation oder Einrichtung:
+
+### [Notes-Webanwendung öffnen →](https://notes-web-qwo2.onrender.com)
+
+*Tipp:* Über die Schaltfläche **„Demo ausprobieren“** auf der Login-Seite wird sofort ein isolierter Gast-Zugang mit vorgefertigten Beispielnotizen erstellt. Die Daten werden beim Logout oder nach Inaktivität automatisch bereinigt.
+
+---
+
+## Architektur & Designmuster
+
+Notes folgt einer sauberen, mehrschichtigen **Model-View-Controller (MVC)**-Architektur. Das Frontend setzt auf performantes **Server-Side Rendering (SSR)** mit Thymeleaf, strikte Entkopplung über **Data Transfer Objects (DTOs)** und eine sichere **Session-basierte Authentifizierung** via Spring Security.
+
+```mermaid
+flowchart TD
+    subgraph Client["Client (Browser)"]
+        UI["Thymeleaf UI (SSR HTML5 + Bootstrap 5)"]
+        JS["Vanilla JS (Markdown-Live-Preview, Modals, Checkbox-Toggles)"]
+    end
+
+    subgraph Security["Sicherheits- & Session-Schicht"]
+        Filter["Spring Security Filter Chain"]
+        Session["HttpSession (JSESSIONID) & CSRF-Protection"]
+        AuthManager["BCryptPasswordEncoder & DemoLogoutHandler"]
+    end
+
+    subgraph Controller["MVC Controller-Schicht"]
+        PC["PageController (HTML / SSR-Views)"]
+        NC["NoteController (@RestController: /api/notes)"]
+        UC["UserController (Auth, Profil & Einstellungen)"]
+    end
+
+    subgraph Service["Service- & Transfer-Schicht"]
+        Validation["Jakarta Bean Validation (@Valid, @PasswordsMatch)"]
+        DTO["DTO-Layer (NoteFormDto, NoteDto, NotePageData, SignupDto)"]
+        Mapper["MapStruct (NoteMapper, TagMapper)"]
+        Services["NoteService, NotePageService, UserService, DemoAccountService"]
+    end
+
+    subgraph Persistence["Persistenz-Schicht"]
+        Repo["Spring Data JPA Repositories"]
+        Entities["JPA Entities (Note, User, Tag)"]
+        Flyway["Flyway Migrationen"]
+        DB[("PostgreSQL 16")]
+    end
+
+    Client -->|HTTP GET / POST / PATCH / DELETE| Filter
+    Filter --> Session
+    Session --> Controller
+    PC -->|SSR Model-Binding| UI
+    NC -->|JSON API Responses| JS
+    Controller --> Validation
+    Validation --> DTO
+    DTO <-->|Compile-Time Mapping| Mapper
+    Mapper <--> Services
+    Services --> Repo
+    Repo <--> Entities
+    Repo --> DB
+    Flyway -.->|Automatische Schema-Migration| DB
+```
+
+### 1. Model-View-Controller (MVC)
+Die Anwendungsarchitektur trennt Präsentation, Ablaufsteuerung und Domänenlogik strikt voneinander:
+- **Model**: Kapselt Daten und Geschäftsregeln. Intern arbeiten Services und Repositories mit relationalen JPA-Entitäten (`Note`, `User`, `Tag`). Für die Darstellung im Frontend übergibt der Controller typisierte Datenmodelle (`NotePageData`, `NoteFormDto`) über das Spring `Model`-Interface an die Rendering-Engine.
+- **View**: Thymeleaf-Templates (`notes.html`, `note-view.html`, `archive.html`, `trash.html`, `settings.html`, `login.html`) interpretieren das Model und generieren standardkonformes HTML5.
+- **Controller**:
+  - `PageController`: Behandelt Navigation und Seitenabrufe (`/notes`, `/notes/archive`, `/notes/trash`, `/notes/new`, `/notes/{id}`). Er steuert Filter, Paginierung sowie Sortierung und liefert die fertigen HTML-Views zurück.
+  - `NoteController`: Stellt REST-Endpunkte unter `/api/notes` für asynchrone clientseitige Operationen bereit (z. B. Task-Checkboxen in Markdown abhaken, Notiz anheften, Statusänderungen).
+  - `UserController`: Steuert Authentifizierungs- und Benutzerverwaltungs-Workflows (Registrierung, Anzeigename ändern, Passwortwechsel, Kontolöschung).
+
+### 2. Server-Side Rendering (SSR) mit Thymeleaf
+Die Oberfläche wird vollständig serverseitig mit Thymeleaf gerendert:
+- **Schnelle Ladezeiten (Fast FCP)**: Der Browser empfängt vollständiges, semantisches HTML direkt vom Server. Es entfällt das Herunterladen und Ausführen großer Single-Page-Application-Bundles vor dem ersten Rendering.
+- **Direkte Framework-Integration**: Thymeleaf integriert sich nahtlos mit Spring MVC und Spring Security (`thymeleaf-extras-springsecurity6`). Sicherheitsrelevante Prüfungen oder rollenbasierte UI-Elemente (z. B. das Demo-Hinweisbanner via `th:if="${demoAccount}"`) werden zuverlässig auf dem Server entschieden.
+- **Progressive Enhancement**: Die serverseitig erzeugte Seite wird gezielt durch modulare JavaScript-Komponenten (`/js/notes.js`, `/js/markdown-preview.js`, `/js/note-preview.js`) ergänzt:
+  - Dynamischer Markdown-Parser mit synchronisierter Live-Vorschau im Editor.
+  - Interaktives Abhaken von Markdown-Aufgaben (`[ ]` / `[x]`) direkt aus der Karten- und Detailansicht über asynchrone `fetch`-Aufrufe an die REST-Endpunkte.
+  - Schnelle modale Detailansichten ohne vollständigen Neuladen der Seite.
+
+### 3. Data Transfer Objects (DTOs) & Validierung
+Um Sicherheitsrisiken und Architekturverletzungen zu vermeiden, werden Persistenzentitäten strikt von den äußeren Schnittstellen isoliert:
+- **Schutz vor Over-Posting & Mass Assignment**: JPA-Entitäten werden weder als `@RequestBody` akzeptiert noch direkt an Views exponiert. Sensible Attribute (z. B. Passwort-Hashes, Löschflags, Mandanten-Zuordnungen) bleiben vor Manipulationen geschützt.
+- **Spezifische DTOs**:
+  - `NoteFormDto`: Validiertes Eingabemodell für das Erstellen und Bearbeiten von Notizen (Validierung von Titellänge, Inhaltsgröße und maximaler Tag-Anzahl).
+  - `NoteDto`: Lesemodell für API-Antworten mit formatierten Daten und einer serverseitig generierten Textvorschau (`contentPreview`).
+  - `NotePageData` & `NotePageRequest`: Kapseln Suchfilter, Sortierparameter, Tag-Selektion und Paginierungsinformationen.
+  - `SignupDto`, `NameUpdateDto`, `PasswordUpdateDto`, `DeleteAccountDto`: Spezialisierte Datentransferobjekte für Kontofunktionen.
+- **Typsicheres Mapping mit MapStruct**: `NoteMapper` und `TagMapper` generieren zur Kompilierzeit performanten Mapping-Code zwischen Entitäten und DTOs. Dies eliminiert fehleranfälliges manuelles Kopieren und vermeidet den Laufzeit-Overhead von Reflection-basierten Mappern.
+- **Deklarative Validierung**: Sämtliche Eingaben werden auf DTO-Ebene mit Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@Size`, `@NotNull`) sowie benutzerdefinierten Validatoren (`@PasswordsMatch`) geprüft. Validierungsfehler werden direkt an die Formulare zurückgemeldet (`#fields.hasErrors()`).
+
+### 4. Session-basierte Authentifizierung (Session-Auth)
+Die Benutzerauthentifizierung basiert auf dem bewährten zustandsbehafteten Session-Modell von Spring Security:
+- **Session-Lifecycle**: Nach erfolgreicher Anmeldung am Form-Login (`/login`) initialisiert Spring Security den `SecurityContext` und hinterlegt ihn in der HTTP-Session (`HttpSessionSecurityContextRepository`). Der Client identifiziert sich über ein sicheres `JSESSIONID`-Cookie.
+- **Sichere Passwort-Speicherung**: Passwörter werden vor dem Speichern in der PostgreSQL-Datenbank mit `BCryptPasswordEncoder` und individuellen Salts kryptografisch gehasht.
+- **CSRF-Schutz**: Vollständig aktivierter Cross-Site-Request-Forgery-Schutz für alle zustandsverändernden HTTP-Methoden (`POST`, `PATCH`, `DELETE`). Thymeleaf bindet CSRF-Tokens automatisch als versteckte Eingabefelder in HTML-Formulare ein. Für JavaScript-`fetch`-Requests stehen die Tokens über HTML-`<meta>`-Tags bereit.
+- **Gäste- und Demo-System**: Über eine dedizierte `ROLE_DEMO` können Besucher die Anwendung sofort ausprobieren. Ein maßgeschneiderter `DemoLogoutHandler` und serverseitige Cleanup-Tasks stellen sicher, dass temporäre Demo-Konten und Notizen bei Session-Ende oder Zeitablauf rückstandsfrei aus der Datenbank entfernt werden.
+
+---
 
 ## Funktionen
 
-- Registrierung und Anmeldung per E-Mail
-- Notizen erstellen, bearbeiten und als Markdown in einer Live-Vorschau anzeigen
-- Aufgabenlisten direkt in der Vorschau abhaken
-- Notizen mit bis zu zehn Tags strukturieren
-- Volltextsuche, Tag-Filter, Sortierung und Seitennavigation
-- Wichtige Notizen anheften
-- Mehrere Notizen gesammelt auswählen und bearbeiten
-- Notizen archivieren, in den Papierkorb verschieben, wiederherstellen oder endgültig löschen
-- Responsive Oberfläche auf Basis von Bootstrap und Thymeleaf
+- **Notiz-Organisation**: Notizen erstellen, bearbeiten, anheften, archivieren oder in den Papierkorb verschieben.
+- **Markdown-Editor & Live-Vorschau**: Vollwertige Markdown-Formatierung mit Split-View-Vorschau in Echtzeit.
+- **Interaktive Aufgabenlisten**: Checkboxen (`- [ ]` / `- [x]`) können direkt in der Vorschau per Mausklick abgehakt werden.
+- **Tag-System**: Flexible Kategorisierung mit bis zu 10 Tags pro Notiz inklusive Tag-Filtern und Autovervollständigung.
+- **Volltextsuche & Sortierung**: Notizen nach Titel und Inhalt durchsuchen sowie nach Erstelldatum, Änderungsdatum oder Titel sortieren.
+- **Mehrfachauswahl (Batch-Aktionen)**: Mehrere Notizen gleichzeitig auswählen, um sie gesammelt zu archivieren oder zu löschen.
+- **Konto & Sicherheit**: E-Mail-Registrierung, Passwortänderung, Dark/Light-Theme-Umschaltung und Account-Löschung.
+- **Automatisierte Demo**: Ein-Klick-Demo-Zugang für Gäste ohne Registrierungshürde.
+
+---
 
 ## Tech-Stack
 
-| Bereich               | Technologie                                                  |
-|-----------------------|--------------------------------------------------------------|
-| Backend               | Java 21, Spring Boot 3.5.15, Actuator                        |
-| Web                   | Spring MVC, Thymeleaf, JavaScript, Bootstrap 5.3.8           |
-| Sicherheit            | Spring Security, BCrypt                                      |
-| Persistenz            | Spring Data JPA, PostgreSQL 16                               |
-| Migrationen           | Flyway                                                       |
-| Mapping & Boilerplate | MapStruct, Lombok                                            |
-| Tests                 | JUnit 5, Spring Boot Test, Spring Security Test, MockMvc, H2, Testcontainers |
-| Betrieb               | Docker, Docker Compose, Render                               |
+| Bereich | Technologie | Beschreibung |
+|---|---|---|
+| **Sprache** | Java 21 (LTS) | Modernes Java mit Records, Pattern Matching und Virtual Threads Readiness |
+| **Framework** | Spring Boot 3.5.15 | Backend-Fundament, Dependency Injection, Auto-Configuration, Actuator |
+| **Frontend** | Thymeleaf 3 & Bootstrap 5.3.8 | Serverseitige HTML-Templates, responsive Komponenten, Vanilla JS (ES6) |
+| **Sicherheit** | Spring Security 6 | Session-basierte Authentifizierung, Form-Login, BCrypt, CSRF-Schutz |
+| **Datenbank** | PostgreSQL 16 & Flyway | Relationale Speicherung, automatisierte versionierte Schemamigrationen |
+| **ORM & Mapping** | Spring Data JPA, Hibernate, MapStruct | Deklarative Datenzugriffsschicht, Compile-Time DTO-Mapping, Lombok |
+| **Testing** | JUnit 5, MockMvc, Testcontainers, H2 | Unit-, MVC-, Repository- und containerisierte Integrations-Tests |
+| **DevOps** | Docker, Docker Compose, Render | Multi-Stage Distroless Docker Build, Cloud-Hosting auf Render |
 
-## Anwendung direkt ausprobieren
-
-Der schnellste Weg, Notes zu testen, ist die bereits bereitgestellte Webanwendung – ohne Installation oder lokale Einrichtung:
-
-### [Notes-Webanwendung öffnen →](https://notes-web-6zb2.onrender.com)
-
-Einfach ein eigenes Konto registrieren und direkt Notizen erstellen, Markdown verwenden, Aufgaben abhaken sowie Suche, Tags, Archiv und Papierkorb ausprobieren.
-
-Die Anwendung läuft auf Render und verwendet eine PostgreSQL-Datenbank von Neon.
+---
 
 ## Screenshots
 
-| Einstieg | Notizübersicht |
-|----------|----------------|
-| <img src="docs/screenshots/login-mit-demo-zugang.png" alt="Login mit Demo-Zugang" width="420"> | <img src="docs/screenshots/notizen-uebersicht-demo-vorschau.png" alt="Notizübersicht mit Demo-Notizen" width="420"> |
+| Notizübersicht (Thymeleaf UI) | Markdown-Editor & Live-Vorschau |
+|:---:|:---:|
+| <img src="docs/screenshots/notizen-uebersicht-demo-vorschau.png" alt="Notizübersicht" width="440"> | <img src="docs/screenshots/editor-markdown-live-preview.png" alt="Markdown-Editor mit Live-Vorschau" width="440"> |
 
-| Markdown-Editor | Mehrfachauswahl |
-|-----------------|-----------------|
-| <img src="docs/screenshots/editor-markdown-live-preview.png" alt="Markdown-Editor mit Live-Vorschau" width="420"> | <img src="docs/screenshots/notizen-mehrfachauswahl.png" alt="Mehrfachauswahl für Archivieren und Löschen" width="420"> |
+| Mehrfachauswahl & Aktionen | Interaktives Detail-Modal |
+|:---:|:---:|
+| <img src="docs/screenshots/notizen-mehrfachauswahl.png" alt="Mehrfachauswahl" width="440"> | <img src="docs/screenshots/notiz-detail-modal.png" alt="Detailansicht und Aufgaben abhaken" width="440"> |
 
-Weitere Ansichten wie Dark Mode, Archiv, Papierkorb, Einstellungen und Registrierung liegen unter [`docs/screenshots`](docs/screenshots).
+| Login mit Demo-Zugang | Dark-Mode-Ansicht |
+|:---:|:---:|
+| <img src="docs/screenshots/login-mit-demo-zugang.png" alt="Login mit Demo-Zugang" width="440"> | <img src="docs/screenshots/notizen-uebersicht-dark-mode.png" alt="Dark Mode" width="440"> |
 
+*Weitere Bildschirmfotos (Archiv, Papierkorb, Einstellungen, Registrierung) befinden sich unter [`docs/screenshots`](docs/screenshots).*
 
-## Lokal mit Docker starten
+---
 
-Voraussetzung ist eine aktuelle Installation von Docker mit Docker Compose.
+## Lokale Installation & Ausführung
+
+### Schnellstart mit Docker Compose
+Voraussetzung: Installiertes [Docker Desktop](https://www.docker.com/) inklusive Docker Compose.
 
 ```bash
 docker compose up --build
 ```
 
-Anschließend ist die Anwendung unter [http://localhost:8080](http://localhost:8080) erreichbar. Beim ersten Start legt Flyway das Datenbankschema automatisch an. Ein Benutzerkonto kann direkt über die Registrierungsseite erstellt werden.
+Anschließend ist die Anwendung im Browser erreichbar unter:
+👉 **[http://localhost:8080](http://localhost:8080)**
 
-Container stoppen:
-
+Container und Ressourcen beenden:
 ```bash
 docker compose down
 ```
+*(Die Datenbankdaten bleiben im Docker-Volume `postgres_data` persistent erhalten).*
 
-Die PostgreSQL-Daten bleiben dabei im Volume `postgres_data` erhalten.
+---
 
-## Lokale Entwicklung
+### Lokale Entwicklung mit Maven
+Benötigt werden ein installiertes **JDK 21** und eine lokale Docker-Instanz für PostgreSQL.
 
-Benötigt werden:
+1. **PostgreSQL-Container starten:**
+   ```bash
+   docker compose up -d postgres
+   ```
+   *(PostgreSQL läuft lokal auf Port `5433`).*
 
-- JDK 21
-- Docker (für PostgreSQL)
+2. **Anwendung mit dem Entwicklungsprofil (`dev`) starten:**
 
-Zuerst nur die Datenbank starten:
+   **PowerShell (Windows):**
+   ```powershell
+   $env:SPRING_PROFILES_ACTIVE = "dev"
+   .\mvnw.cmd spring-boot:run
+   ```
 
-```bash
-docker compose up -d postgres
-```
+   **Bash (macOS / Linux):**
+   ```bash
+   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+   ```
 
-Danach die Anwendung mit dem Entwicklungsprofil ausführen:
+Beim Start wendet Flyway alle noch ausstehenden Datenbankmigrationen automatisch an.
+
+---
+
+## Tests & Qualitätssicherung
+
+Die Testsuite deckt Unit-, Web-MVC-, Repository- und End-to-End-Szenarien ab:
+- **Schnelle Modultests:** Verwenden eine In-Memory-H2-Datenbank und benötigen keine externe Infrastruktur.
+- **Containerisierte Integrationstests:** Testcontainers startet bei vorhandener Docker-Umgebung eine reale PostgreSQL-16-Instanz, führt alle Flyway-Migrationen aus und validiert das Hibernate-Schema. Fehlt Docker, wird dieser Test automatisch übersprungen.
+
+**Tests ausführen:**
 
 PowerShell:
-
-```powershell
-$env:SPRING_PROFILES_ACTIVE = "dev"
-.\mvnw.cmd spring-boot:run
-```
-
-macOS/Linux:
-
-```bash
-SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
-```
-
-Die Entwicklungsdatenbank läuft auf Port `5433`. Das `dev`-Profil enthält passende lokale Standardwerte für die mitgelieferte Docker-Datenbank. `DB_URL`, `DB_USERNAME` und `DB_PASSWORD` können bei Bedarf über Umgebungsvariablen überschrieben werden.
-
-## Tests
-
-Die schnelle Testbasis verwendet H2 und benötigt keine laufende PostgreSQL-Instanz. Wenn Docker verfügbar ist, startet ein zusätzlicher Test über Testcontainers PostgreSQL 16, führt alle Flyway-Migrationen aus und validiert das resultierende Schema mit Hibernate. Ohne Docker wird nur dieser Integrationstest automatisch übersprungen.
-
-PowerShell:
-
 ```powershell
 .\mvnw.cmd test
 ```
 
-macOS/Linux:
-
+macOS / Linux:
 ```bash
 ./mvnw test
 ```
 
-Die Testsuite umfasst Unit-, Repository-, MVC-, Migrations- und End-to-End-Tests für die wichtigsten Notiz-Workflows.
+---
 
-## Konfiguration
+## Konfiguration & Profile
 
-Die Anwendung verwendet Spring-Profile:
+Die Anwendung nutzt Spring-Profile zur Umgebungssteuerung:
 
-| Profil | Zweck                | Datenbankkonfiguration                                 |
-|--------|----------------------|--------------------------------------------------------|
-| `dev`  | Lokale Entwicklung   | PostgreSQL mit überschreibbaren lokalen Standardwerten |
-| `test` | Automatisierte Tests | H2 In-Memory-Datenbank                                 |
-| `prod` | Produktivbetrieb     | PostgreSQL ausschließlich über Umgebungsvariablen      |
+| Profil | Einsatzbereich | Datenbank-Konfiguration |
+|---|---|---|
+| `dev` | Lokale Entwicklung | PostgreSQL (`localhost:5433`), überschreibbare Defaults |
+| `test` | Automatisierte Testsuite | H2 In-Memory-Datenbank |
+| `prod` | Produktivbetrieb (z. B. Render) | PostgreSQL via Umgebungsvariablen |
 
-Das `prod`-Profil erwartet zwingend folgende Variablen; im `dev`-Profil sind sie optional:
+### Umgebungsvariablen (Produktion)
+Im `prod`-Profil müssen folgende Umgebungsvariablen gesetzt werden (Vorlage siehe [`.env.example`](.env.example)):
 
-| Variable      | Beschreibung                      |
-|---------------|-----------------------------------|
-| `DB_URL`      | JDBC-URL der PostgreSQL-Datenbank |
-| `DB_USERNAME` | Datenbankbenutzer                 |
-| `DB_PASSWORD` | Datenbankpasswort                 |
+| Variable | Beschreibung |
+|---|---|
+| `DB_URL` | JDBC-Verbindungs-URL (z. B. `jdbc:postgresql://host:5432/notes`) |
+| `DB_USERNAME` | Benutzername der PostgreSQL-Datenbank |
+| `DB_PASSWORD` | Passwort des Datenbankbenutzers |
 
-Eine Vorlage befindet sich in [`.env.example`](.env.example). Spring Boot lädt diese Datei nicht automatisch. Die Werte müssen über die Shell, die Run-Konfiguration der IDE oder Docker Compose gesetzt werden. Echte Zugangsdaten gehören nicht ins Repository.
+### Parameter für temporäre Demo-Konten (optional)
 
-## Demo-Daten beim Deployment
+| Variable | Standardwert | Beschreibung |
+|---|---|---|
+| `DEMO_ACCOUNT_LIFETIME` | `PT2H` (2 Stunden) | Gültigkeitsdauer eines Gast-Accounts (ISO-8601 Dauer) |
+| `DEMO_CLEANUP_INTERVAL` | `PT15M` (15 Min.) | Intervall für den Hintergrund-Cleanup abgelaufener Demos |
+| `DEMO_MAX_ACCOUNTS` | `50` | Maximale Anzahl zeitgleich aktiver Demo-Konten |
 
-Auf der Loginseite kann ohne Registrierung eine persönliche Demo gestartet werden. Für jeden Aufruf wird ein eigener temporärer Benutzer mit fünf Beispielnotizen erzeugt und automatisch angemeldet. Andere Besucher sehen dessen Änderungen nicht.
-
-Beim regulären Logout werden Benutzer und Notizen sofort gelöscht. Wird der Browser nur geschlossen, entfernt ein regelmäßiger Cleanup abgelaufene Demo-Konten. Der Cleanup läuft zusätzlich vor jeder neuen Demo-Erstellung, damit er auch nach einer Ruhephase des Render-Dienstes zuverlässig greift.
-
-| Variable                | Erforderlich | Standardwert | Beschreibung                         |
-|-------------------------|--------------|--------------|--------------------------------------|
-| `DEMO_ACCOUNT_LIFETIME` | nein         | `PT2H`       | Lebensdauer eines Demo-Kontos        |
-| `DEMO_CLEANUP_INTERVAL` | nein         | `PT15M`      | Abstand zwischen Cleanup-Durchläufen |
-| `DEMO_MAX_ACCOUNTS`     | nein         | `50`         | Maximale gleichzeitige Demo-Konten   |
-
-Die Zeitwerte verwenden das ISO-8601-Dauerformat, beispielsweise `PT30M` für 30 Minuten oder `PT4H` für vier Stunden. Für Render sind keine zusätzlichen Variablen erforderlich, solange die Standardwerte passen.
-
-Ohne aktives Profil wird nur `application.yml` geladen. Da dort bewusst keine Datenbank-Zugangsdaten definiert sind, bricht die Anwendung beim Start ab. Dadurch kann ein vergessenes Produktionsprofil nicht unbemerkt auf lokale Standardwerte zurückfallen.
+---
 
 ## Projektstruktur
 
@@ -168,24 +266,32 @@ Ohne aktives Profil wird nur `application.yml` geladen. Da dort bewusst keine Da
 src/
 ├── main/
 │   ├── java/com/melina/notes/
-│   │   ├── controller/   # Seiten- und API-Endpunkte
-│   │   ├── service/      # Anwendungslogik
-│   │   ├── repository/   # Datenbankzugriff
-│   │   ├── entity/       # JPA-Entitäten
-│   │   └── security/     # Authentifizierung und Autorisierung
+│   │   ├── controller/      # MVC- (PageController) & REST-Controller (NoteController)
+│   │   ├── service/         # Geschäftslogik & Paginierungsdienste
+│   │   ├── repository/      # Spring Data JPA Repositories
+│   │   ├── entity/          # Relationale JPA-Entitäten (Note, User, Tag)
+│   │   ├── dto/             # Data Transfer Objects (Form-, View- & Auth-DTOs)
+│   │   ├── mapper/          # MapStruct-Mapper (NoteMapper, TagMapper)
+│   │   ├── security/        # Spring Security Config, UserDetails, LogoutHandler
+│   │   ├── validation/      # Benutzerdefinierte Validatoren (@PasswordsMatch)
+│   │   ├── filter/          # JPA Specifications für Notiz-Filter
+│   │   ├── exception/       # Domänenspezifische Exceptions & GlobalExceptionHandler
+│   │   └── util/            # Hilfsklassen (z. B. ContentPreviewUtil)
 │   └── resources/
-│       ├── db/migration/ # Flyway-Migrationen
-│       ├── static/       # CSS, JavaScript und Bilder
-│       └── templates/    # Thymeleaf-Templates
-└── test/                 # Unit-, Integrations- und E2E-Tests
+│       ├── db/migration/    # Versionierte Flyway-SQL-Migrationen (V1..V8)
+│       ├── static/          # CSS, JavaScript (ES6-Module), WebJars & Assets
+│       └── templates/       # Serverseitige Thymeleaf-Templates (HTML5)
+└── test/                    # Unit-, MVC-, Security-, Repo- & Testcontainers-Tests
 ```
+
+---
 
 ## Build
 
-Ein ausführbares JAR lässt sich mit dem Maven Wrapper erstellen:
+Ein ausführbares Produktions-JAR lässt sich über den Maven Wrapper erzeugen:
 
 ```powershell
 .\mvnw.cmd clean package
 ```
 
-Das Ergebnis liegt anschließend unter `target/`. Das mehrstufige `Dockerfile` baut die Anwendung mit Maven und startet sie in einem schlanken Java-21-Container.
+Das Multi-Stage [`Dockerfile`](Dockerfile) kompiliert den Quellcode in einer isolierten Maven-Build-Stage und führt das Artefakt anschließend in einem schlanken Distroless-Image (`gcr.io/distroless/java21-debian12`) aus.
