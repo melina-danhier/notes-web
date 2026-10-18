@@ -104,6 +104,46 @@ class TagRepositoryTest {
         assertTrue(foundUnusedTag.isEmpty());
     }
 
+    @Test
+    void findAllByUserId_withSameTagOnMultipleNotes_returnsDistinctTagWithoutDuplicates() {
+        User user = createAndSaveUser("user@mail.com");
+
+        Note note1 = createAndSaveNote(user);
+        Note note2 = createAndSaveNote(user);
+
+        Tag sharedTag = createAndSaveTag(note1, "shared-tag");
+        note2.getTags().add(sharedTag);
+        noteRepository.saveAndFlush(note2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Tag> tags = tagRepository.findAllByUserId(user.getId());
+
+        assertEquals(1, tags.size());
+        assertEquals("shared-tag", tags.getFirst().getTag());
+    }
+
+    @Test
+    void deleteAllWithNoNotes_whenAllTagsAreReferenced_returnsZeroAndDeletesNothing() {
+        User user = createAndSaveUser("user@mail.com");
+        Note note = createAndSaveNote(user);
+        Tag tag1 = createAndSaveTag(note, "work");
+        Tag tag2 = createAndSaveTag(note, "home");
+
+        entityManager.flush();
+        entityManager.clear();
+
+        int deletedCount = tagRepository.deleteAllWithNoNotes();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(0, deletedCount);
+        assertTrue(tagRepository.findById(tag1.getId()).isPresent());
+        assertTrue(tagRepository.findById(tag2.getId()).isPresent());
+    }
+
     private User createAndSaveUser(String email) {
         User user = User.builder()
                 .displayName("Username")
