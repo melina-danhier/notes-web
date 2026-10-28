@@ -38,7 +38,7 @@ public class DemoAccountService {
     private int maxAccounts;
 
     @Transactional(noRollbackFor = DemoCapacityExceededException.class)
-    public DemoCredentials createDemoAccount() {
+    public synchronized DemoCredentials createDemoAccount() {
         deleteExpiredDemoAccounts();
 
         if (userRepository.countByDemoAccountTrue() >= maxAccounts) {
@@ -139,10 +139,23 @@ public class DemoAccountService {
         List<User> expiredUsers = userRepository
                 .findAllByDemoAccountTrueAndExpiresAtBefore(Instant.now());
 
-        expiredUsers.forEach(this::deleteAccount);
-        if (!expiredUsers.isEmpty()) {
-            tagRepository.deleteAllWithNoNotes();
-            log.info("Expired demo accounts deleted - count={}", expiredUsers.size());
+        int deletedCount = 0;
+        for (User user : expiredUsers) {
+            try {
+                deleteAccount(user);
+                deletedCount++;
+            } catch (RuntimeException ex) {
+                log.error("Could not delete expired demo account - userId={}", user.getId(), ex);
+            }
+        }
+
+        if (deletedCount > 0) {
+            try {
+                tagRepository.deleteAllWithNoNotes();
+            } catch (RuntimeException ex) {
+                log.warn("Could not clean up unused tags after demo account deletion", ex);
+            }
+            log.info("Expired demo accounts deleted - count={}/{}", deletedCount, expiredUsers.size());
         }
     }
 

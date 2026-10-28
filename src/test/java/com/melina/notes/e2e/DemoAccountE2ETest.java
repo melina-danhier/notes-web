@@ -121,6 +121,20 @@ class DemoAccountE2ETest {
         userRepository.delete(regularUser);
     }
 
+    @Test
+    void demoLoginWhenCapacityExceededRedirectsWithDemoUnavailable() throws Exception {
+        org.springframework.test.util.ReflectionTestUtils.setField(demoAccountService, "maxAccounts", 1);
+        try {
+            demoAccountService.createDemoAccount();
+
+            mockMvc.perform(post("/demo-login").with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/login?demoUnavailable=true"));
+        } finally {
+            org.springframework.test.util.ReflectionTestUtils.setField(demoAccountService, "maxAccounts", 50);
+        }
+    }
+
     private CustomUserDetails principalFrom(HttpSession session) {
         SecurityContext context = (SecurityContext) session.getAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
