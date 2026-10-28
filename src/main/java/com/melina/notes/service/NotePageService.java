@@ -62,7 +62,8 @@ public class NotePageService {
         Sort.Direction sortDirection = resolveSortDirection(request.getSortDir());
 
         Sort sort = Sort.by(Sort.Direction.DESC, "pinned")
-                .and(Sort.by(sortDirection, sortField));
+                .and(Sort.by(sortDirection, sortField))
+                .and(Sort.by(sortDirection, "id"));
         Page<NoteDto> notes = noteService.getAllNotes(filter, PageRequest.of(pageNo, pageSize, sort));
 
         List<NoteDto> pinnedNotes = notes.getContent().stream()

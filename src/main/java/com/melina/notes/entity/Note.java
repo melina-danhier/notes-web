@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -42,6 +43,7 @@ public class Note {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @Builder.Default
+    @BatchSize(size = 50)
     private List<Tag> tags = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

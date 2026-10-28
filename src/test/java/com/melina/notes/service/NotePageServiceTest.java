@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -82,8 +83,43 @@ class NotePageServiceTest {
                 () -> assertEquals(0, pageable.getPageNumber()),
                 () -> assertEquals(50, pageable.getPageSize()),
                 () -> assertEquals("created", result.sortField()),
-                () -> assertEquals("desc", result.sortDir())
+                () -> assertEquals("desc", result.sortDir()),
+                () -> assertEquals(
+                        Sort.by(Sort.Direction.DESC, "pinned")
+                                .and(Sort.by(Sort.Direction.DESC, "created"))
+                                .and(Sort.by(Sort.Direction.DESC, "id")),
+                        pageable.getSort()
+                )
         );
         verify(tagService, never()).getAllTagsByUserId(any(Long.class));
+    }
+
+    @Test
+    void getArchivedNotes_withCustomSortAndAscending_ordersCorrectlyWithSecondaryId() {
+        NotePageRequest request = new NotePageRequest();
+        request.setPageNo(2);
+        request.setPageSize(25);
+        request.setSortField("title");
+        request.setSortDir("asc");
+        when(noteService.getAllNotes(any(), any())).thenReturn(new PageImpl<>(List.of()));
+
+        NotePageData result = notePageService.getArchivedNotes(5L, request);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(noteService).getAllNotes(any(), pageableCaptor.capture());
+        Pageable pageable = pageableCaptor.getValue();
+
+        assertAll(
+                () -> assertEquals(2, pageable.getPageNumber()),
+                () -> assertEquals(25, pageable.getPageSize()),
+                () -> assertEquals("title", result.sortField()),
+                () -> assertEquals("asc", result.sortDir()),
+                () -> assertEquals(
+                        Sort.by(Sort.Direction.DESC, "pinned")
+                                .and(Sort.by(Sort.Direction.ASC, "title"))
+                                .and(Sort.by(Sort.Direction.ASC, "id")),
+                        pageable.getSort()
+                )
+        );
     }
 }
